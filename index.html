@@ -27,23 +27,23 @@
 <link rel="manifest" href="/Alberto/manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="theme-color" content="#0b1220">
+<meta name="theme-color" content="#0f766e">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap">
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root{
-  --r:#1e6fff;--r2:#0d47b8;--r3:#3ad6ff;--r4:#062a63;
-  --bg:#0b1220;--card:#121a2c;--card2:#182238;
+  --r:#0f766e;--r2:#0b5c56;--r3:#5eead4;--r4:#08403c;
+  --bg:#0b1210;--card:#121c1a;--card2:#182420;
   --tx:#eef2fa;--tx2:rgba(238,242,250,.48);--tx3:rgba(238,242,250,.2);
-  --border:rgba(255,255,255,.08);--rd:20px;
-  --font:'Manrope',sans-serif;
-  --font-head:'Sora',sans-serif;
+  --border:rgba(255,255,255,.08);--rd:16px;
+  --font:'Inter',sans-serif;
+  --font-head:'Space Grotesk',sans-serif;
   --shadow:0 10px 30px rgba(0,0,0,.5);
   --shadow2:0 10px 32px rgba(var(--theme-rgb),.32);
   --shadow-sm:0 3px 12px rgba(0,0,0,.3);
-  --theme-rgb:30,111,255;
+  --theme-rgb:15,118,110;
   --ease-spring:cubic-bezier(.16,1,.3,1);
   --ease-out:cubic-bezier(.4,0,.2,1);
   --dur-fast:.18s;--dur-med:.28s;--dur-slow:.42s;
@@ -53,16 +53,19 @@
 /* ── MODO CLARO ── */
 
 body.modo-claro{
-  --bg:#f2f2f7;--card:#ffffff;--card2:#f7f7f7;
-  --tx:#111111;--tx2:rgba(0,0,0,.5);--tx3:rgba(0,0,0,.22);
-  --border:rgba(0,0,0,.09);
-  --shadow:0 2px 16px rgba(0,0,0,.1);
-  background:#f2f2f7;color:#111;
+  --bg:#fafaf9;--card:#ffffff;--card2:#f6f6f4;
+  --tx:#161b19;--tx2:rgba(22,27,25,.52);--tx3:rgba(22,27,25,.24);
+  --border:rgba(22,27,25,.08);
+  --shadow:0 1px 3px rgba(16,24,22,.06),0 8px 24px rgba(16,24,22,.05);
+  background:#fafaf9;color:#161b19;
 }
 body.modo-claro #topbar{background:rgba(255,255,255,.88);backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);border-bottom:1px solid rgba(0,0,0,.07);box-shadow:0 1px 0 rgba(255,255,255,.8),0 2px 12px rgba(0,0,0,.06)}
 body.modo-claro #drawer{background:#ffffff;border-left:1px solid rgba(0,0,0,.09)}
-body.modo-claro #authWrap{background:#f2f2f7}
-body.modo-claro .login-card{background:#ffffff;box-shadow:0 2px 20px rgba(0,0,0,.08)}
+body.modo-claro #authWrap{background:#fafaf9}
+body.modo-claro .login-card{background:#ffffff;border-color:rgba(22,27,25,.08);box-shadow:0 1px 3px rgba(16,24,22,.05),0 12px 32px rgba(16,24,22,.06)}
+body.modo-claro .auth-logo{background:linear-gradient(135deg,var(--r2) 15%,var(--r) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:none}
+body.modo-claro .login-sub{color:rgba(22,27,25,.5)}
+body.modo-claro .fgrp label{color:rgba(22,27,25,.45)}
 body.modo-claro .fgrp input,body.modo-claro .fgrp select,body.modo-claro .fgrp textarea{background:#f7f7f7;border-color:rgba(0,0,0,.14);color:#111}
 body.modo-claro .sbox{background:#f7f7f7;border-color:rgba(0,0,0,.14);color:#111}
 body.modo-claro .fsec{background:#ffffff;box-shadow:0 1px 4px rgba(0,0,0,.05)}
@@ -80,7 +83,7 @@ body.modo-claro .d-section{color:rgba(0,0,0,.3)}
 body.modo-claro .d-sep{background:rgba(0,0,0,.08)}
 body.modo-claro .d-item{color:rgba(0,0,0,.5)}
 body.modo-claro .d-item:hover{color:#111;background:rgba(var(--theme-rgb),.08)}
-body.modo-claro .d-item.active{color:#0d47b8;background:rgba(30,111,255,.08);border-left-color:#1e6fff;font-weight:800}
+body.modo-claro .d-item.active{color:#0b5c56;background:rgba(15,118,110,.08);border-left-color:#0f766e;font-weight:800}
 body.modo-claro .toast{background:#fff;color:#111;border-color:rgba(0,0,0,.12);box-shadow:0 4px 20px rgba(0,0,0,.15)}
 body.modo-claro .btn-s{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.12)}
 body.modo-claro .btn-s:hover{border-color:var(--r);color:var(--r)}
@@ -257,7 +260,7 @@ body.modo-claro .skel{background:linear-gradient(90deg,rgba(0,0,0,.06) 25%,rgba(
 .d-section{padding:14px 20px 4px;font-size:10px;font-weight:800;color:rgba(255,255,255,.35);letter-spacing:2px;text-transform:uppercase}
 .d-item{display:flex;align-items:center;gap:12px;padding:11px 20px;font-size:13px;font-weight:700;color:rgba(255,255,255,.65);cursor:pointer;transition:color .15s ease,background .15s ease,border-color .15s ease,padding-left .18s cubic-bezier(.16,1,.3,1);border-left:3px solid transparent;border-radius:0 10px 10px 0;margin-right:8px}
 .d-item:hover{color:#fff;background:rgba(var(--theme-rgb),.12);border-left-color:rgba(var(--theme-rgb),.5);padding-left:24px}
-.d-item.active{color:#fff;background:linear-gradient(90deg,rgba(30,111,255,.18),rgba(30,111,255,.06));border-left-color:#1e6fff;padding-left:24px;font-weight:800}
+.d-item.active{color:#fff;background:linear-gradient(90deg,rgba(15,118,110,.18),rgba(15,118,110,.06));border-left-color:#0f766e;padding-left:24px;font-weight:800}
 .d-icon{font-size:18px;width:24px;text-align:center;flex-shrink:0}
 .d-grupo-label{padding:10px 20px 4px;font-size:10px;font-weight:800;color:var(--r);letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;gap:6px}
 .d-sep{height:1px;background:rgba(255,255,255,.08);margin:8px 16px}
@@ -1666,7 +1669,7 @@ const _genMaskableIcon=(logoData,size,bgColor)=>new Promise(resolve=>{
     const isRedBg=bg.toLowerCase().replace(/\s/g,'').match(/^#?(e5|c6|b7|ff|d3).*/) && 
       !bg.toLowerCase().replace(/\s/g,'').match(/^#?(1|2|3|4|5|6|7|8|9|a|b|c|d|e|f)(e|d|c|b|a|9|8|7|6|5)/);
     // Color del logo: blanco si fondo rojo, rojo si fondo otro color
-    const logoColor=_isRedishColor(bg)?'#ffffff':'#1e6fff';
+    const logoColor=_isRedishColor(bg)?'#ffffff':'#0f766e';
     // Aplicar color al logo usando composite
     const c2=document.createElement('canvas');
     c2.width=size;c2.height=size;
@@ -1736,7 +1739,7 @@ function _showUpdateBanner(){
   b.innerHTML=`
     <div style="
       position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
-      background:#1a1a2e;border:1px solid #1e6fff;border-radius:16px;
+      background:#1a1a2e;border:1px solid #0f766e;border-radius:16px;
       padding:14px 20px;display:flex;align-items:center;gap:14px;
       box-shadow:0 4px 24px rgba(0,0,0,0.5);z-index:99999;
       font-family:sans-serif;color:#fff;white-space:nowrap;
@@ -1745,7 +1748,7 @@ function _showUpdateBanner(){
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.1"/></svg>
       <span style="font-size:.95rem">Nueva versión disponible</span>
       <button onclick="_applyUpdate()" style="
-        background:#1e6fff;color:#fff;border:none;border-radius:10px;
+        background:#0f766e;color:#fff;border:none;border-radius:10px;
         padding:8px 16px;font-size:.9rem;font-weight:600;cursor:pointer;
       ">Actualizar ahora</button>
       <button onclick="this.closest('#_updateBanner').remove()" style="
@@ -6420,7 +6423,7 @@ window.imprimirPartes=(modo)=>{
     </tr>`;
   }).join('');
 
-  const accentColor='#0d47b8';
+  const accentColor='#0b5c56';
   const printHTML=`<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7116,12 +7119,12 @@ const pdfHTML=(p,iva,tot,grp,firmaDataURL)=>{
 
   return`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Parte: ${p.titulo}</title>
   <style>
-  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;font-family:'Manrope',sans-serif;background:#fff;color:#222}
+  html,body{height:100%;font-family:'Inter',sans-serif;background:#fff;color:#222}
   @page{margin:0;size:A4 portrait}
   .page{width:210mm;min-height:297mm;display:flex;flex-direction:column;page-break-after:always}
-  .head{background:linear-gradient(135deg,#0d47b8,#1e6fff);color:#fff;padding:28px 36px;display:flex;align-items:center;gap:18px;flex-shrink:0}
+  .head{background:linear-gradient(135deg,#0b5c56,#0f766e);color:#fff;padding:28px 36px;display:flex;align-items:center;gap:18px;flex-shrink:0}
   .head-logo{font-size:40px;line-height:1}
   .head-brand{flex:1}
   .head-brand h1{font-size:22px;font-weight:900;margin-bottom:2px}
@@ -7130,14 +7133,14 @@ const pdfHTML=(p,iva,tot,grp,firmaDataURL)=>{
   .head-meta strong{display:block;font-size:15px;font-weight:900}
   .content{flex:1;padding:24px 36px;display:flex;flex-direction:column;gap:0}
   .sec{margin-bottom:16px}
-  .sec-title{font-size:9px;font-weight:900;color:#1e6fff;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:8px;padding-bottom:5px;border-bottom:2px solid #1e6fff}
+  .sec-title{font-size:9px;font-weight:900;color:#0f766e;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:8px;padding-bottom:5px;border-bottom:2px solid #0f766e}
   .row{display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:12.5px;gap:12px}
   .row .lbl{color:#999;min-width:120px;flex-shrink:0}
   .row .val{font-weight:700;text-align:right;flex:1}
-  .total-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:17px;font-weight:900;color:#1e6fff;background:#eef5ff;border-radius:10px;margin-top:10px;border:1px solid #cfe3ff}
+  .total-row{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;font-size:17px;font-weight:900;color:#0f766e;background:#eafaf7;border-radius:10px;margin-top:10px;border:1px solid #bfe8e0}
   .two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
   .firma-sec{margin-top:auto;padding:20px 36px 28px;text-align:center;page-break-inside:avoid}
-  .firma-titulo{font-size:9px;font-weight:900;color:#1e6fff;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:14px}
+  .firma-titulo{font-size:9px;font-weight:900;color:#0f766e;letter-spacing:2.5px;text-transform:uppercase;margin-bottom:14px}
   .firma-box{width:300px;height:100px;border:2px dashed #ccc;border-radius:10px;margin:0 auto 8px;background:#fafafa}
   .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:800}
   .badge-ok{background:#e8f5e9;color:#2e7d32}
@@ -7424,14 +7427,14 @@ window.exportarBackupZIP=async()=>{
 
   // ── ESTILOS COMUNES ──
   const backupCSS=`
-    @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Manrope',sans-serif;background:#fff;color:#222}
+    body{font-family:'Inter',sans-serif;background:#fff;color:#222}
     @page{margin:0;size:A4 portrait}
     .pg{width:210mm;min-height:297mm;display:flex;flex-direction:column;page-break-after:always;page-break-inside:avoid}
     .pg-flow{width:210mm;display:block;page-break-after:always;page-break-inside:auto}
     /* Portada */
-    .portada{background:linear-gradient(135deg,#062a63,#1e6fff,#3ad6ff);color:#fff;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px}
+    .portada{background:linear-gradient(135deg,#08403c,#0f766e,#5eead4);color:#fff;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px}
     .portada-logo{font-size:80px;margin-bottom:16px}
     .portada h1{font-size:52px;font-weight:900;letter-spacing:-1px;margin-bottom:8px}
     .portada-sub{font-size:16px;opacity:.8;margin-bottom:40px}
@@ -7446,16 +7449,16 @@ window.exportarBackupZIP=async()=>{
     .idx-head p{font-size:12px;color:rgba(255,255,255,.5);margin-top:4px}
     .idx-body{padding:24px 36px;flex:1}
     .idx-cli{display:flex;align-items:stretch;gap:0;margin-bottom:10px;border-radius:12px;overflow:hidden;border:1px solid #eee}
-    .idx-cli-num{background:#1e6fff;color:#fff;font-size:13px;font-weight:900;width:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+    .idx-cli-num{background:#0f766e;color:#fff;font-size:13px;font-weight:900;width:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
     .idx-cli-info{padding:10px 14px;flex:1}
     .idx-cli-nom{font-size:14px;font-weight:800}
     .idx-cli-det{font-size:11px;color:#999;margin-top:2px}
     .idx-cli-parts{background:#f5f5f5;padding:10px 14px;font-size:12px;color:#555;min-width:80px;display:flex;flex-direction:column;justify-content:center;text-align:right}
-    .idx-cli-parts strong{color:#1e6fff;font-size:15px;font-weight:900}
+    .idx-cli-parts strong{color:#0f766e;font-size:15px;font-weight:900}
     /* Cabecera de cliente */
     .cli-head{background:linear-gradient(135deg,#1a1a1a,#333);color:#fff;padding:28px 36px;flex-shrink:0}
     .cli-head-top{display:flex;align-items:center;gap:16px;margin-bottom:16px}
-    .cli-ava-big{width:52px;height:52px;border-radius:50%;background:#1e6fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;flex-shrink:0}
+    .cli-ava-big{width:52px;height:52px;border-radius:50%;background:#0f766e;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;flex-shrink:0}
     .cli-head h2{font-size:22px;font-weight:900}
     .cli-head-meta{font-size:12px;color:rgba(255,255,255,.55);margin-top:3px}
     .cli-head-datos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
@@ -7463,17 +7466,17 @@ window.exportarBackupZIP=async()=>{
     .cli-dato-lbl{font-size:10px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
     .cli-dato-val{font-size:13px;font-weight:700}
     /* Parte individual */
-    .parte-head{background:#1e6fff;color:#fff;padding:20px 36px;flex-shrink:0}
+    .parte-head{background:#0f766e;color:#fff;padding:20px 36px;flex-shrink:0}
     .parte-head-top{display:flex;justify-content:space-between;align-items:flex-start}
     .parte-head h3{font-size:18px;font-weight:900;margin-bottom:4px}
     .parte-head-sub{font-size:12px;opacity:.8}
     .parte-badge{display:inline-block;background:rgba(255,255,255,.2);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:800}
     .parte-body{padding:20px 36px;flex:1}
     .p-sec{margin-bottom:14px}
-    .p-sec-title{font-size:9px;font-weight:900;color:#1e6fff;letter-spacing:2px;text-transform:uppercase;padding-bottom:5px;border-bottom:2px solid #1e6fff;margin-bottom:8px}
+    .p-sec-title{font-size:9px;font-weight:900;color:#0f766e;letter-spacing:2px;text-transform:uppercase;padding-bottom:5px;border-bottom:2px solid #0f766e;margin-bottom:8px}
     .p-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f5f5f5;font-size:12px}
     .p-row .l{color:#aaa;min-width:120px}.p-row .v{font-weight:700;text-align:right}
-    .p-total{display:flex;justify-content:space-between;padding:10px 14px;background:#eef5ff;border-radius:10px;font-size:16px;font-weight:900;color:#1e6fff;border:1px solid #cfe3ff;margin-top:8px}
+    .p-total{display:flex;justify-content:space-between;padding:10px 14px;background:#eafaf7;border-radius:10px;font-size:16px;font-weight:900;color:#0f766e;border:1px solid #bfe8e0;margin-top:8px}
     .p-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
     .firma-area{margin-top:auto;padding:16px 36px;border-top:1px solid #eee}
     .firma-title{font-size:9px;font-weight:900;color:#aaa;letter-spacing:2px;text-transform:uppercase;text-align:center;margin-bottom:10px}
@@ -7500,7 +7503,7 @@ window.exportarBackupZIP=async()=>{
     .pr-info{flex:1}
     .pr-titulo{font-size:12px;font-weight:800;color:#222}
     .pr-sub{font-size:10px;color:#999;margin-top:2px}
-    .pr-total{font-size:13px;font-weight:900;color:#1e6fff;margin-top:3px}
+    .pr-total{font-size:13px;font-weight:900;color:#0f766e;margin-top:3px}
     .pr-badge{font-size:9px;font-weight:800;padding:2px 8px;border-radius:20px;display:inline-block;margin-top:3px}
     .pr-badge.espera{background:#f3e5f5;color:#6a1b9a}
     .pr-badge.ok{background:#e8f5e9;color:#2e7d32}
@@ -7647,7 +7650,7 @@ window.exportarBackupZIP=async()=>{
       <div style="padding:20px 36px">
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;page-break-inside:avoid">
           <div>
-            <div style="font-size:10px;font-weight:900;color:var(--r);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;padding-bottom:4px;border-bottom:2px solid #1e6fff">Partes de trabajo (${cPartes.length})</div>
+            <div style="font-size:10px;font-weight:900;color:var(--r);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;padding-bottom:4px;border-bottom:2px solid #0f766e">Partes de trabajo (${cPartes.length})</div>
             ${cPartes.length===0?'<div style="color:#aaa;font-size:12px;padding:10px 0">Sin partes registrados</div>':''}
             ${cPartes.map(p=>{
               const tot=calcTotal(p);
@@ -7662,7 +7665,7 @@ window.exportarBackupZIP=async()=>{
             }).join('')}
           </div>
           <div>
-            <div style="font-size:10px;font-weight:900;color:var(--r);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;padding-bottom:4px;border-bottom:2px solid #1e6fff">Mantenimientos programados (${cMants.length})</div>
+            <div style="font-size:10px;font-weight:900;color:var(--r);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;padding-bottom:4px;border-bottom:2px solid #0f766e">Mantenimientos programados (${cMants.length})</div>
             ${mantHTML}
           </div>
         </div>
@@ -8931,7 +8934,7 @@ window.imprimirCalendario=(modo)=>{
     });
   });
 
-  const accentColor='#0d47b8';
+  const accentColor='#0b5c56';
   const printHTML=`<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8944,7 +8947,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1a1a1a;font-size:12px
 @page{margin:12mm 10mm;size:A4 portrait}
 
 /* ── Encabezado ── */
-.page-header{background:linear-gradient(135deg,#062a63,${accentColor} 40%,#1e6fff);color:#fff;padding:18px 22px 16px;border-radius:10px 8px 0 0;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0}
+.page-header{background:linear-gradient(135deg,#08403c,${accentColor} 40%,#0f766e);color:#fff;padding:18px 22px 16px;border-radius:10px 8px 0 0;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0}
 .ph-brand{font-size:26px;font-weight:900;letter-spacing:-1px;opacity:.25;line-height:1}
 .ph-title{font-size:18px;font-weight:900;margin-bottom:2px}
 .ph-sub{font-size:11px;opacity:.8;font-weight:500}
@@ -9576,18 +9579,18 @@ window._descargarFichaCliArchivado=async(archId)=>{
     const iniCl=(cl.nombre||'?').split(' ').map(w=>w[0]||'').join('').toUpperCase().slice(0,2);
     const facTotal=partesCli.reduce((a,p)=>a+calcTotal(p),0);
     const fichaHTML=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Ficha — ${cl.nombre||'Cliente'}</title>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&display=swap');
-    *{box-sizing:border-box;margin:0;padding:0}body{font-family:'Manrope',sans-serif;background:#fff;color:#222}
+    <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
+    *{box-sizing:border-box;margin:0;padding:0}body{font-family:'Inter',sans-serif;background:#fff;color:#222}
     @page{margin:0;size:A4 portrait}.pg{width:210mm;min-height:297mm;display:flex;flex-direction:column}
     .head{background:linear-gradient(135deg,#1a1a1a,#333);color:#fff;padding:28px 36px;flex-shrink:0}
-    .ava{width:52px;height:52px;border-radius:50%;background:#1e6fff;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;flex-shrink:0}
+    .ava{width:52px;height:52px;border-radius:50%;background:#0f766e;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900;flex-shrink:0}
     .datos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
     .dato{background:rgba(255,255,255,.08);border-radius:10px;padding:10px 12px}
     .dato-lbl{font-size:10px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px}
     .dato-val{font-size:13px;font-weight:700}
     .body{padding:24px 36px;flex:1}
-    .sec{font-size:9px;font-weight:900;color:#1e6fff;letter-spacing:2px;text-transform:uppercase;padding-bottom:5px;border-bottom:2px solid #1e6fff;margin:16px 0 10px}
-    .row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;border:1px solid #eee;margin-bottom:6px;border-left:4px solid #1e6fff}
+    .sec{font-size:9px;font-weight:900;color:#0f766e;letter-spacing:2px;text-transform:uppercase;padding-bottom:5px;border-bottom:2px solid #0f766e;margin:16px 0 10px}
+    .row{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:10px;border:1px solid #eee;margin-bottom:6px;border-left:4px solid #0f766e}
     .row.ok{border-left-color:#4caf50}.rtit{font-size:12px;font-weight:800;color:#222}.rsub{font-size:10px;color:#999;margin-top:2px}
     .total{background:#fff5f5;border:1px solid #ffcdd2;border-radius:12px;padding:12px 18px;display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
     .footer{background:#f5f5f5;padding:8px 36px;font-size:10px;color:#aaa;display:flex;justify-content:space-between;flex-shrink:0}
@@ -11080,9 +11083,9 @@ const _presuHTML=(p,grp,c,iva,total,firmaDataURL)=>{
   (p.partidas||[]).filter(pt=>pt.desc||pt.importe).forEach(pt=>filasConceptos.push([pt.desc||'—',fmtM(pt.importe)]));
   return`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Presupuesto: ${p.titulo}</title>
   <style>
-  @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;font-family:'Manrope',sans-serif;background:#fff;color:#222}
+  html,body{height:100%;font-family:'Inter',sans-serif;background:#fff;color:#222}
   @page{margin:0;size:A4 portrait}
   .page{width:210mm;min-height:297mm;display:flex;flex-direction:column;page-break-after:always}
   .head{background:linear-gradient(135deg,#1565c0,#1e88e5);color:#fff;padding:28px 36px;display:flex;align-items:center;gap:18px;flex-shrink:0}
@@ -11832,13 +11835,13 @@ const renderPerfil=()=>{
       <div class="theme-picker-label">Color de la interfaz</div>
       <div class="theme-picker">
         ${[
-          {k:'azul',       c1:'#1e6fff', c2:'#0d47b8', lbl:'Azul'},
-          {k:'rojo',       c1:'#e53935', c2:'#c62828', lbl:'Rojo'},
-          {k:'lila',       c1:'#8e24aa', c2:'#6a1b9a', lbl:'Lila'},
-          {k:'verde',      c1:'#2e7d32', c2:'#1b5e20', lbl:'Verde'},
-          {k:'rosa',       c1:'#c2185b', c2:'#880e4f', lbl:'Rosa'},
-          {k:'ambar',      c1:'#f57f17', c2:'#e65100', lbl:'Ámbar'},
-          {k:'astonmartin',c1:'#005f3c', c2:'#003d27', lbl:'Aston Martin'},
+          {k:'azul',       c1:'#0f766e', c2:'#0b5c56', lbl:'Turquesa'},
+          {k:'rojo',       c1:'#c2452f', c2:'#9a3620', lbl:'Terracota'},
+          {k:'lila',       c1:'#6d5a8a', c2:'#4f3f68', lbl:'Ciruela'},
+          {k:'verde',      c1:'#2f6b4f', c2:'#204a38', lbl:'Bosque'},
+          {k:'rosa',       c1:'#a15c72', c2:'#7a4457', lbl:'Malva'},
+          {k:'ambar',      c1:'#b9793a', c2:'#8f5c29', lbl:'Ámbar'},
+          {k:'astonmartin',c1:'#1b4332', c2:'#0f2a1e', lbl:'Aston Martin'},
         ].map(t=>`<div class="theme-swatch ${(localStorage.getItem('alberto_theme')||'azul')===t.k?'active':''}" style="background:linear-gradient(135deg,${t.c1},${t.c2})" onclick="cambiarColorTema('${t.k}')" title="${t.lbl}"></div>`).join('')}
       </div>
     </div>
@@ -13536,13 +13539,13 @@ const _prevScreen=id=>{
 // PERSONALIZACIÓN: TEMA Y MODO CLARO
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const _TEMAS={
-  azul:        {r:'#1e6fff',r2:'#0d47b8',r3:'#3ad6ff',r4:'#062a63',rgb:'30,111,255',  shadow:'0 6px 28px rgba(30,111,255,.28)'},
-  rojo:        {r:'#e53935',r2:'#c62828',r3:'#ff5252',r4:'#b71c1c',rgb:'229,57,53',   shadow:'0 6px 28px rgba(229,57,53,.28)'},
-  lila:        {r:'#8e24aa',r2:'#6a1b9a',r3:'#ce93d8',r4:'#4a148c',rgb:'142,36,170', shadow:'0 6px 28px rgba(142,36,170,.28)'},
-  verde:       {r:'#2e7d32',r2:'#1b5e20',r3:'#66bb6a',r4:'#0a3d0f',rgb:'46,125,50',  shadow:'0 6px 28px rgba(46,125,50,.28)'},
-  rosa:        {r:'#c2185b',r2:'#880e4f',r3:'#f48fb1',r4:'#560027',rgb:'194,24,91',  shadow:'0 6px 28px rgba(194,24,91,.28)'},
-  ambar:       {r:'#f57f17',r2:'#e65100',r3:'#ffcc02',r4:'#bf360c',rgb:'245,127,23', shadow:'0 6px 28px rgba(245,127,23,.28)'},
-  astonmartin: {r:'#005f3c',r2:'#003d27',r3:'#00b87a',r4:'#001f14',rgb:'0,95,60',    shadow:'0 6px 28px rgba(0,95,60,.28)'},
+  azul:        {r:'#0f766e',r2:'#0b5c56',r3:'#5eead4',r4:'#08403c',rgb:'15,118,110', shadow:'0 6px 28px rgba(15,118,110,.24)'},
+  rojo:        {r:'#c2452f',r2:'#9a3620',r3:'#f4a38a',r4:'#6b2415',rgb:'194,69,47',  shadow:'0 6px 28px rgba(194,69,47,.24)'},
+  lila:        {r:'#6d5a8a',r2:'#4f3f68',r3:'#c4b5d6',r4:'#382c4a',rgb:'109,90,138', shadow:'0 6px 28px rgba(109,90,138,.24)'},
+  verde:       {r:'#2f6b4f',r2:'#204a38',r3:'#86c9a0',r4:'#163826',rgb:'47,107,79',  shadow:'0 6px 28px rgba(47,107,79,.24)'},
+  rosa:        {r:'#a15c72',r2:'#7a4457',r3:'#d9a8b6',r4:'#4a2831',rgb:'161,92,114', shadow:'0 6px 28px rgba(161,92,114,.24)'},
+  ambar:       {r:'#b9793a',r2:'#8f5c29',r3:'#e8b573',r4:'#5c3b15',rgb:'185,121,58', shadow:'0 6px 28px rgba(185,121,58,.24)'},
+  astonmartin: {r:'#1b4332',r2:'#0f2a1e',r3:'#6fa98a',r4:'#0d2a1d',rgb:'27,67,50',   shadow:'0 6px 28px rgba(27,67,50,.24)'},
 };
 
 
