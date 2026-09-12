@@ -603,12 +603,20 @@ body.sel-mode [data-sel-id]:not(.sel-checked){transform:scale(.97)}
   animation:selBarIn .32s var(--ease-spring);
 }
 @keyframes selBarIn{from{transform:translateY(24px) scale(.96);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
-.sel-action-bar .sel-count{flex:1;font-size:13px;font-weight:700;color:var(--tx)}
+.sel-action-bar .sel-count{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:700;color:var(--tx)}
 .sel-action-bar .sel-cancel{width:44px;height:44px;border-radius:50%;border:1px solid var(--glass-border);background:transparent;color:var(--tx2);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .16s var(--ease-spring),background .15s ease}
 .sel-action-bar .sel-cancel:active{transform:scale(.9)}
-.sel-action-bar .sel-delete-btn{border:none;border-radius:var(--rd-sm);padding:14px 22px;background:linear-gradient(135deg,var(--danger2),var(--danger));color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:var(--font);flex-shrink:0;display:flex;align-items:center;gap:7px;box-shadow:0 3px 10px -2px rgba(239,68,68,.4);transition:transform .16s var(--ease-spring)}
+.sel-action-bar .sel-delete-btn{border:none;border-radius:var(--rd-sm);padding:13px 16px;background:linear-gradient(135deg,var(--danger2),var(--danger));color:#fff;font-size:13.5px;font-weight:800;cursor:pointer;font-family:var(--font);flex-shrink:0;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px -2px rgba(239,68,68,.4);transition:transform .16s var(--ease-spring)}
 .sel-action-bar .sel-delete-btn:active{transform:scale(.95)}
 .sel-action-bar .sel-delete-btn:disabled{opacity:.4;cursor:default}
+.sel-action-bar .sel-secondary-btn{border:none;border-radius:var(--rd-sm);padding:13px 16px;background:linear-gradient(135deg,var(--ok),#0d9668);color:#fff;font-size:13.5px;font-weight:800;cursor:pointer;font-family:var(--font);flex-shrink:0;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px -2px rgba(16,185,129,.4);transition:transform .16s var(--ease-spring)}
+.sel-action-bar .sel-secondary-btn:active{transform:scale(.95)}
+.sel-action-bar .sel-secondary-btn:disabled{opacity:.4;cursor:default}
+@media (max-width:380px){
+  .sel-action-bar{padding:9px 8px 9px 12px;gap:6px}
+  .sel-action-bar .sel-delete-btn,.sel-action-bar .sel-secondary-btn{padding:12px 12px;font-size:12.5px}
+  .sel-action-bar .sel-count{font-size:12px}
+}
 /* Mientras el modo selección está activo, el FAB de acciones rápidas se
    oculta: si no, queda encima de la barra de selección (mismo rincón
    inferior derecho) y bloquea los toques sobre "Eliminar". El !important
@@ -2707,8 +2715,14 @@ window._fabSetDefault=(key)=>{
 
   const TYPE_CONF={
     cliente:{deleteFn:'_selDeleteClientes',label:'cliente',plural:'clientes'},
-    aviso:{deleteFn:'_selDeleteAvisos',label:'aviso',plural:'avisos'},
-    presupuesto:{deleteFn:'_selDeletePresupuestos',label:'presupuesto',plural:'presupuestos'},
+    aviso:{deleteFn:'_selDeleteAvisos',label:'aviso',plural:'avisos',
+      secondary:()=> _avisTab==='pend'
+        ? {fn:'_selResolverAvisos',label:'Resolver',icon:ICO.check(15)}
+        : {fn:'_selRestaurarAvisos',label:'Restaurar',icon:ICO.undo(15)}},
+    presupuesto:{deleteFn:'_selDeletePresupuestos',label:'presupuesto',plural:'presupuestos',
+      secondary:()=> _presuTabActiva==='pend'
+        ? {fn:'_selCompletarPresupuestos',label:'Completar',icon:ICO.check(15)}
+        : {fn:'_selRestaurarPresupuestos',label:'Restaurar',icon:ICO.undo(15)}},
   };
 
   window._selMode={active:false,type:null,ids:new Set()};
@@ -2723,9 +2737,13 @@ window._fabSetDefault=(key)=>{
       bar.className='sel-action-bar';
       document.body.appendChild(bar);
     }
+    const conf=TYPE_CONF[window._selMode.type]||{};
+    const sec=typeof conf.secondary==='function'?conf.secondary():null;
+    const secBtn=sec?`<button class="sel-secondary-btn" onclick="window._selSecondaryConfirm()" ${n?'':'disabled'}>${sec.icon} ${sec.label}</button>`:'';
     bar.innerHTML=`
       <button class="sel-cancel" onclick="window._selCancel()">${ICO.x(15)}</button>
       <span class="sel-count">${n?`${n} seleccionado${n!==1?'s':''}`:'Toca para seleccionar'}</span>
+      ${secBtn}
       <button class="sel-delete-btn" onclick="window._selDeleteConfirm()" ${n?'':'disabled'}>${ICO.trash(15)} Eliminar</button>`;
   };
 
@@ -2735,6 +2753,16 @@ window._fabSetDefault=(key)=>{
     document.body.classList.remove('sel-mode');
     document.body.removeAttribute('data-sel-type');
     renderBar();
+  };
+
+  window._selSecondaryConfirm=async()=>{
+    const {type,ids}=window._selMode;
+    if(!ids||!ids.size)return;
+    const conf=TYPE_CONF[type]; const sec=conf&&typeof conf.secondary==='function'?conf.secondary():null;
+    if(!sec)return;
+    const idArr=[...ids];
+    window._selCancel();
+    if(typeof window[sec.fn]==='function') await window[sec.fn](idArr);
   };
 
   window._selDeleteConfirm=async()=>{
@@ -2823,6 +2851,22 @@ window._selDeleteAvisos=async(ids)=>{
   }
   toast(`🗑️ ${ids.length>1?'Avisos eliminados':'Aviso eliminado'}`,'o');
 };
+window._selResolverAvisos=async(ids)=>{
+  toast('Actualizando…','i');
+  for(const id of ids){
+    try{ await updateDoc(doc(db,'grupos',CGID,'avisos',id),{estado:'resuelto',resueltaEn:serverTimestamp()}); }
+    catch(e){ console.warn('_selResolverAvisos',id,e); }
+  }
+  toast(`✅ ${ids.length>1?'Avisos resueltos':'Aviso resuelto'}`,'o');
+};
+window._selRestaurarAvisos=async(ids)=>{
+  toast('Actualizando…','i');
+  for(const id of ids){
+    try{ await updateDoc(doc(db,'grupos',CGID,'avisos',id),{estado:'pendiente',resueltaEn:null}); }
+    catch(e){ console.warn('_selRestaurarAvisos',id,e); }
+  }
+  toast(`↩️ ${ids.length>1?'Avisos restaurados a pendientes':'Aviso restaurado a pendiente'}`,'o');
+};
 window._selDeletePresupuestos=async(ids)=>{
   toast('Eliminando…','i');
   for(const id of ids){
@@ -2832,6 +2876,22 @@ window._selDeletePresupuestos=async(ids)=>{
     }catch(e){ console.warn('_selDeletePresupuestos',id,e); }
   }
   toast(`🗑️ ${ids.length>1?'Presupuestos eliminados':'Presupuesto eliminado'}`,'o');
+};
+window._selCompletarPresupuestos=async(ids)=>{
+  toast('Actualizando…','i');
+  for(const id of ids){
+    try{ await updateDoc(doc(db,'grupos',CGID,'presupuestos',id),{estado:'aceptado',actualizadoEn:serverTimestamp()}); }
+    catch(e){ console.warn('_selCompletarPresupuestos',id,e); }
+  }
+  toast(`✅ ${ids.length>1?'Presupuestos completados':'Presupuesto completado'}`,'o');
+};
+window._selRestaurarPresupuestos=async(ids)=>{
+  toast('Actualizando…','i');
+  for(const id of ids){
+    try{ await updateDoc(doc(db,'grupos',CGID,'presupuestos',id),{estado:'espera',actualizadoEn:serverTimestamp()}); }
+    catch(e){ console.warn('_selRestaurarPresupuestos',id,e); }
+  }
+  toast(`↩️ ${ids.length>1?'Presupuestos restaurados a pendientes':'Presupuesto restaurado a pendiente'}`,'o');
 };
 
 window.goScreen=id=>{
@@ -11824,7 +11884,7 @@ const _renderVerPresupuesto=(prId,p)=>{
     ${p.notas?`<div style="font-size:13px;color:var(--tx2);margin-bottom:14px;padding:10px;background:var(--card2);border-radius:12px">${p.notas}</div>`:''}
     ${p.firmado&&p.firmaCliente?`
       <div style="margin-bottom:14px">
-        <div style="font-size:12px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">✍️ Firma del cliente</div>
+        <div style="font-size:12px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">✍️ Firmado · ${CG?.nombre||'Grupo'}</div>
         <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px">
           <img src="${p.firmaCliente}" style="max-width:100%;max-height:130px;display:block;margin:0 auto">
         </div>
@@ -11833,7 +11893,11 @@ const _renderVerPresupuesto=(prId,p)=>{
           <button class="btn btn-del btn-sm" style="flex:1" onclick="eliminarFirmaPresupuesto('${prId}')">🗑️ Eliminar firma</button>
         </div>
       </div>
-    `:''}
+    `:`
+      <div style="margin-bottom:14px">
+        <button class="btn btn-s btn-sm" style="width:100%" onclick="editarFirmaPresupuesto('${prId}')">✍️ Añadir firma</button>
+      </div>
+    `}
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
       <button class="btn ${isAcep?'btn-s':'btn-p'}" style="flex:1" onclick="toggleEstadoPresupuesto('${prId}','${isAcep?'espera':'aceptado'}')">${isAcep?'↩️ Marcar como pendiente':'✅ Marcar como completado'}</button>
     </div>
@@ -11843,9 +11907,6 @@ const _renderVerPresupuesto=(prId,p)=>{
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-s" style="flex:1" onclick="exportarPresupuestoPDF('${prId}')"><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' style='margin-right:4px'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>PDF</button>
-      <button class="btn btn-ok btn-sm" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.4);color:#25d366" onclick="enviarPresupuestoWhatsAppPDF('${prId}')"><svg width='13' height='13' viewBox='0 0 24 24' fill='currentColor' style='margin-right:4px;vertical-align:-2px'><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 20.2 12 8.2 8.2 0 0 1 12 20.2z"/></svg>PDF por WhatsApp</button>
-      ${c?.telefono?`<button class="btn btn-ok btn-sm" onclick="enviarPresupuestoWADirecto('${prId}','${c.telefono.replace(/\s/g,'')}','${(c?.nombre||'').replace(/'/g,"\\'")}','${fmtM(total)}','${(p.titulo||'').replace(/'/g,"\\'")}')">💬 Enviar</button>`:''}
-      ${!isAcep&&prTel?`<button class="btn btn-s btn-sm" style="color:#ff9800;border-color:rgba(255,152,0,.35)" onclick="_recordarPresupuesto('${prId}')">🔔 Recordar</button>`:''}
       <button class="btn btn-del btn-sm" onclick="borrarPresupuesto('${prId}')">🗑️</button>
     </div>
   `);
@@ -11861,9 +11922,10 @@ window.editarFirmaPresupuesto=async(prId)=>{
     }catch(e){}
   }
   if(!p){toast('No se pudo cargar el presupuesto','e');return;}
-  abrirSB('✍️ Editar firma del cliente',`
+  abrirSB('✍️ Firma del presupuesto',`
     <div style="text-align:center;margin-bottom:12px">
       <div style="font-size:13px;color:var(--tx2)">Presupuesto: <strong style="color:var(--tx)">${p.titulo||''}</strong></div>
+      <div style="font-size:11px;color:var(--tx2);margin-top:4px">Se guardará como firmado por <strong style="color:var(--tx)">${CG?.nombre||'Grupo'}</strong></div>
     </div>
     <div style="background:rgba(255,255,255,.06);border:2px dashed var(--border);border-radius:16px;padding:10px;margin-bottom:12px">
       <div style="font-size:11px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:1.5px;text-align:center;margin-bottom:8px">Firme aquí con el dedo</div>
@@ -11874,7 +11936,7 @@ window.editarFirmaPresupuesto=async(prId)=>{
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn btn-s" onclick="verPresupuesto('${prId}')">Cancelar</button>
-      <button class="btn btn-ok" style="background:linear-gradient(135deg,#1fae54,#25d366)" onclick="_guardarFirmaPresupuestoEditada('${prId}')">💾 Guardar firma</button>
+      <button class="btn btn-ok" style="background:linear-gradient(135deg,#1fae54,#25d366);color:#fff" onclick="_guardarFirmaPresupuestoEditada('${prId}')">💾 Guardar firma</button>
     </div>
   `);
   setTimeout(()=>{
@@ -11918,7 +11980,7 @@ window._guardarFirmaPresupuestoEditada=async(prId)=>{
   _lcSave('presus_comp',CGID,_presusComp);
   try{
     await updateDoc(doc(db,'grupos',CGID,'presupuestos',prId),cambios);
-    toast('✅ Firma actualizada','o');
+    toast('✅ Firma guardada','o');
   }catch(e){
     console.error('_guardarFirmaPresupuestoEditada',e);
     toast('Sin conexión: se actualizará al recuperar internet','i');
@@ -12098,7 +12160,7 @@ window.enviarPresupuestoWhatsAppPDF=async(prId)=>{
   const total=(parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+iva+(parseFloat(p.importeDesplazamiento)||0)+((p.partidas||[]).reduce((a,b)=>a+(parseFloat(b.importe)||0),0));
 
   // Mostrar panel de firma (igual que el botón "PDF" del detalle)
-  abrirSB('✍️ Firma del cliente — Presupuesto',`
+  abrirSB('✍️ Firma del presupuesto',`
     <div style="text-align:center;margin-bottom:12px">
       <div style="font-size:13px;color:var(--tx2);margin-bottom:4px">Presupuesto: <strong style="color:var(--tx)">${p.titulo}</strong></div>
       <div style="font-size:12px;color:var(--tx2)">Cliente: <strong style="color:var(--tx)">${p.clienteNombre||'—'}</strong></div>
@@ -12113,7 +12175,7 @@ window.enviarPresupuestoWhatsAppPDF=async(prId)=>{
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn btn-s" onclick="_enviarPresuWA('${prId}',null)" style="font-size:13px">Omitir firma</button>
-      <button class="btn btn-ok" style="background:linear-gradient(135deg,#1fae54,#25d366)" onclick="_capturarFirmaPresuWA('${prId}')">📲 Generar y enviar</button>
+      <button class="btn btn-ok" style="background:linear-gradient(135deg,#1fae54,#25d366);color:#fff" onclick="_capturarFirmaPresuWA('${prId}')">📲 Generar y enviar</button>
     </div>
   `);
   // Reusar el mismo canvas de firma que el flujo de "PDF"
@@ -12273,8 +12335,8 @@ window.swipeEliminarPresupuesto=async(prId)=>{
 // ── HTML completo del presupuesto (misma calidad que partes)
 const _presuHTML=(p,grp,c,iva,total,firmaDataURL)=>{
   const firmaBloque=firmaDataURL
-    ?`<div class="firma-sec"><div class="firma-titulo">ACEPTACIÓN Y FIRMA</div><img src="${firmaDataURL}" style="max-width:300px;max-height:120px;display:block;margin:0 auto 8px"><div style="border-top:2px solid #222;width:300px;margin:0 auto;padding-top:6px;text-align:center;font-size:12px;color:#555">${p.clienteNombre||'Cliente'}</div></div>`
-    :`<div class="firma-sec"><div class="firma-titulo">ACEPTACIÓN Y FIRMA</div><div class="firma-box"></div><div style="border-top:2px solid #222;width:300px;margin:8px auto 0;padding-top:6px;text-align:center;font-size:12px;color:#555">${p.clienteNombre||'Cliente'}</div></div>`;
+    ?`<div class="firma-sec"><div class="firma-titulo">FIRMA</div><img src="${firmaDataURL}" style="max-width:300px;max-height:120px;display:block;margin:0 auto 8px"><div style="border-top:2px solid #222;width:300px;margin:0 auto;padding-top:6px;text-align:center;font-size:12px;color:#555">Firmado: ${grp?.nombre||'Grupo'}</div></div>`
+    :`<div class="firma-sec"><div class="firma-titulo">FIRMA</div><div class="firma-box"></div><div style="border-top:2px solid #222;width:300px;margin:8px auto 0;padding-top:6px;text-align:center;font-size:12px;color:#555">${grp?.nombre||'Grupo'}</div></div>`;
   const dir=p.clienteDireccion||c?.direccion||'';
   const tel=p.clienteTelefono||c?.telefono||'';
   const edif=p.clienteEdificio||c?.edificio||'';
@@ -12363,7 +12425,7 @@ window.exportarPresupuestoPDF=async(prId)=>{
   const total=(parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+iva+(parseFloat(p.importeDesplazamiento)||0)+((p.partidas||[]).reduce((a,b)=>a+(parseFloat(b.importe)||0),0));
 
   // Mostrar panel de firma (igual que partes)
-  abrirSB('✍️ Firma del cliente — Presupuesto',`
+  abrirSB('✍️ Firma del presupuesto',`
     <div style="text-align:center;margin-bottom:12px">
       <div style="font-size:13px;color:var(--tx2);margin-bottom:4px">Presupuesto: <strong style="color:var(--tx)">${p.titulo}</strong></div>
       <div style="font-size:12px;color:var(--tx2)">Cliente: <strong style="color:var(--tx)">${p.clienteNombre||'—'}</strong></div>
@@ -13258,12 +13320,11 @@ const _renderGTabAvisos=()=>{
   const el=$('tabAvisContent');
   if(!el)return;
   el.innerHTML=`
-    <div style="display:grid;grid-template-columns:1fr auto;gap:8px;margin-bottom:14px">
-      <button class="btn btn-p" onclick="abrirNuevoAviso()">
+    <div style="margin-bottom:14px">
+      <button class="btn btn-p" style="width:100%" onclick="abrirNuevoAviso()">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:6px;vertical-align:-2px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Nuevo aviso
       </button>
-      <button class="btn btn-s" title="Imprimir avisos" onclick="imprimirAvisos()">🖨️ Imprimir</button>
     </div>
     <div class="stabs" style="margin-bottom:12px">
       <button class="stab active" id="avisTabPend" onclick="switchAvisTab('pend')">💬 Pendientes <span id="avisBadgePend" style="margin-left:4px;background:rgba(171,71,188,.15);color:#ab47bc;border-radius:20px;padding:1px 7px;font-size:11px;font-weight:800"></span></button>
@@ -13408,9 +13469,11 @@ const _renderAvisBody=()=>{
             ${a.creadoPorNombre||'Técnico'} · ${fmtF(a.creado)}
             ${esResuelto?` · <span style="color:var(--ok);font-weight:700">Resuelto ${fmtF(a.resueltaEn)}</span>`:''}
           </div>
-          ${!esResuelto?`<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
-            <button class="btn btn-s btn-sm" onclick="event.stopPropagation();editarAviso('${a.id}')">${ICO.edit(14)} Editar</button>
-          </div>`:''}
+          <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+            ${cli?.telefono?`<a href="tel:${cli.telefono}" style="text-decoration:none" onclick="event.stopPropagation()" class="btn btn-s btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.71 3.4 2 2 0 0 1 3.68 1.21h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.86-1.04a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Llamar</a>`:''}
+            ${cli?.telefono?`<a href="https://wa.me/34${cli.telefono.replace(/\D/g,'')}" target="_blank" style="text-decoration:none" onclick="event.stopPropagation()" class="btn btn-s btn-sm">💬 WhatsApp</a>`:''}
+            ${!esResuelto?`<button class="btn btn-s btn-sm" onclick="event.stopPropagation();editarAviso('${a.id}')">${ICO.edit(14)} Editar</button>`:''}
+          </div>
         </div>
       </div>
       </div>
