@@ -504,67 +504,67 @@ body.modo-claro .sbox:focus{box-shadow:inset 0 1px 2px rgba(0,0,0,.03),0 0 0 3px
 .gtile-name{position:absolute;bottom:12px;left:12px;right:12px;font-size:15px;font-weight:900;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
 
 /* ── GRUPO HEADER ── */
-.grupo-header{height:172px;border-radius:22px;overflow:hidden;position:relative;cursor:pointer;margin-bottom:18px;flex-shrink:0;box-shadow:0 14px 32px -12px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.06)}
+.grupo-header{height:120px;border-radius:20px;overflow:hidden;position:relative;cursor:pointer;margin-bottom:16px;flex-shrink:0;box-shadow:0 10px 24px -12px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.06)}
 .grupo-header-img{position:absolute;inset:0;background-size:cover;background-position:center;filter:saturate(1.25) brightness(.98);transform:scale(1.02);transition:transform .5s cubic-bezier(.16,1,.3,1)}
 .grupo-header:active .grupo-header-img{transform:scale(1.06)}
 .grupo-header-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.86) 0%,rgba(0,0,0,.32) 46%,rgba(0,0,0,.08) 100%)}
-.grupo-header-content{position:absolute;bottom:0;left:0;right:0;padding:16px 18px;display:flex;align-items:center;gap:12px}
+.grupo-header-content{position:absolute;bottom:0;left:0;right:0;padding:11px 15px;display:flex;align-items:center;gap:12px}
 .grupo-ava{width:60px;height:60px;border-radius:0;background:transparent;display:flex;align-items:center;justify-content:center;font-size:28px;border:none;flex-shrink:0;cursor:pointer;overflow:visible;padding:0;filter:drop-shadow(0 3px 8px rgba(0,0,0,.4))}
 .grupo-ava svg{width:60px;height:60px;display:block}
-.grupo-title{font-size:19.5px;font-weight:900;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.55);letter-spacing:-.2px}
-.grupo-sub{font-size:12px;color:rgba(255,255,255,.68);margin-top:2px;font-weight:600}
+.grupo-title{font-size:16.5px;font-weight:900;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.55);letter-spacing:-.2px}
+.grupo-sub{font-size:11px;color:rgba(255,255,255,.68);margin-top:1px;font-weight:600}
 
 /* ── Widget mini-calendario dentro del banner de grupo ── */
 .grupo-header-text{flex-shrink:0}
 /* El widget ya no vive dentro de la fila de texto (que está anclada abajo);
    se posiciona de forma independiente para poder centrarlo verticalmente
    dejando el mismo hueco arriba y abajo dentro del banner. */
-.mcal-widget{position:absolute;top:50%;right:16px;transform:translateY(-50%);width:min(260px,58%);box-sizing:border-box;padding:10px 12px 9px;background:rgba(12,16,15,.5);backdrop-filter:blur(14px) saturate(1.6);-webkit-backdrop-filter:blur(14px) saturate(1.6);border:1px solid rgba(255,255,255,.22);border-radius:15px;cursor:pointer;transition:.2s var(--ease-out);z-index:2;box-shadow:0 8px 22px -6px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.14)}
+.mcal-widget{position:absolute;top:50%;right:14px;transform:translateY(-50%);width:min(230px,58%);box-sizing:border-box;padding:6px 10px 5px;background:rgba(12,16,15,.5);backdrop-filter:blur(14px) saturate(1.6);-webkit-backdrop-filter:blur(14px) saturate(1.6);border:1px solid rgba(255,255,255,.22);border-radius:13px;cursor:pointer;transition:.2s var(--ease-out);z-index:2;box-shadow:0 6px 18px -6px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.14)}
 .mcal-widget:hover,.mcal-widget:active{background:rgba(12,16,15,.65);border-color:rgba(255,255,255,.38);transform:translateY(-50%) translateY(-1px)}
-.mcal-month{font-size:11.5px;font-weight:800;color:#fff;text-align:center;margin-bottom:6px;letter-spacing:1px;text-transform:uppercase;text-shadow:0 1px 3px rgba(0,0,0,.5)}
-.mcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
-.mcal-grid span{font-size:9px;font-weight:600;color:rgba(255,255,255,.75);text-align:center;line-height:15px;height:15px;border-radius:50%;transition:background .15s ease}
+.mcal-month{font-size:9.5px;font-weight:800;color:#fff;text-align:center;margin-bottom:3px;letter-spacing:.8px;text-transform:uppercase;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.mcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1.5px}
+.mcal-grid span{font-size:7.5px;font-weight:600;color:rgba(255,255,255,.75);text-align:center;line-height:11px;height:11px;border-radius:50%;transition:background .15s ease}
 .mcal-today{background:linear-gradient(155deg,var(--r3),var(--r))!important;color:#04211d!important;font-weight:900!important;box-shadow:0 0 0 1px rgba(255,255,255,.55),0 2px 6px rgba(0,0,0,.3)}
-@media(max-width:359px){.mcal-widget{width:min(230px,62%);padding:8px 9px 7px}.mcal-month{font-size:10px}.mcal-grid span{font-size:8px;line-height:13px;height:13px}}
+@media(max-width:359px){.mcal-widget{width:min(205px,62%);padding:5px 8px 4px}.mcal-month{font-size:8.5px}.mcal-grid span{font-size:7px;line-height:10px;height:10px}}
 
 /* ── GTABS ── */
 /* ══ MENÚ PRINCIPAL DEL GRUPO — 3 secciones simétricas ══ */
 .gtabs-main{display:flex;gap:12px;margin-bottom:20px}
-.gtab-item{flex:1;border:1.5px solid var(--glass-border);border-radius:20px;padding:22px 10px 18px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:12px;transition:transform .18s var(--ease-spring),box-shadow .25s ease,background .25s ease,border-color .25s ease;font-family:var(--font);position:relative;background:var(--glass-bg);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.gtab-item{flex:1;border:1.5px solid var(--glass-border);border-radius:18px;padding:14px 10px 12px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;transition:transform .18s var(--ease-spring),box-shadow .25s ease,background .25s ease,border-color .25s ease;font-family:var(--font);position:relative;background:var(--glass-bg);box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .gtab-item:active{transform:scale(.96)}
-.gtab-item-ico{width:48px;height:48px;display:flex;align-items:center;justify-content:center;transition:color .25s ease}
-.gtab-item-ico svg{width:30px;height:30px;position:relative;stroke-width:1.75}
-.gtab-item-txt{font-size:14px;font-weight:800;letter-spacing:.1px;transition:color .22s ease;position:relative;color:var(--tx2)}
+.gtab-item-ico{width:34px;height:34px;display:flex;align-items:center;justify-content:center;transition:color .25s ease}
+.gtab-item-ico svg{width:24px;height:24px;position:relative;stroke-width:2.4}
+.gtab-item-txt{font-size:13.5px;font-weight:800;letter-spacing:.1px;transition:color .22s ease;position:relative;color:var(--tx2)}
 /* Brillo superior sutil solo en el estado activo — un único acabado pulido,
    sin la caja interior separada del icono que daba el efecto "doble
    recuadro" de la versión anterior. */
-.gtab-item.active::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(160deg,rgba(255,255,255,.22),transparent 45%);pointer-events:none}
+.gtab-item.active::after{content:'';position:absolute;inset:0;border-radius:inherit;background:linear-gradient(160deg,rgba(255,255,255,.16),transparent 45%);pointer-events:none}
 
-/* Clientes — ámbar */
-.gtab-item.gt-cli{border-color:rgba(255,179,0,.3)}
-.gtab-item.gt-cli .gtab-item-ico{color:#f5a300}
-.gtab-item.gt-cli.active{background:linear-gradient(155deg,#ffca28,#fb8c00);border-color:transparent;box-shadow:0 10px 22px -8px rgba(251,140,0,.5)}
+/* Clientes — ámbar (tono suavizado) */
+.gtab-item.gt-cli{border-color:rgba(214,158,64,.24)}
+.gtab-item.gt-cli .gtab-item-ico{color:#c8923f}
+.gtab-item.gt-cli.active{background:linear-gradient(155deg,#e0ac59,#c9812f);border-color:transparent;box-shadow:0 8px 16px -8px rgba(201,129,47,.4)}
 .gtab-item.gt-cli.active .gtab-item-ico{color:#fff}
 .gtab-item.gt-cli.active .gtab-item-txt{color:#fff}
 
-/* Avisos — coral */
-.gtab-item.gt-avis{border-color:rgba(229,57,53,.28)}
-.gtab-item.gt-avis .gtab-item-ico{color:#e53935}
-.gtab-item.gt-avis.active{background:linear-gradient(155deg,#ef5350,#d32f2f);border-color:transparent;box-shadow:0 10px 22px -8px rgba(211,47,47,.5)}
+/* Avisos — coral (tono suavizado) */
+.gtab-item.gt-avis{border-color:rgba(200,90,86,.22)}
+.gtab-item.gt-avis .gtab-item-ico{color:#c1615d}
+.gtab-item.gt-avis.active{background:linear-gradient(155deg,#d98682,#b8534f);border-color:transparent;box-shadow:0 8px 16px -8px rgba(184,83,79,.4)}
 .gtab-item.gt-avis.active .gtab-item-ico{color:#fff}
 .gtab-item.gt-avis.active .gtab-item-txt{color:#fff}
 
-/* Presupuestos — azul */
-.gtab-item.gt-presu{border-color:rgba(30,136,229,.28)}
-.gtab-item.gt-presu .gtab-item-ico{color:#2196f3}
-.gtab-item.gt-presu.active{background:linear-gradient(155deg,#42a5f5,#1976d2);border-color:transparent;box-shadow:0 10px 22px -8px rgba(25,118,210,.5)}
+/* Presupuestos — azul (tono suavizado) */
+.gtab-item.gt-presu{border-color:rgba(64,124,182,.22)}
+.gtab-item.gt-presu .gtab-item-ico{color:#5b8cc0}
+.gtab-item.gt-presu.active{background:linear-gradient(155deg,#719fd0,#3f6fa3);border-color:transparent;box-shadow:0 8px 16px -8px rgba(63,111,163,.4)}
 .gtab-item.gt-presu.active .gtab-item-ico{color:#fff}
 .gtab-item.gt-presu.active .gtab-item-txt{color:#fff}
 
 body.modo-claro .gtab-item{background:var(--card)}
-body.modo-claro .gtab-item.gt-cli{border-color:rgba(255,179,0,.4)}
-body.modo-claro .gtab-item.gt-avis{border-color:rgba(229,57,53,.35)}
-body.modo-claro .gtab-item.gt-presu{border-color:rgba(30,136,229,.35)}
+body.modo-claro .gtab-item.gt-cli{border-color:rgba(214,158,64,.32)}
+body.modo-claro .gtab-item.gt-avis{border-color:rgba(200,90,86,.28)}
+body.modo-claro .gtab-item.gt-presu{border-color:rgba(64,124,182,.28)}
 
 /* ── CLIENTE CARDS ── */
 .cli-card{position:relative;background:var(--glass-bg);backdrop-filter:blur(var(--glass-blur)) saturate(140%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(140%);border:1px solid var(--glass-border);box-shadow:inset 0 1px 0 var(--glass-hi);border-radius:var(--rd);padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .18s var(--ease-spring),box-shadow .18s ease,background .15s ease,border-color .2s ease;margin-bottom:8px}
@@ -4403,7 +4403,7 @@ const _renderVentanaExclusiva = (tab) => {
   // El botón vuelve siempre a inicio.
   el.innerHTML=`
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-      <button onclick="goScreen('inicio')" style="background:rgba(var(--theme-rgb),.12);border:1px solid rgba(var(--theme-rgb),.25);border-radius:14px;padding:9px 16px;font-size:13px;font-weight:800;color:var(--r);font-family:var(--font);cursor:pointer;display:flex;align-items:center;gap:6px">
+      <button onclick="${tab==='cobros'?"goScreen('grupo')":"goScreen('inicio')"}" style="background:rgba(var(--theme-rgb),.12);border:1px solid rgba(var(--theme-rgb),.25);border-radius:14px;padding:9px 16px;font-size:13px;font-weight:800;color:var(--r);font-family:var(--font);cursor:pointer;display:flex;align-items:center;gap:6px">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
         Menú
       </button>
@@ -12038,7 +12038,10 @@ const _renderVerPresupuesto=(prId,p)=>{
       </div>
     `:`
       <div style="margin-bottom:14px">
-        <button class="btn btn-s btn-sm" style="width:100%" onclick="editarFirmaPresupuesto('${prId}')">✍️ Añadir firma</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-s btn-sm" style="flex:1" onclick="editarFirmaPresupuesto('${prId}',true)">✍️ Firmar ahora</button>
+          <button class="btn btn-s btn-sm" style="flex:1;color:var(--r);border-color:rgba(var(--theme-rgb),.35)" onclick="usarMiFirmaPresupuesto('${prId}')">📋 Usar mi firma</button>
+        </div>
       </div>
     `}
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
@@ -12056,7 +12059,7 @@ const _renderVerPresupuesto=(prId,p)=>{
 };
 
 // ── Editar / eliminar la firma de un presupuesto ya firmado ──
-window.editarFirmaPresupuesto=async(prId)=>{
+window.editarFirmaPresupuesto=async(prId,ocultarUsarFirma)=>{
   let p=(_presusPend||[]).find(x=>x.id===prId)||(_presusComp||[]).find(x=>x.id===prId);
   if(!p){
     try{
@@ -12076,7 +12079,7 @@ window.editarFirmaPresupuesto=async(prId)=>{
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <button class="btn btn-s btn-sm" onclick="limpiarFirma()" style="flex:1">🗑️ Limpiar</button>
-      ${CUD?.firmaUrl?`<button class="btn btn-s btn-sm" onclick="_usarMiFirmaEnCanvas()" style="flex:1;color:var(--r);border-color:rgba(var(--theme-rgb),.35)">✍️ Usar mi firma</button>`:''}
+      ${(!ocultarUsarFirma&&CUD?.firmaUrl)?`<button class="btn btn-s btn-sm" onclick="_usarMiFirmaEnCanvas()" style="flex:1;color:var(--r);border-color:rgba(var(--theme-rgb),.35)">✍️ Usar mi firma</button>`:''}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn btn-s" onclick="verPresupuesto('${prId}')">Cancelar</button>
@@ -12149,6 +12152,35 @@ window.eliminarFirmaPresupuesto=async(prId)=>{
   }
   const p=(_presusPend||[]).find(x=>x.id===prId)||(_presusComp||[]).find(x=>x.id===prId);
   if(p) _renderVerPresupuesto(prId,p); else verPresupuesto(prId);
+};
+
+// ── Firmar un presupuesto directamente con la firma guardada en el perfil,
+// sin pasar por el lienzo de dibujo ──
+window.usarMiFirmaPresupuesto=async(prId)=>{
+  if(!CUD?.firmaUrl){toast('No tienes una firma guardada en tu perfil — ve a tu perfil para crearla','i');return;}
+  let p=(_presusPend||[]).find(x=>x.id===prId)||(_presusComp||[]).find(x=>x.id===prId);
+  if(!p){
+    try{
+      const snap=await getDoc(doc(db,'grupos',CGID,'presupuestos',prId));
+      if(snap.exists()) p={id:snap.id,...snap.data()};
+    }catch(e){}
+  }
+  if(!p){toast('No se pudo cargar el presupuesto','e');return;}
+  const cambios={firmaCliente:CUD.firmaUrl,firmado:true,firmadoEn:serverTimestamp()};
+  const actualizarLocal=(arr)=>(arr||[]).map(x=>x.id===prId?{...x,...cambios,firmadoEn:{seconds:Math.floor(Date.now()/1000)}}:x);
+  _presusPend=actualizarLocal(_presusPend);
+  _presusComp=actualizarLocal(_presusComp);
+  _lcSave('presus_pend',CGID,_presusPend);
+  _lcSave('presus_comp',CGID,_presusComp);
+  try{
+    await updateDoc(doc(db,'grupos',CGID,'presupuestos',prId),cambios);
+    toast('✅ Firma guardada','o');
+  }catch(e){
+    console.error('usarMiFirmaPresupuesto',e);
+    toast('Sin conexión: se actualizará al recuperar internet','i');
+  }
+  const p2=(_presusPend||[]).find(x=>x.id===prId)||(_presusComp||[]).find(x=>x.id===prId);
+  if(p2) _renderVerPresupuesto(prId,p2); else verPresupuesto(prId);
 };
 
 // ── Cargar html2pdf.js + html2canvas bajo demanda (solo cuando hace falta generar un PDF para compartir) ──
