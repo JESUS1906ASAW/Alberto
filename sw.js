@@ -1,5 +1,5 @@
-const CN       = 'alberto-v1';       // versión de caché de datos/red
-const SHELL_CN = 'alberto-shell-v1'; // versión de caché del app shell
+const CN       = 'alberto-v2';       // versión de caché de datos/red
+const SHELL_CN = 'alberto-shell-v2'; // versión de caché del app shell
 
 // Assets del app shell que se pre-cachean en el install
 const SHELL_ASSETS = [
