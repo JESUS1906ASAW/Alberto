@@ -965,18 +965,21 @@ body.modo-claro .stab.active{box-shadow:0 2px 6px rgba(16,24,22,.1),0 0 0 1px rg
   box-shadow:inset 0 1px 0 var(--glass-hi),var(--sh-1);
   clip-path:inset(0 round var(--rd));
   isolation:isolate;
-  transform:translateZ(0);-webkit-transform:translateZ(0);
   transition:box-shadow .2s ease,background .15s ease;
   /* Nota sobre el scroll vertical con el dedo encima de la tarjeta:
      - touch-action:pan-y aquí (además de en .swipe-content) asegura que el
-       permiso de scroll vertical esté declarado también en el contenedor
-       que lleva el transform, para navegadores que no lo propagan bien
-       desde el hijo cuando hay un ancestro transformado.
-     - Se ha quitado "contain:paint" (que sí llevaba antes junto con
-       transform+overflow:hidden): en Chrome/Android esa combinación puede
-       hacer que el motor no le "pase" el gesto de scroll a la lista y haga
-       falta empezar el dedo fuera de la tarjeta. clip-path ya se encarga
-       de recortar el fondo del swipe, así que contain:paint era redundante. */
+       permiso de scroll vertical esté declarado también en el contenedor.
+     - IMPORTANTE: aquí NO se promueve una capa propia con
+       transform:translateZ(0)/will-change. Se probó y es justo lo que
+       causaba el problema real: con overflow:hidden + una capa de
+       composición forzada, Chrome/Android a veces no "arma" el gesto de
+       scroll vertical la primera vez que se toca la tarjeta — hacía falta
+       empezar el dedo fuera de ella, o intentarlo varias veces. Sin esa
+       promoción de capa, touch-action:pan-y se respeta de forma fiable
+       desde el primer toque. La capa para animar el arrastre horizontal
+       se sigue creando (ver .swipe-content.dragging más abajo), pero solo
+       DURANTE el propio arrastre, momento en el que ya no compite con el
+       gesto de scroll. */
   touch-action:pan-y;
 }
 .swipe-item:hover{background:var(--glass-bg2)}
@@ -1017,17 +1020,6 @@ body.modo-claro .stab.active{box-shadow:0 2px 6px rgba(16,24,22,.1),0 0 0 1px rg
 .swipe-content.dragging{transition:none!important;will-change:transform}
 .swipe-content:not(.dragging){transition:transform .32s var(--ease-spring)}
 .swipe-content .presu-card,.swipe-content .averia-card,.swipe-content .cli-card{margin-bottom:0;border:none;border-radius:0;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
-/* ── Mitigar el "primer toque" que no deja hacer scroll vertical ──
-   Chrome/WebView en Android a veces tarda en registrar la regla
-   touch-action:pan-y de una tarjeta hasta que esta tiene ya una capa de
-   composición propia (promovida por transform/will-change). Si esa capa se
-   crea de forma perezosa (solo al empezar a arrastrar, como pasaba antes
-   con ".dragging"), el primer gesto de scroll iniciado con el dedo ENCIMA
-   de la tarjeta puede ser ignorado la primera vez. Forzando la capa desde
-   el principio (permanente, no solo durante el arrastre) el navegador ya
-   conoce touch-action:pan-y desde el primer toque y el scroll responde a
-   la primera, de forma consistente empieces donde empieces. */
-.swipe-content{will-change:transform}
 
 /* ── FAB — acciones rápidas ── */
 #fabOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:890;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
