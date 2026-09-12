@@ -11317,6 +11317,11 @@ window._cargarHtml2Pdf=()=>{
 };
 
 // ── Generación del PDF del presupuesto (compartida por WhatsApp y Gmail) ──
+// Usa exactamente la misma plantilla (_presuHTML) que el botón "PDF" del
+// detalle, para que el diseño sea idéntico. Antes se veía "menos bonito" al
+// compartir porque el motor de captura (html2canvas) tomaba la foto antes de
+// que terminara de cargar la tipografía Inter — aquí esperamos a que las
+// fuentes estén listas antes de generar el PDF.
 // Devuelve {blob,file,nombreArchivo,p,c} o null si no se encontró el presupuesto.
 window._generarPresupuestoPDF=async(prId)=>{
   let p=(_presusPend||[]).find(x=>x.id===prId)||(_presusComp||[]).find(x=>x.id===prId);
@@ -11332,17 +11337,37 @@ window._generarPresupuestoPDF=async(prId)=>{
 
   await _cargarHtml2Pdf();
 
-  // Renderizamos en un iframe oculto para aislar los estilos propios del documento del presupuesto
+  // Renderizamos en un iframe visible-pero-fuera-de-pantalla (no display:none,
+  // para que las fuentes y el layout se calculen igual que en una pestaña real)
   let ifr=null;
   try{
     ifr=document.createElement('iframe');
-    ifr.style.cssText='position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:0;opacity:0;pointer-events:none';
+    ifr.style.cssText='position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:0;opacity:1;pointer-events:none';
     document.body.appendChild(ifr);
     await new Promise(res=>{ ifr.onload=res; ifr.srcdoc=html; });
 
-    const blob=await window.html2pdf().from(ifr.contentDocument.body).set({
+    // Esperar a que la tipografía (Inter, cargada por @import en _presuHTML)
+    // esté realmente lista antes de capturar: si no, html2canvas dibuja con
+    // la fuente de reserva del sistema y el PDF sale con otra estética.
+    try{
+      if(ifr.contentDocument.fonts && ifr.contentDocument.fonts.ready){
+        await ifr.contentDocument.fonts.ready;
+      }
+    }catch(eF){}
+    // Pequeño margen extra para que termine de aplicarse el layout con la
+    // fuente ya cargada (gradientes, sombras, etc.)
+    await new Promise(res=>setTimeout(res,200));
+
+    const bodyEl=ifr.contentDocument.body;
+    const blob=await window.html2pdf().from(bodyEl).set({
       margin:0,
-      html2canvas:{scale:2,useCORS:true},
+      html2canvas:{
+        scale:2,
+        useCORS:true,
+        backgroundColor:'#ffffff',
+        windowWidth:bodyEl.scrollWidth,
+        windowHeight:bodyEl.scrollHeight
+      },
       jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
     }).outputPdf('blob');
 
@@ -11355,75 +11380,49 @@ window._generarPresupuestoPDF=async(prId)=>{
 };
 
 // ── Enviar presupuesto por WhatsApp en PDF (deslizar en la lista, o botón en el detalle) ──
-// Genera el PDF del presupuesto (sin firma) y abre el panel nativo para compartirlo:
-// en Android/iOS con soporte de Web Share API con ficheros, WhatsApp aparece como una opción más.
-// Si el dispositivo no lo soporta, se descarga el PDF y se abre WhatsApp para adjuntarlo a mano.
+// Genera el PDF (misma estética que "PDF" del detalle) y va DIRECTO a
+// WhatsApp: descarga el PDF y abre el chat listo para adjuntarlo, sin pasar
+// por el panel genérico de "compartir con..." del sistema.
 window.enviarPresupuestoWhatsAppPDF=async(prId)=>{
   toast('📄 Generando PDF...','i');
   try{
     const res=await window._generarPresupuestoPDF(prId);
     if(!res){toast('Presupuesto no encontrado','e');return;}
-    const {blob,file,nombreArchivo,p,c}=res;
+    const {blob,nombreArchivo,p,c}=res;
     const tel=(p.clienteTelefono||c?.telefono||'').replace(/\s/g,'');
 
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      await navigator.share({
-        files:[file],
-        title:p.titulo||'Presupuesto',
-        text:`Presupuesto para ${p.clienteNombre||c?.nombre||''}`
-      });
-      toast('✅ Elige WhatsApp en el panel para enviarlo','o');
-    }else{
-      // Sin Web Share API con ficheros (navegador/escritorio): descargamos el PDF
-      // y abrimos WhatsApp con el chat listo, para adjuntarlo manualmente.
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');a.href=url;a.download=nombreArchivo;a.click();
-      URL.revokeObjectURL(url);
-      const msg=encodeURIComponent(`Hola ${p.clienteNombre||c?.nombre||''}, te adjunto el presupuesto "${p.titulo||''}". Un saludo.`);
-      window.open(tel?`https://wa.me/34${tel}?text=${msg}`:`https://wa.me/?text=${msg}`,'_blank');
-      toast('📥 PDF descargado — adjúntalo en el chat de WhatsApp','i');
-    }
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=nombreArchivo;a.click();
+    URL.revokeObjectURL(url);
+    const msg=encodeURIComponent(`Hola ${p.clienteNombre||c?.nombre||''}, te adjunto el presupuesto "${p.titulo||''}". Un saludo.`);
+    window.open(tel?`https://wa.me/34${tel}?text=${msg}`:`https://wa.me/?text=${msg}`,'_blank');
+    toast('📥 PDF descargado — adjúntalo en el chat de WhatsApp','i');
   }catch(e){
-    if(e?.name==='AbortError'){ /* el usuario cerró el panel de compartir: no es un error */ }
-    else{ console.error('enviarPresupuestoWhatsAppPDF',e); toast('Error al generar el PDF','e'); }
+    console.error('enviarPresupuestoWhatsAppPDF',e); toast('Error al generar el PDF','e');
   }
 };
 
 // ── Enviar presupuesto por Gmail en PDF (deslizar en la lista) ──
-// Igual que el envío por WhatsApp: genera el PDF y abre el panel nativo de
-// compartir para que el usuario elija Gmail (u otra app de correo). Si el
-// dispositivo no soporta compartir ficheros, descarga el PDF y abre un
-// borrador de Gmail listo para adjuntarlo a mano.
+// Igual que WhatsApp: genera el PDF con la misma estética y abre Gmail
+// DIRECTAMENTE (borrador ya preparado), sin panel de "compartir con...".
 window.compartirPresupuestoPDFGmail=async(prId)=>{
   toast('📄 Generando PDF...','i');
   try{
     const res=await window._generarPresupuestoPDF(prId);
     if(!res){toast('Presupuesto no encontrado','e');return;}
-    const {blob,file,nombreArchivo,p,c}=res;
+    const {blob,nombreArchivo,p,c}=res;
     const destinatario=(p.clienteEmail||c?.email||'');
     const asunto=`Presupuesto: ${p.titulo||''}`;
     const cuerpo=`Hola ${p.clienteNombre||c?.nombre||''},\n\nTe adjunto el presupuesto "${p.titulo||''}".\nUn saludo.`;
 
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      await navigator.share({
-        files:[file],
-        title:asunto,
-        text:cuerpo
-      });
-      toast('✅ Elige Gmail en el panel para enviarlo','o');
-    }else{
-      // Sin Web Share API con ficheros: descargamos el PDF y abrimos un
-      // borrador de Gmail (web) listo, para adjuntarlo a mano.
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');a.href=url;a.download=nombreArchivo;a.click();
-      URL.revokeObjectURL(url);
-      const gmailUrl=`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(destinatario)}&su=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
-      window.open(gmailUrl,'_blank');
-      toast('📥 PDF descargado — adjúntalo en el borrador de Gmail','i');
-    }
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=nombreArchivo;a.click();
+    URL.revokeObjectURL(url);
+    const gmailUrl=`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(destinatario)}&su=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
+    window.open(gmailUrl,'_blank');
+    toast('📥 PDF descargado — adjúntalo en el borrador de Gmail','i');
   }catch(e){
-    if(e?.name==='AbortError'){ /* el usuario cerró el panel de compartir: no es un error */ }
-    else{ console.error('compartirPresupuestoPDFGmail',e); toast('Error al generar el PDF','e'); }
+    console.error('compartirPresupuestoPDFGmail',e); toast('Error al generar el PDF','e');
   }
 };
 
