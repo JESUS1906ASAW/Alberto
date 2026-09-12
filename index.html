@@ -870,6 +870,9 @@ body.offline .dash-offline-bar{display:flex}
 .swipe-act{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:78px;border:none;background:#607d8b;color:#fff;font-family:var(--font);font-size:10px;font-weight:800;cursor:pointer;flex-shrink:0}
 .swipe-act.wa{background:linear-gradient(135deg,#25d366,#1ebe5d)}
 .swipe-act.del{background:linear-gradient(135deg,#ef5350,#e53935)}
+.swipe-act.done{background:linear-gradient(135deg,#26a69a,#00897b)}
+.swipe-act.restore{background:linear-gradient(135deg,#42a5f5,#1e88e5)}
+.swipe-act.edit{background:linear-gradient(135deg,#ffa726,#fb8c00)}
 .swipe-content{position:relative;touch-action:pan-y;will-change:transform;z-index:1;background:var(--bg)}
 .swipe-content.dragging{transition:none!important}
 .swipe-content:not(.dragging){transition:transform .25s cubic-bezier(.16,1,.3,1)}
@@ -2497,7 +2500,13 @@ window._fabSetDefault=(key)=>{
   document.addEventListener('click',e=>{
     const item=e.target.closest?.('.swipe-item');
     if(!item)return;
-    if(item.dataset.justDragged==='1'){ e.stopPropagation(); e.preventDefault(); return; }
+    // El "justDragged" solo debe bloquear el tap sobre el CONTENIDO (para no
+    // abrir el detalle sin querer justo tras arrastrar). Si el toque es sobre
+    // un botón de acción (Eliminar, WhatsApp, Completar...), nunca se bloquea:
+    // antes esto obligaba a pulsar dos veces el botón cuando se tocaba justo
+    // después de deslizar, porque la marca "justDragged" seguía activa y
+    // tragaba también ese primer clic sobre el propio botón.
+    if(item.dataset.justDragged==='1' && !e.target.closest('.swipe-actions')){ e.stopPropagation(); e.preventDefault(); return; }
     // Si la fila ya está abierta y el toque fue en el contenido (no en un botón
     // de acción), el primer tap solo la cierra: evita abrir el detalle por error.
     if(item.classList.contains('swipe-open') && !e.target.closest('.swipe-actions')){
@@ -5168,7 +5177,8 @@ window.verCliente=async id=>{
       presusCli=[...(_presusPend||[]),...(_presusComp||[])].filter(p=>p.clienteId===id);
       window._fichaHistData={
         partes:allPartes.filter(p=>p.clienteId===id&&!p.archivado).map(p=>({...p,_archivado:false})),
-        avisos:[],entregas:[],cobros:[]
+        avisos:[],entregas:[],cobros:[],
+        presupuestos:presusCli
       };
     }
     const [avSnap,avHSnap,hmSnap,presuSnap,imgSnap,archParteSnap,avisSnap,entrSnap,cobrSnap]=await Promise.all([
@@ -5195,7 +5205,8 @@ window.verCliente=async id=>{
       partes:[...partesCli.map(p=>({...p,_archivado:false})),...archivadosCliente.map(p=>({...p,_archivado:true}))],
       avisos:(avisSnap?.docs||[]).map(d=>({id:d.id,...d.data()})),
       entregas:(entrSnap?.docs||[]).map(d=>({id:d.id,...d.data()})),
-      cobros:(cobrSnap?.docs||[]).map(d=>({id:d.id,...d.data()}))
+      cobros:(cobrSnap?.docs||[]).map(d=>({id:d.id,...d.data()})),
+      presupuestos:presusCli
     };
     // Asegurar que _verParteArchivado pueda resolver estos partes aunque la pestaña Archivos no se haya abierto
     window._archivosCache=window._archivosCache||{};
@@ -5454,8 +5465,9 @@ window.verCliente=async id=>{
 
     <div style="margin-top:18px">
       <div style="font-size:10px;font-weight:800;color:var(--tx2);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Registro completo del cliente</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px" id="fichaHistFiltros">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px" id="fichaHistFiltros">
         <button class="fbtn ficha-hist-fbtn active" data-t="avisos" onclick="window._fichaHistFiltro('${id}','avisos')">💬 Avisos</button>
+        <button class="fbtn ficha-hist-fbtn" data-t="presupuestos" onclick="window._fichaHistFiltro('${id}','presupuestos')">💶 Presupuestos</button>
         <button class="fbtn ficha-hist-fbtn" data-t="cobros" onclick="window._fichaHistFiltro('${id}','cobros')">💰 Cobros</button>
       </div>
       <div id="fichaHistBody">${window._htmlFichaHistLista('avisos')}</div>
@@ -5480,6 +5492,21 @@ window._htmlFichaHistLista=(tipo)=>{
         <div class="parte-info" style="flex:1;min-width:0">
           <div class="parte-title">${p.titulo}${archBadge}</div>
           <div class="parte-sub">${fmtF(p.creado)} · <span class="parte-total">${fmtM(tot)}</span></div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  if(tipo==='presupuestos'){
+    return items.map(pr=>{
+      const tot=_calcTotal(pr);
+      const completado=pr.estado==='aceptado';
+      return`<div class="averia-card ${completado?'resuelta':''}" style="cursor:pointer" onclick="verPresupuesto('${pr.id}')">
+        <div class="averia-header">
+          <div class="averia-ico">💶</div>
+          <div style="flex:1;min-width:0">
+            <div class="averia-title">${pr.titulo||'Presupuesto'}</div>
+            <div class="averia-sub">${completado?'Completado ':'Pendiente '}${fmtF(pr.creado)}${tot>0?' · '+fmtM(tot):''}</div>
+          </div>
         </div>
       </div>`;
     }).join('');
@@ -10544,11 +10571,11 @@ window.abrirNuevaAveriaPrerellenada=(cliId,tipo,desc,contacto)=>{
   const cliOpts=allClientes.filter(c=>!c.archivado).map(c=>`<option value="${c.id}" data-dir="${(c.direccion||'').replace(/"/g,'&quot;')}" data-edif="${(c.edificio||'').replace(/"/g,'&quot;')}" data-tel="${(c.telefono||'').replace(/"/g,'&quot;')}" ${c.id===cliId?'selected':''}>${c.nombre}</option>`).join('');
   abrirSB('Nueva avería',`
     <div class="fsec">
+      <div class="fgrp"><label>Título de avería</label><input id="avTipo" placeholder="Ej: No arranca, fuga de agua..." value="${(tipo||'').replace(/"/g,'&quot;')}"></div>
       <div class="fgrp"><label>Cliente</label><div id="avCli-wrap"><input type="hidden" id="avCli" value="${cliId||''}"></div></div>
       <div class="fgrp"><label>Dirección</label><input id="avDir" value="${_preDir}" placeholder="Dirección del cliente"></div>
       <div class="fgrp"><label>Edificio / Comunidad</label><input id="avEdif" value="${_preEdif}" placeholder="Edificio o comunidad"></div>
       <div class="fgrp"><label>Teléfono</label><input id="avTel" value="${_preTel}" placeholder="Teléfono de contacto" type="tel"></div>
-      <div class="fgrp"><label>Tipo de avería / problema</label><input id="avTipo" placeholder="Ej: No arranca, fuga de agua..." value="${(tipo||'').replace(/"/g,'&quot;')}"></div>
       <div class="fgrp"><label>Prioridad</label><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px" id="avPrioWrap"><button type="button" onclick="_setAverPrio('normal')" style="padding:9px 4px;border-radius:12px;border:2px solid rgba(76,175,80,.5);background:rgba(76,175,80,.15);color:#4caf50;font-size:11px;font-weight:800;font-family:var(--font);cursor:pointer">🟢 Normal</button><button type="button" onclick="_setAverPrio('urgente')" style="padding:9px 4px;border-radius:12px;border:2px solid var(--border);background:transparent;color:var(--tx2);font-size:11px;font-weight:800;font-family:var(--font);cursor:pointer">🟠 Urgente</button><button type="button" onclick="_setAverPrio('critica')" style="padding:9px 4px;border-radius:12px;border:2px solid var(--border);background:transparent;color:var(--tx2);font-size:11px;font-weight:800;font-family:var(--font);cursor:pointer">🔴 Crítica</button></div><input type="hidden" id="avPrio" value="normal"></div>
       <div class="fgrp"><label>Descripción (opcional)</label><textarea id="avDesc" rows="3" placeholder="Detalla el problema...">${desc||''}</textarea></div>
       <button class="btn btn-p" style="width:100%" onclick="_gClick(this,()=>guardarAveria())">Guardar avería</button>
@@ -10585,11 +10612,11 @@ window.abrirAveriaDesdeMantenimiento=(mantId)=>{
       <div style="font-size:12px;color:var(--tx2)">${cli?.nombre||m.clienteNombre||''}${m.frecuencia?' · '+m.frecuencia:''}</div>
     </div>
     <div class="fsec">
+      <div class="fgrp"><label>Título de avería</label><input id="avTipo" placeholder="Ej: No arranca, fuga de agua..." value="${tipoAuto.replace(/"/g,'&quot;')}"></div>
       <div class="fgrp"><label>Cliente</label><div id="avCli-wrap"></div></div>
       <div class="fgrp"><label>Dirección</label><input id="avDir" value="${cliDir}" placeholder="Dirección del cliente"></div>
       <div class="fgrp"><label>Edificio / Comunidad</label><input id="avEdif" value="${cliEdif}" placeholder="Edificio o comunidad"></div>
       <div class="fgrp"><label>Teléfono</label><input id="avTel" value="${cliTel}" placeholder="Teléfono de contacto" type="tel"></div>
-      <div class="fgrp"><label>Tipo de avería / problema</label><input id="avTipo" placeholder="Ej: No arranca, fuga de agua..." value="${tipoAuto.replace(/"/g,'&quot;')}"></div>
       <div class="fgrp"><label>Descripción</label><textarea id="avDesc" rows="4">${descAuto}</textarea></div>
       <button class="btn btn-p" style="width:100%;background:linear-gradient(135deg,#ff7043,#e64a19)" onclick="_gClick(this,()=>guardarAveria())">⚡ Guardar avería</button>
     </div>
@@ -10615,11 +10642,41 @@ window._setAverPrio=(p)=>{
   });
 };
 
-window.guardarAveria=async()=>{
+window.guardarAveria=async(editId)=>{
   const cliEl=$('avCli');
   const cliId=cliEl?.value||'';
   const tipo=($('avTipo')?.value||'').trim();
-  if(!cliId||!tipo){toast('Selecciona cliente y tipo de avería','e');return;}
+  if(!cliId||!tipo){toast('Selecciona cliente y título de avería','e');return;}
+
+  // ── Modo edición: actualiza la avería pendiente existente en vez de crear una nueva ──
+  if(editId){
+    const existente=(_averiasPend||[]).find(x=>x.id===editId);
+    const cambios={
+      clienteId:cliId,
+      clienteNombre:allClientes.find(c=>c.id===cliId)?.nombre||'',
+      clienteDireccion:$('avDir')?.value.trim()||'',
+      clienteEdificio:$('avEdif')?.value.trim()||'',
+      clienteTelefono:$('avTel')?.value.trim()||'',
+      tipo,
+      descripcion:$('avDesc')?.value.trim()||'',
+      prioridad:$('avPrio')?.value||'normal',
+      actualizadoEn:serverTimestamp()
+    };
+    _averiasPend=(_averiasPend||[]).map(x=>x.id===editId?{...x,...cambios,actualizadoEn:{seconds:Math.floor(Date.now()/1000)}}:x);
+    _lcSave('averias_pend',CGID,_averiasPend);
+    if(typeof _renderAveriasTab==='function') _renderAveriasTab();
+    cerrarSB();
+    try{
+      await updateDoc(doc(db,'grupos',CGID,'averias',editId),cambios);
+      toast('✅ Avería actualizada','o');
+    }catch(e){
+      console.error('guardarAveria(edit)',e);
+      toast('Sin conexión: se actualizará al recuperar internet','i');
+    }
+    verAveria(editId);
+    return;
+  }
+
   // Aprender
   const averiaData={
     clienteId:cliId,
@@ -10640,6 +10697,37 @@ window.guardarAveria=async()=>{
   _lcSave('averias_pend',CGID,_averiasPend);
   cerrarSB();
   toast('Avería registrada','o');
+};
+
+window.editarAveria=async(avId)=>{
+  let a=(_averiasPend||[]).find(x=>x.id===avId);
+  if(!a){
+    try{
+      const snap=await getDoc(doc(db,'grupos',CGID,'averias',avId));
+      if(snap.exists()) a={id:snap.id,...snap.data()};
+    }catch(e){}
+  }
+  if(!a){toast('No se pudo cargar la avería','e');return;}
+  const cliOpts=allClientes.filter(c=>!c.archivado).map(c=>`<option value="${c.id}" data-dir="${(c.direccion||'').replace(/"/g,'&quot;')}" data-edif="${(c.edificio||'').replace(/"/g,'&quot;')}" data-tel="${(c.telefono||'').replace(/"/g,'&quot;')}" ${c.id===a.clienteId?'selected':''}>${c.nombre}</option>`).join('');
+  abrirSB('Editar avería',`
+    <div class="fsec">
+      <div class="fgrp"><label>Título de avería</label><input id="avTipo" placeholder="Ej: No arranca, fuga de agua..." value="${(a.tipo||'').replace(/"/g,'&quot;')}"></div>
+      <div class="fgrp"><label>Cliente</label><div id="avCli-wrap"></div></div>
+      <div class="fgrp"><label>Dirección</label><input id="avDir" value="${(a.clienteDireccion||'').replace(/"/g,'&quot;')}" placeholder="Dirección del cliente"></div>
+      <div class="fgrp"><label>Edificio / Comunidad</label><input id="avEdif" value="${(a.clienteEdificio||'').replace(/"/g,'&quot;')}" placeholder="Edificio o comunidad"></div>
+      <div class="fgrp"><label>Teléfono</label><input id="avTel" value="${(a.clienteTelefono||'').replace(/"/g,'&quot;')}" placeholder="Teléfono de contacto" type="tel"></div>
+      <div class="fgrp"><label>Prioridad</label><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px" id="avPrioWrap"><button type="button" onclick="_setAverPrio('normal')" style="padding:9px 4px;border-radius:12px;border:2px solid var(--border);background:transparent;color:var(--tx2);font-size:11px;font-weight:800;font-family:var(--font);cursor:pointer">🟢 Normal</button><button type="button" onclick="_setAverPrio('urgente')" style="padding:9px 4px;border-radius:12px;border:2px solid var(--border);background:transparent;color:var(--tx2);font-size:11px;font-weight:800;font-family:var(--font);cursor:pointer">🟠 Urgente</button><button type="button" onclick="_setAverPrio('critica')" style="padding:9px 4px;border-radius:12px;border:2px solid var(--border);background:transparent;color:var(--tx2);font-size:11px;font-weight:800;font-family:var(--font);cursor:pointer">🔴 Crítica</button></div><input type="hidden" id="avPrio" value="${a.prioridad||'normal'}"></div>
+      <div class="fgrp"><label>Descripción (opcional)</label><textarea id="avDesc" rows="3" placeholder="Detalla el problema...">${(a.descripcion||'')}</textarea></div>
+      <button class="btn btn-p" style="width:100%" onclick="_gClick(this,()=>guardarAveria('${avId}'))">💾 Guardar cambios</button>
+    </div>
+  `);
+  setTimeout(()=>{
+    _setAverPrio(a.prioridad||'normal');
+    if(document.getElementById('avCli-wrap')) _buildCliSelect('avCli',a.clienteId||'',id=>{
+      const c=allClientes.find(x=>x.id===id);
+      if(c){const d=$('avDir'),e=$('avEdif'),t=$('avTel');if(d&&!d.value&&c.direccion)d.value=c.direccion;if(e&&!e.value&&c.edificio)e.value=c.edificio;if(t&&!t.value&&c.telefono)t.value=c.telefono;}
+    });
+  },80);
 };
 
 window.verAveria=async(avId)=>{
@@ -10679,6 +10767,9 @@ window.verAveria=async(avId)=>{
       </div>
       <input type="file" id="avFotoGal_${avId}" accept="image/*" multiple style="display:none" onchange="subirAveriaFotos('${avId}',this.files)">
       <input type="file" id="avFotoCam_${avId}" accept="image/*" capture="environment" style="display:none" onchange="subirAveriaFotos('${avId}',this.files)">
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
+      <button class="btn btn-s btn-sm" style="flex:1;background:rgba(var(--theme-rgb),.1);border-color:rgba(var(--theme-rgb),.35);color:var(--r);font-weight:900" onclick="editarAveria('${avId}')">✏️ Editar</button>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-p" style="flex:1" onclick="resolverAveria('${avId}','${a.clienteId}')"><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2.5' stroke-linecap='round' style='margin-right:4px'><polyline points='20 6 9 17 4 12'/></svg>Marcar como resuelta</button>
@@ -10882,16 +10973,35 @@ const _presuCard = (p, comp=false) => {
     const dias=Math.floor((Date.now()-tsC.getTime())/(1000*60*60*24));
     if(dias>=7) diasBadge=`<span style="font-size:10px;font-weight:900;background:rgba(255,152,0,.15);color:#ff9800;border-radius:10px;padding:2px 7px;margin-left:5px">${dias}d sin respuesta</span>`;
   }
-  return `<div class="swipe-item" data-swipe-id="${p.id}">
-    <div class="swipe-actions">
+  const accionesPend = `
       <button class="swipe-act del" onclick="event.stopPropagation();swipeEliminarPresupuesto('${p.id}')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
         <span>Eliminar</span>
       </button>
+      <button class="swipe-act done" onclick="event.stopPropagation();swipeCompletarPresupuesto('${p.id}')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Completar</span>
+      </button>
+      <button class="swipe-act edit" onclick="event.stopPropagation();editarPresupuesto('${p.id}')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        <span>Editar</span>
+      </button>
       <button class="swipe-act wa" onclick="event.stopPropagation();enviarPresupuestoWhatsAppPDF('${p.id}')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.8-.7-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 20.2 12 8.2 8.2 0 0 1 12 20.2z"/></svg>
         <span>WhatsApp</span>
+      </button>`;
+  const accionesComp = `
+      <button class="swipe-act del" onclick="event.stopPropagation();swipeEliminarPresupuesto('${p.id}')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+        <span>Eliminar</span>
       </button>
+      <button class="swipe-act restore" onclick="event.stopPropagation();swipeRestaurarPresupuesto('${p.id}')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg>
+        <span>Restaurar</span>
+      </button>`;
+  return `<div class="swipe-item" data-swipe-id="${p.id}">
+    <div class="swipe-actions">
+      ${comp?accionesComp:accionesPend}
     </div>
     <div class="swipe-content" onclick="verPresupuesto('${p.id}')">
       <div class="presu-card ${comp?'aceptado':''}">
@@ -11111,7 +11221,56 @@ window.calcPresuTotal=()=>{
   if(ivaEl)ivaEl.textContent=iva>0?fmtM(iva):'—';
   if(tot)tot.textContent=fmtM(total);
 };
-window.guardarPresupuesto=async()=>{
+window.editarPresupuesto=async(prId)=>{
+  let p=(_presusPend||[]).find(x=>x.id===prId)||(_presusComp||[]).find(x=>x.id===prId);
+  if(!p){
+    try{
+      const snap=await getDoc(doc(db,'grupos',CGID,'presupuestos',prId));
+      if(snap.exists()) p={id:snap.id,...snap.data()};
+    }catch(e){}
+  }
+  if(!p){toast('No se pudo cargar el presupuesto','e');return;}
+  abrirSB('Editar presupuesto',`
+    <div class="fsec">
+      <div class="fgrp"><label>Título / descripción del trabajo</label><input id="prTitulo" value="${(p.titulo||'').replace(/"/g,'&quot;')}" placeholder="Ej: Reparación bomba piso 3"></div>
+      <div class="fgrp"><label>Cliente</label><div id="prCli-wrap"></div></div>
+      <div class="fgrp"><label>Dirección</label><input id="prDir" value="${(p.clienteDireccion||'').replace(/"/g,'&quot;')}" placeholder="Dirección del cliente"></div>
+      <div class="fgrp"><label>Edificio / Comunidad</label><input id="prEdif" value="${(p.clienteEdificio||'').replace(/"/g,'&quot;')}" placeholder="Edificio o comunidad"></div>
+      <div class="fgrp"><label>Teléfono</label><input id="prTel" value="${(p.clienteTelefono||'').replace(/"/g,'&quot;')}" placeholder="Teléfono de contacto" type="tel"></div>
+    </div>
+    <div style="font-size:12px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px">Costes</div>
+    <div class="card" style="margin-bottom:12px;padding:14px">
+      <div class="fgrp"><label>Mano de obra (€)</label><input type="number" id="prMO" value="${p.importeManoObra||0}" min="0" step="0.01" oninput="calcPresuTotal()"></div>
+      <div class="fgrp"><label>Materiales (€)</label><input type="number" id="prMat" value="${p.importeMateriales||0}" min="0" step="0.01" oninput="calcPresuTotal()"></div>
+      <div class="fgrp"><label>Desplazamiento (€)</label><input type="number" id="prDesp" value="${p.importeDesplazamiento||0}" min="0" step="0.01" oninput="calcPresuTotal()"></div>
+      <div class="toggle-row" style="cursor:pointer;margin-top:6px" onclick="togglePresuIVA()">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--tx)">Aplicar IVA (21%) a materiales</div>
+          <div style="font-size:12px;color:var(--tx2)" id="prIVADesc">IVA no incluido</div>
+        </div>
+        <div id="prIVAToggle" style="width:44px;height:24px;border-radius:14px;background:var(--border);transition:.2s;position:relative;flex-shrink:0">
+          <div id="prIVADot" style="width:20px;height:20px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.3)"></div>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-bottom:16px;padding:14px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:14px;font-weight:700;color:var(--tx2)">TOTAL</div>
+      <div style="font-size:22px;font-weight:900;color:var(--r)" id="prTotal">0,00 €</div>
+    </div>
+    <div class="fgrp"><label>Notas adicionales</label><textarea id="prNotas" rows="2" placeholder="Observaciones para el cliente...">${(p.notas||'').replace(/</g,'&lt;')}</textarea></div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-p" style="flex:1" onclick="_gClick(this,()=>guardarPresupuesto('${prId}'))">💾 Guardar cambios</button>
+    </div>
+  `);
+  _prIVA=p.aplicarIVA||false;
+  calcPresuTotal();
+  setTimeout(()=>_buildCliSelect('prCli',p.clienteId||'',id=>{
+    const c=allClientes.find(x=>x.id===id);
+    if(c){const d=$('prDir'),e=$('prEdif'),t=$('prTel');if(d&&!d.value&&c.direccion)d.value=c.direccion;if(e&&!e.value&&c.edificio)e.value=c.edificio;if(t&&!t.value&&c.telefono)t.value=c.telefono;}
+  },p.clienteId?'':(p.clienteNombre||'')),0);
+};
+
+window.guardarPresupuesto=async(editId)=>{
   const cliEl=$('prCli');
   const cliId=cliEl?.value||'';
   const nombrePersonal=cliEl?.dataset?.nombrePersonalizado||'';
@@ -11123,6 +11282,47 @@ window.guardarPresupuesto=async()=>{
   const desp=parseFloat($('prDesp')?.value)||0;
   const partRows=[];
   const cliNom=cliId?(allClientes.find(c=>c.id===cliId)?.nombre||''):nombrePersonal;
+
+  // ── Modo edición: actualiza el presupuesto existente en vez de crear uno nuevo ──
+  if(editId){
+    const existente=(_presusPend||[]).find(x=>x.id===editId)||(_presusComp||[]).find(x=>x.id===editId);
+    const cambios={
+      clienteId:cliId,
+      clienteNombre:cliNom,
+      clienteDireccion:$('prDir')?.value.trim()||'',
+      clienteEdificio:$('prEdif')?.value.trim()||'',
+      clienteTelefono:$('prTel')?.value.trim()||'',
+      titulo,
+      importeManoObra:mo,
+      importeMateriales:mat,
+      importeDesplazamiento:desp,
+      aplicarIVA:_prIVA,
+      notas:$('prNotas')?.value.trim()||'',
+      actualizadoEn:serverTimestamp()
+    };
+    // Conserva partidas/firma/estado/fecha de creación existentes: este formulario no los edita.
+    const actualizarLocal=(arr)=>(arr||[]).map(x=>x.id===editId?{...x,...cambios,actualizadoEn:{seconds:Math.floor(Date.now()/1000)}}:x);
+    _presusPend=actualizarLocal(_presusPend);
+    _presusComp=actualizarLocal(_presusComp);
+    _lcSave('presus_pend',CGID,_presusPend);
+    _lcSave('presus_comp',CGID,_presusComp);
+    if(typeof _renderPresuInline==='function') _renderPresuInline();
+    if(typeof _renderPresuTab==='function') _renderPresuTab('presupuestosContent');
+    if(typeof _renderPresuExcl==='function') _renderPresuExcl();
+    cerrarSB();
+    try{
+      await updateDoc(doc(db,'grupos',CGID,'presupuestos',editId),cambios);
+      toast('✅ Presupuesto actualizado','o');
+    }catch(e){
+      console.error('guardarPresupuesto(edit)',e);
+      toast('Sin conexión: se actualizará al recuperar internet','i');
+    }
+    // Reabrir el detalle con los datos ya actualizados
+    const pActualizado={...(existente||{}),...cambios,id:editId};
+    _renderVerPresupuesto(editId,pActualizado);
+    return;
+  }
+
   const presuData={
     clienteId:cliId,
     clienteNombre:cliNom,
@@ -11159,8 +11359,12 @@ window.guardarPresupuesto=async()=>{
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:6px"><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>
           Exportar como PDF
         </button>
-        <button class="btn btn-s" style="width:100%;padding:14px;font-size:14px" onclick="cerrarSBTotal();toast('Presupuesto guardado como pendiente','o')">
-          ⏳ Dejar como pendiente
+        <button class="btn btn-ok" style="width:100%;padding:14px;font-size:14px;background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.4);color:#25d366" onclick="cerrarSBTotal();enviarPresupuestoWhatsAppPDF('${newId}')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right:6px;vertical-align:-3px"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.8-.7-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 20.2 12 8.2 8.2 0 0 1 12 20.2z"/></svg>
+          Compartir PDF por WhatsApp
+        </button>
+        <button class="btn btn-s" style="width:100%;padding:14px;font-size:14px" onclick="cerrarSBTotal();toast('Presupuesto guardado','o')">
+          💾 Guardar
         </button>
       </div>
     `);
@@ -11281,11 +11485,24 @@ const _renderVerPresupuesto=(prId,p)=>{
       <div style="display:flex;justify-content:space-between;padding:10px 0 0;margin-top:4px"><span style="font-size:14px;font-weight:800;color:var(--tx)">TOTAL</span><span style="font-size:20px;font-weight:900;color:var(--r)">${fmtM(total)}</span></div>
     </div>
     ${p.notas?`<div style="font-size:13px;color:var(--tx2);margin-bottom:14px;padding:10px;background:var(--card2);border-radius:12px">${p.notas}</div>`:''}
+    ${p.firmado&&p.firmaCliente?`
+      <div style="margin-bottom:14px">
+        <div style="font-size:12px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">✍️ Firma del cliente</div>
+        <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:10px">
+          <img src="${p.firmaCliente}" style="max-width:100%;max-height:130px;display:block;margin:0 auto">
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn btn-s btn-sm" style="flex:1" onclick="editarFirmaPresupuesto('${prId}')">✏️ Editar firma</button>
+          <button class="btn btn-del btn-sm" style="flex:1" onclick="eliminarFirmaPresupuesto('${prId}')">🗑️ Eliminar firma</button>
+        </div>
+      </div>
+    `:''}
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
       <button class="btn ${isAcep?'btn-s':'btn-p'}" style="flex:1" onclick="toggleEstadoPresupuesto('${prId}','${isAcep?'espera':'aceptado'}')">${isAcep?'↩️ Marcar como pendiente':'✅ Marcar como completado'}</button>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px">
-      <button class="btn btn-s btn-sm" style="flex:1;background:rgba(var(--theme-rgb),.1);border-color:rgba(var(--theme-rgb),.35);color:var(--r);font-weight:900" onclick="usarPresupuesto('${prId}')">📋 Usar como base</button>
+      <button class="btn btn-s btn-sm" style="flex:1;background:rgba(var(--theme-rgb),.1);border-color:rgba(var(--theme-rgb),.35);color:var(--r);font-weight:900" onclick="editarPresupuesto('${prId}')">✏️ Editar</button>
+      <button class="btn btn-s btn-sm" style="flex:1" onclick="usarPresupuesto('${prId}')">📋 Usar como base</button>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-s" style="flex:1" onclick="exportarPresupuestoPDF('${prId}')"><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' style='margin-right:4px'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>PDF</button>
@@ -11295,6 +11512,100 @@ const _renderVerPresupuesto=(prId,p)=>{
       <button class="btn btn-del btn-sm" onclick="borrarPresupuesto('${prId}')">🗑️</button>
     </div>
   `);
+};
+
+// ── Editar / eliminar la firma de un presupuesto ya firmado ──
+window.editarFirmaPresupuesto=async(prId)=>{
+  let p=(_presusPend||[]).find(x=>x.id===prId)||(_presusComp||[]).find(x=>x.id===prId);
+  if(!p){
+    try{
+      const snap=await getDoc(doc(db,'grupos',CGID,'presupuestos',prId));
+      if(snap.exists()) p={id:snap.id,...snap.data()};
+    }catch(e){}
+  }
+  if(!p){toast('No se pudo cargar el presupuesto','e');return;}
+  abrirSB('✍️ Editar firma del cliente',`
+    <div style="text-align:center;margin-bottom:12px">
+      <div style="font-size:13px;color:var(--tx2)">Presupuesto: <strong style="color:var(--tx)">${p.titulo||''}</strong></div>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border:2px dashed var(--border);border-radius:16px;padding:10px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:1.5px;text-align:center;margin-bottom:8px">Firme aquí con el dedo</div>
+      <canvas id="firmaCanvas" width="380" height="160" style="width:100%;height:160px;background:#fff;border-radius:12px;cursor:crosshair;touch-action:none;display:block"></canvas>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn btn-s btn-sm" onclick="limpiarFirma()" style="flex:1">🗑️ Limpiar</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn btn-s" onclick="verPresupuesto('${prId}')">Cancelar</button>
+      <button class="btn btn-ok" style="background:linear-gradient(135deg,#1fae54,#25d366)" onclick="_guardarFirmaPresupuestoEditada('${prId}')">💾 Guardar firma</button>
+    </div>
+  `);
+  setTimeout(()=>{
+    const canvas=document.getElementById('firmaCanvas');
+    if(!canvas)return;
+    const ctx=canvas.getContext('2d');
+    const rect=canvas.getBoundingClientRect();
+    canvas.width=rect.width*window.devicePixelRatio||380;
+    canvas.height=160*window.devicePixelRatio||160;
+    ctx.scale(window.devicePixelRatio||1,window.devicePixelRatio||1);
+    ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle='#1a1a1a';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.lineJoin='round';
+    let drawing=false;
+    const getPos=(e)=>{
+      const r=canvas.getBoundingClientRect();
+      if(e.touches){return{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top};}
+      return{x:e.clientX-r.left,y:e.clientY-r.top};
+    };
+    canvas.addEventListener('mousedown',e=>{drawing=true;ctx.beginPath();const p=getPos(e);ctx.moveTo(p.x,p.y);});
+    canvas.addEventListener('mousemove',e=>{if(!drawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();});
+    canvas.addEventListener('mouseup',()=>drawing=false);
+    canvas.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;ctx.beginPath();const p=getPos(e);ctx.moveTo(p.x,p.y);},{passive:false});
+    canvas.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();},{passive:false});
+    canvas.addEventListener('touchend',()=>drawing=false);
+    window._firmaCanvasActivo=canvas;
+  },300);
+};
+window._guardarFirmaPresupuestoEditada=async(prId)=>{
+  const canvas=document.getElementById('firmaCanvas');
+  if(!canvas){toast('Error con la firma','e');return;}
+  const dataURL=canvas.toDataURL('image/png');
+  const ctx=canvas.getContext('2d');
+  const datos=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+  const hayFirma=Array.from(datos).some((v,i)=>i%4!==3&&v<240);
+  if(!hayFirma){toast('Dibuja una firma antes de guardar','e');return;}
+  const cambios={firmaCliente:dataURL,firmado:true,firmadoEn:serverTimestamp()};
+  const actualizarLocal=(arr)=>(arr||[]).map(x=>x.id===prId?{...x,...cambios,firmadoEn:{seconds:Math.floor(Date.now()/1000)}}:x);
+  _presusPend=actualizarLocal(_presusPend);
+  _presusComp=actualizarLocal(_presusComp);
+  _lcSave('presus_pend',CGID,_presusPend);
+  _lcSave('presus_comp',CGID,_presusComp);
+  try{
+    await updateDoc(doc(db,'grupos',CGID,'presupuestos',prId),cambios);
+    toast('✅ Firma actualizada','o');
+  }catch(e){
+    console.error('_guardarFirmaPresupuestoEditada',e);
+    toast('Sin conexión: se actualizará al recuperar internet','i');
+  }
+  const p=(_presusPend||[]).find(x=>x.id===prId)||(_presusComp||[]).find(x=>x.id===prId);
+  if(p) _renderVerPresupuesto(prId,p); else verPresupuesto(prId);
+};
+window.eliminarFirmaPresupuesto=async(prId)=>{
+  if(!confirm('¿Eliminar la firma de este presupuesto?'))return;
+  const cambios={firmaCliente:null,firmado:false};
+  const actualizarLocal=(arr)=>(arr||[]).map(x=>x.id===prId?{...x,...cambios}:x);
+  _presusPend=actualizarLocal(_presusPend);
+  _presusComp=actualizarLocal(_presusComp);
+  _lcSave('presus_pend',CGID,_presusPend);
+  _lcSave('presus_comp',CGID,_presusComp);
+  try{
+    await updateDoc(doc(db,'grupos',CGID,'presupuestos',prId),cambios);
+    toast('🗑️ Firma eliminada','o');
+  }catch(e){
+    console.error('eliminarFirmaPresupuesto',e);
+    toast('Sin conexión: se eliminará al recuperar internet','i');
+  }
+  const p=(_presusPend||[]).find(x=>x.id===prId)||(_presusComp||[]).find(x=>x.id===prId);
+  if(p) _renderVerPresupuesto(prId,p); else verPresupuesto(prId);
 };
 
 // ── Cargar html2pdf.js + html2canvas bajo demanda (solo cuando hace falta generar un PDF para compartir) ──
@@ -11592,6 +11903,18 @@ window.borrarPresupuesto=async(prId)=>{
     console.error('borrarPresupuesto',e);
     toast('Sin conexión: se eliminará al recuperar internet','i');
   }
+};
+
+// Marcar como completado directamente desde el gesto de deslizar (lista de pendientes).
+window.swipeCompletarPresupuesto=async(prId)=>{
+  if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
+  await toggleEstadoPresupuesto(prId,'aceptado');
+};
+
+// Restaurar a pendiente directamente desde el gesto de deslizar (lista de completados).
+window.swipeRestaurarPresupuesto=async(prId)=>{
+  if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
+  await toggleEstadoPresupuesto(prId,'espera');
 };
 
 // Eliminar directamente desde el gesto de deslizar en la lista (sin abrir el
