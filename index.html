@@ -863,6 +863,39 @@ body.offline .dash-offline-bar{display:flex}
 .presu-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
 .presu-badge.espera{background:rgba(255,152,0,.15);color:#ff9800}
 .presu-badge.aceptado{background:rgba(76,175,80,.15);color:#4caf50}
+
+/* ── Deslizar para actuar (swipe-to-act) ── */
+.swipe-item{position:relative;overflow:hidden;border-radius:16px;margin-bottom:10px}
+.swipe-actions{position:absolute;inset:0;display:flex;align-items:stretch;justify-content:flex-end;background:linear-gradient(135deg,#25d366,#1ebe5d);border-radius:16px}
+.swipe-act{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:92px;border:none;background:transparent;color:#fff;font-family:var(--font);font-size:10.5px;font-weight:800;cursor:pointer}
+.swipe-content{position:relative;touch-action:pan-y;will-change:transform}
+.swipe-content.dragging{transition:none!important}
+.swipe-content:not(.dragging){transition:transform .25s cubic-bezier(.16,1,.3,1)}
+.swipe-content .presu-card{margin-bottom:0}
+
+/* ── FAB — acciones rápidas ── */
+#fabOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:890;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
+#fabOverlay.open{display:block;animation:fadeIn .2s ease}
+#fabWrap{display:none;position:fixed;right:18px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:900;flex-direction:column;align-items:flex-end;gap:12px}
+#fabMenu{display:flex;flex-direction:column;align-items:flex-end;gap:10px;pointer-events:none}
+#fabWrap.open #fabMenu{pointer-events:auto}
+.fab-opt{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:30px;padding:11px 18px 11px 15px;box-shadow:0 6px 22px rgba(0,0,0,.4);opacity:0;transform:translateY(10px) scale(.9);transition:opacity .2s ease,transform .22s cubic-bezier(.16,1,.3,1);cursor:pointer;font-family:var(--font)}
+#fabWrap.open .fab-opt{opacity:1;transform:translateY(0) scale(1)}
+#fabWrap.open .fab-opt:nth-child(1){transition-delay:.02s}
+#fabWrap.open .fab-opt:nth-child(2){transition-delay:.06s}
+#fabWrap.open .fab-opt:nth-child(3){transition-delay:.1s}
+.fab-opt-ico{font-size:17px;line-height:1}
+.fab-opt-txt{font-size:13px;font-weight:800;color:var(--tx);white-space:nowrap}
+.fab-opt-star{display:none;font-size:11px}
+.fab-opt.fab-default{border-color:rgba(var(--theme-rgb),.55)}
+.fab-opt.fab-default .fab-opt-star{display:inline}
+#fabMain{width:58px;height:58px;border-radius:50%;background:linear-gradient(135deg,var(--r),var(--r2));border:none;box-shadow:0 8px 26px rgba(0,0,0,.45),0 0 0 1px rgba(255,255,255,.08) inset;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+#fabMain svg{transition:transform .25s cubic-bezier(.16,1,.3,1)}
+#fabWrap.open #fabMain svg{transform:rotate(45deg)}
+#fabWrap.open #fabMain{transform:scale(1.05)}
+.fab-pref-card{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 6px;border-radius:14px;border:2px solid var(--border);background:transparent;color:var(--tx2);font-size:20px;cursor:pointer;font-family:var(--font)}
+.fab-pref-card span{font-size:11px;font-weight:800}
+.fab-pref-card.active{border-color:var(--r);background:rgba(var(--theme-rgb),.12);color:var(--r)}
 .partida-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;background:var(--card2);border-radius:12px;padding:10px 12px}
 .partida-row input{background:transparent;border:none;color:var(--tx);font-family:var(--font);font-size:13px;outline:none}
 .partida-desc{flex:2;min-width:0}
@@ -1551,7 +1584,24 @@ body.offline .dash-offline-bar{display:flex}
     </div>
   </div>
 
-
+  <!-- ═══════════ FAB — Acciones rápidas ═══════════ -->
+  <div id="fabOverlay" onclick="cerrarFabMenu()"></div>
+  <div id="fabWrap">
+    <div id="fabMenu">
+      <button class="fab-opt" id="fabOptPresupuesto" onclick="fabAccion('presupuesto')">
+        <span class="fab-opt-ico">🧾</span><span class="fab-opt-txt">Nuevo presupuesto</span><span class="fab-opt-star">⭐</span>
+      </button>
+      <button class="fab-opt" id="fabOptAveria" onclick="fabAccion('averia')">
+        <span class="fab-opt-ico">⚠️</span><span class="fab-opt-txt">Nueva avería</span><span class="fab-opt-star">⭐</span>
+      </button>
+      <button class="fab-opt" id="fabOptCliente" onclick="fabAccion('cliente')">
+        <span class="fab-opt-ico">👤</span><span class="fab-opt-txt">Nuevo cliente</span><span class="fab-opt-star">⭐</span>
+      </button>
+    </div>
+    <button id="fabMain" aria-label="Acciones rápidas">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+  </div>
 
 <!-- ═══════════ APP CLIENTE ═══════════ -->
 <!-- ═══════════ JS ═══════════ -->
@@ -2284,7 +2334,150 @@ const _renderScreen=id=>{
   else if(id==='notificaciones')renderNotificaciones();
   else if(id==='perfil')renderPerfil();
   else if(id==='historialGlobal')renderHistorialGlobal();
+  if(typeof window._fabUpdateVisibility==='function') window._fabUpdateVisibility(id);
 };
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// FAB — Acciones rápidas (Presupuesto / Avería / Cliente)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let _fabOpen=false;
+const _FAB_LABELS={presupuesto:'Presupuesto',averia:'Avería',cliente:'Cliente'};
+window._fabDefaultKey=()=>localStorage.getItem('alberto_fab_default')||'presupuesto';
+
+// Muestra u oculta el FAB según la pantalla activa (solo tiene sentido dentro de un grupo)
+window._fabUpdateVisibility=(screenId)=>{
+  const wrap=$('fabWrap');
+  if(!wrap)return;
+  const visible = !!CGID && screenId!=='inicio';
+  wrap.style.display = visible?'flex':'none';
+  if(!visible) toggleFabMenu(false);
+};
+
+window._fabRefreshDefaultMarks=()=>{
+  const key=_fabDefaultKey();
+  ['presupuesto','averia','cliente'].forEach(k=>{
+    const el=document.getElementById('fabOpt'+k.charAt(0).toUpperCase()+k.slice(1));
+    if(el) el.classList.toggle('fab-default', k===key);
+  });
+};
+
+window.toggleFabMenu=(force)=>{
+  const wrap=$('fabWrap'),ov=$('fabOverlay');
+  if(!wrap)return;
+  _fabOpen = force!==undefined ? force : !_fabOpen;
+  if(_fabOpen) window._fabRefreshDefaultMarks();
+  wrap.classList.toggle('open',_fabOpen);
+  if(ov) ov.classList.toggle('open',_fabOpen);
+  if(navigator.vibrate) navigator.vibrate(_fabOpen?[10]:[6]);
+};
+window.cerrarFabMenu=()=>toggleFabMenu(false);
+
+window.fabAccion=(tipo)=>{
+  toggleFabMenu(false);
+  setTimeout(()=>{
+    if(tipo==='presupuesto') abrirNuevoPresupuesto();
+    else if(tipo==='averia') abrirNuevaAveria();
+    else if(tipo==='cliente') abrirCliExpress();
+  },180);
+};
+
+// Guarda la preferencia de pulsación larga (elegida en Perfil) para futuras aperturas
+window._fabSetDefault=(key)=>{
+  localStorage.setItem('alberto_fab_default',key);
+  ['presupuesto','averia','cliente'].forEach(k=>{
+    const el=document.getElementById('fabPref'+k.charAt(0).toUpperCase()+k.slice(1));
+    if(el) el.classList.toggle('active', k===key);
+  });
+  toast('⚡ Acción rápida: '+(_FAB_LABELS[key]||key),'o');
+};
+
+// Pulsación corta = abre el menú · Pulsación larga (≈480ms) = acción por defecto directa
+(()=>{
+  let pressTimer=null,longFired=false,sx=0,sy=0;
+  const clearTimer=()=>{ if(pressTimer) clearTimeout(pressTimer); pressTimer=null; };
+  document.addEventListener('DOMContentLoaded',()=>{
+    const btn=$('fabMain');
+    if(!btn)return;
+    btn.addEventListener('pointerdown',e=>{
+      longFired=false; sx=e.clientX; sy=e.clientY;
+      clearTimer();
+      pressTimer=setTimeout(()=>{
+        longFired=true;
+        if(navigator.vibrate) navigator.vibrate([16,30,16]);
+        toggleFabMenu(false);
+        fabAccion(_fabDefaultKey());
+      },480);
+    });
+    btn.addEventListener('pointermove',e=>{
+      if(pressTimer && (Math.abs(e.clientX-sx)>14||Math.abs(e.clientY-sy)>14)) clearTimer();
+    });
+    const finish=()=>{ clearTimer(); if(!longFired) toggleFabMenu(); };
+    btn.addEventListener('pointerup',finish);
+    btn.addEventListener('pointercancel',clearTimer);
+  });
+})();
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// DESLIZAR PARA ACTUAR — mecanismo genérico de swipe-to-act
+// Aplica a cualquier lista que envuelva sus tarjetas en:
+//   <div class="swipe-item"><div class="swipe-actions">…botones…</div>
+//        <div class="swipe-content">…tarjeta visible…</div></div>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+(()=>{
+  const SWIPE_W=92;
+  let curItem=null,startX=0,startY=0,curX=0,dragging=false,locked=null,baseX=0;
+  const content=item=>item.querySelector('.swipe-content');
+  const closeAllExcept=(except)=>{
+    document.querySelectorAll('.swipe-item.swipe-open').forEach(it=>{
+      if(it!==except){
+        it.classList.remove('swipe-open');
+        const c=content(it); if(c) c.style.transform='translateX(0)';
+      }
+    });
+  };
+  document.addEventListener('touchstart',e=>{
+    const item=e.target.closest('.swipe-item');
+    if(!item || e.target.closest('.swipe-actions')){ closeAllExcept(null); curItem=null; return; }
+    curItem=item; locked=null; dragging=false;
+    baseX = item.classList.contains('swipe-open') ? -SWIPE_W : 0;
+    const t=e.touches[0]; startX=t.clientX; startY=t.clientY; curX=baseX;
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!curItem)return;
+    const t=e.touches[0];
+    const dx=t.clientX-startX, dy=t.clientY-startY;
+    if(locked===null){
+      if(Math.abs(dx)>8||Math.abs(dy)>8) locked=Math.abs(dx)>Math.abs(dy)?'x':'y';
+    }
+    if(locked==='y'){ curItem=null; return; }
+    if(locked==='x'){
+      dragging=true;
+      curX=Math.min(0,Math.max(-SWIPE_W-14,baseX+dx));
+      const c=content(curItem);
+      if(c){ c.classList.add('dragging'); c.style.transform=`translateX(${curX}px)`; }
+    }
+  },{passive:true});
+  document.addEventListener('touchend',()=>{
+    if(!curItem){ return; }
+    if(!dragging){ curItem=null; return; }
+    const c=content(curItem);
+    const shouldOpen = curX < -SWIPE_W/2;
+    if(c){
+      c.classList.remove('dragging');
+      c.style.transform = shouldOpen?`translateX(-${SWIPE_W}px)`:'translateX(0)';
+      curItem.dataset.justDragged='1';
+      setTimeout(()=>{ delete curItem.dataset.justDragged; },300);
+    }
+    curItem.classList.toggle('swipe-open',shouldOpen);
+    if(shouldOpen){ closeAllExcept(curItem); if(navigator.vibrate) navigator.vibrate(8); }
+    curItem=null; dragging=false;
+  });
+  // Evita que el "tap" que cierra un drag dispare el onclick de la tarjeta
+  document.addEventListener('click',e=>{
+    const item=e.target.closest?.('.swipe-item');
+    if(item && item.dataset.justDragged==='1'){ e.stopPropagation(); e.preventDefault(); }
+  },true);
+})();
 
 window.goScreen=id=>{
   if($('sb').classList.contains('open')){cerrarSB();return;}
@@ -7600,7 +7793,7 @@ window.exportarBackupZIP=async()=>{
     }).join(''):`<div style="color:#aaa;font-size:12px;padding:10px 0">Sin mantenimientos programados</div>`;
 
     const calcPresuTotal2=(p)=>{
-      const iva=p.aplicarIVA?(parseFloat(p.importeMateriales)||0)*0.21:0;
+      const iva=p.aplicarIVA?((parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+(parseFloat(p.importeDesplazamiento)||0))*0.21:0;
       return(parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+iva+(parseFloat(p.importeDesplazamiento)||0)+((p.partidas||[]).reduce((a,b)=>a+(parseFloat(b.importe)||0),0));
     };
 
@@ -10631,7 +10824,7 @@ window.switchPresuTab = (tab) => {
 };
 
 const _calcTotal = p => {
-  const iva = p.aplicarIVA ? (parseFloat(p.importeMateriales)||0)*0.21 : 0;
+  const iva = p.aplicarIVA ? ((parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+(parseFloat(p.importeDesplazamiento)||0))*0.21 : 0;
   return (parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+iva+(parseFloat(p.importeDesplazamiento)||0)+((p.partidas||[]).reduce((a,b)=>a+(parseFloat(b.importe)||0),0));
 };
 
@@ -10656,19 +10849,29 @@ const _presuCard = (p, comp=false) => {
     const dias=Math.floor((Date.now()-tsC.getTime())/(1000*60*60*24));
     if(dias>=7) diasBadge=`<span style="font-size:10px;font-weight:900;background:rgba(255,152,0,.15);color:#ff9800;border-radius:10px;padding:2px 7px;margin-left:5px">${dias}d sin respuesta</span>`;
   }
-  return `<div class="presu-card ${comp?'aceptado':''}" onclick="verPresupuesto('${p.id}')">
-    <div class="presu-header">
-      <div style="flex:1;min-width:0">
-        <div class="presu-title" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">${p.titulo||'Presupuesto'}${diasBadge}</div>
-        <div style="font-size:12px;color:var(--tx2)">${c?.nombre||p.clienteNombre||'—'} · ${fmtF(p.creado)}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+  return `<div class="swipe-item" data-swipe-id="${p.id}">
+    <div class="swipe-actions">
+      <button class="swipe-act" onclick="event.stopPropagation();enviarPresupuestoWhatsAppPDF('${p.id}')">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.8-.7-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 20.2 12 8.2 8.2 0 0 1 12 20.2z"/></svg>
+        <span>WhatsApp PDF</span>
+      </button>
+    </div>
+    <div class="swipe-content" onclick="verPresupuesto('${p.id}')">
+      <div class="presu-card ${comp?'aceptado':''}">
+        <div class="presu-header">
+          <div style="flex:1;min-width:0">
+            <div class="presu-title" style="display:flex;align-items:center;flex-wrap:wrap;gap:4px">${p.titulo||'Presupuesto'}${diasBadge}</div>
+            <div style="font-size:12px;color:var(--tx2)">${c?.nombre||p.clienteNombre||'—'} · ${fmtF(p.creado)}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
 
-        ${!comp?`<button onclick="event.stopPropagation();_recordarPresupuesto('${p.id}')" style="border:none;background:rgba(37,211,102,.1);color:#25d366;border-radius:12px;padding:5px 8px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font)">💬</button>`:''}
-        <span class="presu-badge ${comp?'aceptado':'espera'}">${comp?'Completado':'Pendiente'}</span>
+            ${!comp?`<button onclick="event.stopPropagation();_recordarPresupuesto('${p.id}')" style="border:none;background:rgba(37,211,102,.1);color:#25d366;border-radius:12px;padding:5px 8px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font)">💬</button>`:''}
+            <span class="presu-badge ${comp?'aceptado':'espera'}">${comp?'Completado':'Pendiente'}</span>
+          </div>
+        </div>
+        <div class="presu-total" style="margin-top:8px">${fmtM(total)}</div>
       </div>
     </div>
-    <div class="presu-total" style="margin-top:8px">${fmtM(total)}</div>
   </div>`;
 };
 
@@ -10854,14 +11057,14 @@ window.togglePresuIVA=()=>{
   const tog=$('prIVAToggle'),dot=$('prIVADot'),desc=$('prIVADesc');
   if(tog){tog.style.background=_prIVA?'var(--r)':'var(--border)';}
   if(dot){dot.style.left=_prIVA?'22px':'2px';}
-  if(desc){desc.textContent=_prIVA?'IVA incluido (21% sobre materiales)':'IVA no incluido';}
+  if(desc){desc.textContent=_prIVA?'IVA incluido (21% sobre mano de obra, materiales y desplazamiento)':'IVA no incluido';}
   calcPresuTotal();
 };
 window.calcPresuTotal=()=>{
   const mo=parseFloat($('prMO')?.value)||0;
   const mat=parseFloat($('prMat')?.value)||0;
   const desp=parseFloat($('prDesp')?.value)||0;
-  const iva=_prIVA?mat*0.21:0;
+  const iva=_prIVA?(mo+mat+desp)*0.21:0;
   const total=mo+mat+iva+desp;
   // Resumen simple (nuevo presupuesto)
   const el=$('prTotal');if(el)el.textContent=fmtM(total);
@@ -10899,8 +11102,11 @@ window.guardarPresupuesto=async()=>{
     estado:'espera',
     creado:serverTimestamp()
   };
-  // Optimistic: añadir localmente y cerrar sin esperar red
-  const newId=_offlineSave(collection(db,'grupos',CGID,'presupuestos'), presuData);
+  // Optimistic: añadir localmente y cerrar sin esperar red.
+  // Usamos _offlineSaveWithId (ID real generado en el dispositivo) en vez de
+  // _offlineSave (ID temporal "local_...") porque justo después ofrecemos
+  // exportar el PDF, que necesita leer el documento por su ID real de inmediato.
+  const newId=_offlineSaveWithId(collection(db,'grupos',CGID,'presupuestos'), presuData);
   _presusPend=[{id:newId,...presuData},...(_presusPend||[])];
   _lcSave('presus_pend',CGID,_presusPend);
   try{
@@ -10912,9 +11118,9 @@ window.guardarPresupuesto=async()=>{
         <div style="font-size:13px;color:var(--tx2)">¿Qué deseas hacer ahora?</div>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px">
-        <button class="btn btn-p" style="width:100%;padding:14px;font-size:14px" onclick="cerrarSBTotal();exportarPresupuestoPDF('${newId}');toggleEstadoPresupuesto('${newId}','aceptado')">
+        <button class="btn btn-p" style="width:100%;padding:14px;font-size:14px" onclick="cerrarSBTotal();exportarPresupuestoPDF('${newId}')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:6px"><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>
-          Exportar como PDF y marcar completado
+          Exportar como PDF
         </button>
         <button class="btn btn-s" style="width:100%;padding:14px;font-size:14px" onclick="cerrarSBTotal();toast('Presupuesto guardado como pendiente','o')">
           ⏳ Dejar como pendiente
@@ -10941,14 +11147,14 @@ window.crearParteDesdePresupuesto = async (prId) => {
   const mat = parseFloat(p.importeMateriales)||0;
   const desp = parseFloat(p.importeDesplazamiento)||0;
   const partidasTotal = (p.partidas||[]).reduce((a,b)=>a+(parseFloat(b.importe)||0),0);
-  const iva = p.aplicarIVA ? mat*0.21 : 0;
+  const iva = p.aplicarIVA ? (mo+mat+desp)*0.21 : 0;
   const total = mo+mat+iva+desp+partidasTotal;
   // Título ordenado con puntos (·) y signos (€)
   const tituloBloques = [p.titulo||'Presupuesto'];
   if(mo>0) tituloBloques.push(`M.O.: ${fmtM(mo)}`);
-  if((mat+partidasTotal)>0) tituloBloques.push(`Materiales: ${fmtM(mat+partidasTotal)}${iva>0?` (+IVA ${fmtM(iva)})`:''}`);
+  if((mat+partidasTotal)>0) tituloBloques.push(`Materiales: ${fmtM(mat+partidasTotal)}`);
   if(desp>0) tituloBloques.push(`Desplazamiento: ${fmtM(desp)}`);
-  tituloBloques.push(`Total: ${fmtM(total)}`);
+  tituloBloques.push(`Total: ${fmtM(total)}${iva>0?` (IVA ${fmtM(iva)} incl.)`:''}`);
   const tituloParte = tituloBloques.join(' · ');
   const preData = {
     titulo: tituloParte,
@@ -10990,7 +11196,7 @@ window.verPresupuesto=async(prId)=>{
   if(!snap.exists())return;
   const p={id:prId,...snap.data()};
   const c=allClientes.find(x=>x.id===p.clienteId);
-  const iva=p.aplicarIVA?(parseFloat(p.importeMateriales)||0)*0.21:0;
+  const iva=p.aplicarIVA?((parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+(parseFloat(p.importeDesplazamiento)||0))*0.21:0;
   const total=(parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+iva+(parseFloat(p.importeDesplazamiento)||0)+((p.partidas||[]).reduce((a,b)=>a+(parseFloat(b.importe)||0),0));
   const isAcep=p.estado==='aceptado';
   const partidasHTML=(p.partidas||[]).length?`<div style="margin-top:10px"><div style="font-size:12px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">Partidas</div>`+(p.partidas.map(pt=>`<div style="display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--tx)">${pt.desc}</span><span style="font-weight:700;color:var(--tx)">${fmtM(pt.importe)}</span></div>`).join(''))+'</div>':'';
@@ -11008,7 +11214,7 @@ window.verPresupuesto=async(prId)=>{
     <div class="card" style="padding:14px;margin-bottom:12px">
       ${p.importeManoObra?`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--tx2)">Mano de obra</span><span style="font-weight:700;color:var(--tx)">${fmtM(p.importeManoObra)}</span></div>`:''}
       ${p.importeMateriales?`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--tx2)">Materiales</span><span style="font-weight:700;color:var(--tx)">${fmtM(p.importeMateriales)}</span></div>`:''}
-      ${p.aplicarIVA?`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--tx2)">IVA 21% materiales</span><span style="font-weight:700;color:var(--tx)">${fmtM(iva)}</span></div>`:''}
+      ${p.aplicarIVA?`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--tx2)">IVA 21%</span><span style="font-weight:700;color:var(--tx)">${fmtM(iva)}</span></div>`:''}
       ${p.importeDesplazamiento?`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border)"><span style="color:var(--tx2)">Desplazamiento</span><span style="font-weight:700;color:var(--tx)">${fmtM(p.importeDesplazamiento)}</span></div>`:''}
       ${partidasHTML}
       <div style="display:flex;justify-content:space-between;padding:10px 0 0;margin-top:4px"><span style="font-size:14px;font-weight:800;color:var(--tx)">TOTAL</span><span style="font-size:20px;font-weight:900;color:var(--r)">${fmtM(total)}</span></div>
@@ -11022,11 +11228,88 @@ window.verPresupuesto=async(prId)=>{
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-s" style="flex:1" onclick="exportarPresupuestoPDF('${prId}')"><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' style='margin-right:4px'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>PDF</button>
+      <button class="btn btn-ok btn-sm" style="background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.4);color:#25d366" onclick="enviarPresupuestoWhatsAppPDF('${prId}')"><svg width='13' height='13' viewBox='0 0 24 24' fill='currentColor' style='margin-right:4px;vertical-align:-2px'><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 20.2 12 8.2 8.2 0 0 1 12 20.2z"/></svg>PDF por WhatsApp</button>
       ${c?.telefono?`<button class="btn btn-ok btn-sm" onclick="enviarPresupuestoWADirecto('${prId}','${c.telefono.replace(/\s/g,'')}','${(c?.nombre||'').replace(/'/g,"\\'")}','${fmtM(total)}','${(p.titulo||'').replace(/'/g,"\\'")}')">💬 Enviar</button>`:''}
       ${!isAcep&&prTel?`<button class="btn btn-s btn-sm" style="color:#ff9800;border-color:rgba(255,152,0,.35)" onclick="_recordarPresupuesto('${prId}')">🔔 Recordar</button>`:''}
       <button class="btn btn-del btn-sm" onclick="borrarPresupuesto('${prId}')">🗑️</button>
     </div>
   `);
+};
+
+// ── Cargar html2pdf.js bajo demanda (solo cuando hace falta generar un PDF para compartir) ──
+let _html2pdfLoading=null;
+window._cargarHtml2Pdf=()=>{
+  if(window.html2pdf) return Promise.resolve();
+  if(_html2pdfLoading) return _html2pdfLoading;
+  _html2pdfLoading=new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    s.onload=resolve; s.onerror=()=>{_html2pdfLoading=null;reject(new Error('No se pudo cargar html2pdf'));};
+    document.head.appendChild(s);
+  });
+  return _html2pdfLoading;
+};
+
+// ── Enviar presupuesto por WhatsApp en PDF (deslizar en la lista, o botón en el detalle) ──
+// Genera el PDF del presupuesto (sin firma) y abre el panel nativo para compartirlo:
+// en Android/iOS con soporte de Web Share API con ficheros, WhatsApp aparece como una opción más.
+// Si el dispositivo no lo soporta, se descarga el PDF y se abre WhatsApp para adjuntarlo a mano.
+window.enviarPresupuestoWhatsAppPDF=async(prId)=>{
+  toast('📄 Generando PDF...','i');
+  let ifr=null;
+  try{
+    let p=(_presusPend||[]).find(x=>x.id===prId)||(_presusComp||[]).find(x=>x.id===prId);
+    if(!p){
+      const snap=await getDoc(doc(db,'grupos',CGID,'presupuestos',prId));
+      if(snap.exists()) p={id:snap.id,...snap.data()};
+    }
+    if(!p){toast('Presupuesto no encontrado','e');return;}
+    const c=allClientes.find(x=>x.id===p.clienteId);
+    const iva=p.aplicarIVA?((parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+(parseFloat(p.importeDesplazamiento)||0))*0.21:0;
+    const total=(parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+iva+(parseFloat(p.importeDesplazamiento)||0)+((p.partidas||[]).reduce((a,b)=>a+(parseFloat(b.importe)||0),0));
+    const html=_presuHTML(p,CG,c,iva,total,null);
+
+    await _cargarHtml2Pdf();
+
+    // Renderizamos en un iframe oculto para aislar los estilos propios del documento del presupuesto
+    ifr=document.createElement('iframe');
+    ifr.style.cssText='position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:0;opacity:0;pointer-events:none';
+    document.body.appendChild(ifr);
+    await new Promise(res=>{ ifr.onload=res; ifr.srcdoc=html; });
+
+    const blob=await window.html2pdf().from(ifr.contentDocument.body).set({
+      margin:0,
+      html2canvas:{scale:2,useCORS:true},
+      jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
+    }).outputPdf('blob');
+
+    const nombreArchivo=`Presupuesto_${(p.clienteNombre||c?.nombre||'cliente').replace(/[^\w\-]+/g,'_')}.pdf`;
+    const file=new File([blob],nombreArchivo,{type:'application/pdf'});
+    const tel=(p.clienteTelefono||c?.telefono||'').replace(/\s/g,'');
+
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      await navigator.share({
+        files:[file],
+        title:p.titulo||'Presupuesto',
+        text:`Presupuesto para ${p.clienteNombre||c?.nombre||''}`
+      });
+      toast('✅ Elige WhatsApp en el panel para enviarlo','o');
+    }else{
+      // Sin Web Share API con ficheros (navegador/escritorio): descargamos el PDF
+      // y abrimos WhatsApp con el chat listo, para adjuntarlo manualmente.
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download=nombreArchivo;a.click();
+      URL.revokeObjectURL(url);
+      const msg=encodeURIComponent(`Hola ${p.clienteNombre||c?.nombre||''}, te adjunto el presupuesto "${p.titulo||''}". Un saludo.`);
+      window.open(tel?`https://wa.me/34${tel}?text=${msg}`:`https://wa.me/?text=${msg}`,'_blank');
+      toast('📥 PDF descargado — adjúntalo en el chat de WhatsApp','i');
+    }
+  }catch(e){
+    if(e?.name==='AbortError'){ /* el usuario cerró el panel de compartir: no es un error */ }
+    else{ console.error('enviarPresupuestoWhatsAppPDF',e); toast('Error al generar el PDF','e'); }
+  }finally{
+    if(ifr && ifr.parentNode) ifr.parentNode.removeChild(ifr);
+  }
 };
 
 window.enviarPresupuestoWADirecto=(prId,tel,nombre,totalStr,titulo)=>{
@@ -11069,7 +11352,7 @@ const _presuHTML=(p,grp,c,iva,total,firmaDataURL)=>{
   const filasConceptos=[];
   if((parseFloat(p.importeManoObra)||0)>0)filasConceptos.push(['Mano de obra',fmtM(p.importeManoObra)]);
   if((parseFloat(p.importeMateriales)||0)>0)filasConceptos.push(['Materiales',fmtM(p.importeMateriales)]);
-  if(iva>0)filasConceptos.push(['IVA 21% (materiales)',fmtM(iva)]);
+  if(iva>0)filasConceptos.push(['IVA 21%',fmtM(iva)]);
   if((parseFloat(p.importeDesplazamiento)||0)>0)filasConceptos.push(['Desplazamiento',fmtM(p.importeDesplazamiento)]);
   (p.partidas||[]).filter(pt=>pt.desc||pt.importe).forEach(pt=>filasConceptos.push([pt.desc||'—',fmtM(pt.importe)]));
   return`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Presupuesto: ${p.titulo}</title>
@@ -11145,7 +11428,7 @@ window.exportarPresupuestoPDF=async(prId)=>{
   if(!snap.exists())return;
   const p={id:prId,...snap.data()};
   const c=allClientes.find(x=>x.id===p.clienteId);
-  const iva=p.aplicarIVA?(parseFloat(p.importeMateriales)||0)*0.21:0;
+  const iva=p.aplicarIVA?((parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+(parseFloat(p.importeDesplazamiento)||0))*0.21:0;
   const total=(parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+iva+(parseFloat(p.importeDesplazamiento)||0)+((p.partidas||[]).reduce((a,b)=>a+(parseFloat(b.importe)||0),0));
 
   // Mostrar panel de firma (igual que partes)
@@ -11813,6 +12096,17 @@ const renderPerfil=()=>{
     </div>
     <div class="fgrp" style="margin-bottom:8px"><input id="pNom" value="${CUD?.nombre||''}" placeholder="Editar nombre" autocomplete="name"></div>
     <button class="btn btn-p" id="pf-save-btn" onclick="_gClick(this,()=>guardarPerfil())">Guardar nombre</button>
+  </div>
+
+  <!-- ── ACCIÓN RÁPIDA (FAB) ── -->
+  <div class="fsec">
+    <div class="fsec-title">⚡ Acción rápida</div>
+    <div style="font-size:12px;color:var(--tx2);margin-bottom:10px;line-height:1.5">Mantén pulsado el botón flotante <strong style="color:var(--tx)">+</strong> para abrir directamente esta opción, sin pasar por el menú.</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <button type="button" class="fab-pref-card ${_fabDefaultKey()==='presupuesto'?'active':''}" id="fabPrefPresupuesto" onclick="_fabSetDefault('presupuesto')">🧾<span>Presupuesto</span></button>
+      <button type="button" class="fab-pref-card ${_fabDefaultKey()==='averia'?'active':''}" id="fabPrefAveria" onclick="_fabSetDefault('averia')">⚠️<span>Avería</span></button>
+      <button type="button" class="fab-pref-card ${_fabDefaultKey()==='cliente'?'active':''}" id="fabPrefCliente" onclick="_fabSetDefault('cliente')">👤<span>Cliente</span></button>
+    </div>
   </div>
 
   <!-- ── APARIENCIA ── -->
