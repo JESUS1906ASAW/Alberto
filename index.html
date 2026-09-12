@@ -11297,17 +11297,25 @@ const _renderVerPresupuesto=(prId,p)=>{
   `);
 };
 
-// ── Cargar html2pdf.js bajo demanda (solo cuando hace falta generar un PDF para compartir) ──
+// ── Cargar html2pdf.js + html2canvas bajo demanda (solo cuando hace falta generar un PDF para compartir) ──
+// Se cargan AMBAS librerías por separado (aunque html2pdf.js ya trae
+// html2canvas empaquetado dentro) porque necesitamos invocar html2canvas
+// nosotros mismos con window.html2canvas — ver el porqué en
+// window._generarPresupuestoPDF más abajo.
+const _cargarScript=(src)=>new Promise((resolve,reject)=>{
+  const s=document.createElement('script');
+  s.src=src;
+  s.onload=resolve; s.onerror=()=>reject(new Error('No se pudo cargar '+src));
+  document.head.appendChild(s);
+});
 let _html2pdfLoading=null;
 window._cargarHtml2Pdf=()=>{
-  if(window.html2pdf) return Promise.resolve();
+  if(window.html2pdf && window.html2canvas) return Promise.resolve();
   if(_html2pdfLoading) return _html2pdfLoading;
-  _html2pdfLoading=new Promise((resolve,reject)=>{
-    const s=document.createElement('script');
-    s.src='https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
-    s.onload=resolve; s.onerror=()=>{_html2pdfLoading=null;reject(new Error('No se pudo cargar html2pdf'));};
-    document.head.appendChild(s);
-  });
+  _html2pdfLoading=Promise.all([
+    window.html2canvas?Promise.resolve():_cargarScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
+    window.html2pdf?Promise.resolve():_cargarScript('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js')
+  ]).catch(e=>{_html2pdfLoading=null;throw e;});
   return _html2pdfLoading;
 };
 
@@ -11333,21 +11341,33 @@ window._generarPresupuestoPDF=async(prId,firmaDataURL)=>{
 
   await _cargarHtml2Pdf();
 
-  // Renderizamos en un iframe visible-pero-fuera-de-pantalla (no display:none,
-  // para que las fuentes y el layout se calculen igual que en una pestaña real)
+  // Renderizamos en un iframe oculto usando document.write() — la MISMA
+  // técnica que usa el botón "PDF" normal (ventana + document.write), que es
+  // la que sabemos que sí respeta el diseño al 100%. Antes se usaba
+  // iframe.srcdoc, pero un documento cargado con srcdoc tiene un origen
+  // "opaco" en muchos navegadores/WebViews — como si fuera de otra web — y
+  // eso hacía que html2canvas no pudiera leer sus estilos con garantías y
+  // capturase el documento prácticamente sin CSS (de ahí el aspecto feo:
+  // solo texto plano con algún detalle suelto). Escribiendo el HTML con
+  // document.write() sobre un iframe en blanco (mismo origen que la app),
+  // html2canvas lee los estilos exactamente igual que en la ventana de
+  // impresión.
   let ifr=null;
   try{
     ifr=document.createElement('iframe');
     ifr.style.cssText='position:fixed;left:-9999px;top:0;width:210mm;height:297mm;border:0;opacity:1;pointer-events:none';
     document.body.appendChild(ifr);
-    await new Promise(res=>{ ifr.onload=res; ifr.srcdoc=html; });
+    await new Promise(res=>{
+      ifr.addEventListener('load',res,{once:true});
+      const idoc=ifr.contentDocument||ifr.contentWindow.document;
+      idoc.open();
+      idoc.write(html);
+      idoc.close();
+    });
 
     // Esperar a que la tipografía (Inter, cargada con <link> en _presuHTML)
     // esté realmente lista antes de capturar: si no, html2canvas dibuja con
     // la fuente de reserva del sistema y el PDF sale con otra estética.
-    // (Antes se cargaba con @import dentro de <style>, lo que hacía que
-    // html2canvas descartara la hoja de estilos entera al clonar el
-    // documento y el PDF saliera sin ningún diseño — de ahí el aspecto feo.)
     try{
       if(ifr.contentDocument.fonts && ifr.contentDocument.fonts.ready){
         await ifr.contentDocument.fonts.ready;
@@ -11358,16 +11378,35 @@ window._generarPresupuestoPDF=async(prId,firmaDataURL)=>{
     await new Promise(res=>setTimeout(res,300));
 
     const bodyEl=ifr.contentDocument.body;
-    const blob=await window.html2pdf().from(bodyEl).set({
+    // ── EL FIX DE VERDAD ──
+    // Antes se le pasaba bodyEl a html2pdf().from(bodyEl) y era html2pdf.js
+    // quien llamaba a html2canvas por dentro. El problema: internamente,
+    // html2pdf.js CLONA solo el <body> (con toContainer()) y cuelga ese
+    // clon del <body> de la página PRINCIPAL de la app (no del iframe) para
+    // poder capturarlo. Ese clon arrastra las clases CSS (class="head",
+    // class="row", class="badge"...) pero NO el <style> de la plantilla del
+    // presupuesto, que se queda atrás en el <head> del iframe. Resultado:
+    // el clon queda flotando en el documento de la app real, con SU CSS
+    // global — por eso el badge "Pendiente" salía con la pastillita
+    // genérica del menú de la app y todo lo demás (banner azul, tablas,
+    // colores) salía completamente sin estilo, ya que esas clases solo
+    // existen en el <style> de _presuHTML.
+    // La solución es generar el canvas NOSOTROS con html2canvas directamente
+    // sobre bodyEl, que sigue viviendo dentro de nuestro iframe con su
+    // propio <style> aplicado tal cual — así se captura con el diseño
+    // real — y solo entonces pasarle el canvas YA HECHO a html2pdf con
+    // .from(canvas,'canvas'), con lo que se salta por completo el clonado
+    // problemático.
+    const canvas=await window.html2canvas(bodyEl,{
+      scale:2,
+      useCORS:true,
+      allowTaint:true,
+      backgroundColor:'#ffffff',
+      windowWidth:bodyEl.scrollWidth,
+      windowHeight:bodyEl.scrollHeight
+    });
+    const blob=await window.html2pdf().from(canvas,'canvas').set({
       margin:0,
-      html2canvas:{
-        scale:2,
-        useCORS:true,
-        allowTaint:true,
-        backgroundColor:'#ffffff',
-        windowWidth:bodyEl.scrollWidth,
-        windowHeight:bodyEl.scrollHeight
-      },
       jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
     }).outputPdf('blob');
 
