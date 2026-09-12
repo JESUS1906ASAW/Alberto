@@ -75,92 +75,92 @@ html,body{background:radial-gradient(ellipse 120% 60% at 20% -10%,#1c2024 0%,var
 /* ── MODO CLARO ── */
 
 body.modo-claro{
-  --bg:#fafaf9;--card:#ffffff;--card2:#f6f6f4;
-  --tx:#161b19;--tx2:rgba(22,27,25,.52);--tx3:rgba(22,27,25,.24);
-  --border:rgba(22,27,25,.08);
+  --bg:#f2f3f1;--card:#fdfdfc;--card2:#f5f6f3;
+  --tx:#1b211f;--tx2:rgba(27,33,31,.56);--tx3:rgba(27,33,31,.26);
+  --border:rgba(27,33,31,.10);
   --shadow:0 1px 3px rgba(16,24,22,.06),0 8px 24px rgba(16,24,22,.05);
-  --glass-bg:#ffffff;--glass-bg2:#f6f6f4;--glass-border:rgba(22,27,25,.08);--glass-hi:rgba(255,255,255,.9);--glass-blur:0px;
+  --glass-bg:#fdfdfc;--glass-bg2:#f5f6f3;--glass-border:rgba(27,33,31,.10);--glass-hi:rgba(255,255,255,.9);--glass-blur:0px;
   --sh-1:0 1px 2px rgba(16,24,22,.05),0 4px 10px -6px rgba(16,24,22,.08);
   --sh-2:0 2px 6px rgba(16,24,22,.06),0 10px 22px -10px rgba(16,24,22,.1);
   --sh-3:0 8px 20px rgba(16,24,22,.08),0 20px 44px -16px rgba(16,24,22,.14);
-  background:#fafaf9;color:#161b19;
+  background:#f2f3f1;color:#1b211f;
 }
-html:has(body.modo-claro),body.modo-claro{background:#fafaf9}
+html:has(body.modo-claro),body.modo-claro{background:#f2f3f1}
 body.modo-claro #topbar{background:rgba(255,255,255,.88);backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);border-bottom:1px solid rgba(0,0,0,.07);box-shadow:0 1px 0 rgba(255,255,255,.8),0 2px 12px rgba(0,0,0,.06)}
-body.modo-claro #drawer{background:#ffffff;border-left:1px solid rgba(0,0,0,.09)}
+body.modo-claro #drawer{background:var(--card);border-left:1px solid rgba(0,0,0,.09)}
 body.modo-claro #authWrap{background:#fafaf9}
-body.modo-claro .login-card{background:#ffffff;border-color:rgba(22,27,25,.08);box-shadow:0 1px 3px rgba(16,24,22,.05),0 12px 32px rgba(16,24,22,.06)}
+body.modo-claro .login-card{background:var(--card);border-color:rgba(22,27,25,.08);box-shadow:0 1px 3px rgba(16,24,22,.05),0 12px 32px rgba(16,24,22,.06)}
 body.modo-claro .auth-logo{background:linear-gradient(135deg,var(--r2) 15%,var(--r) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:none}
 body.modo-claro .login-sub{color:rgba(22,27,25,.5)}
 body.modo-claro .fgrp label{color:rgba(22,27,25,.45)}
-body.modo-claro .fgrp input,body.modo-claro .fgrp select,body.modo-claro .fgrp textarea{background:#f7f7f7;border-color:rgba(0,0,0,.14);color:#111}
-body.modo-claro .sbox{background:#f7f7f7;border-color:rgba(0,0,0,.14);color:#111}
-body.modo-claro .fsec{background:#ffffff;box-shadow:0 1px 4px rgba(0,0,0,.05)}
-body.modo-claro .card{background:#ffffff}
-body.modo-claro #sb{background:#ffffff}
+body.modo-claro .fgrp input,body.modo-claro .fgrp select,body.modo-claro .fgrp textarea{background:#f7f7f7;border-color:rgba(0,0,0,.14);color:var(--tx)}
+body.modo-claro .sbox{background:#f7f7f7;border-color:rgba(0,0,0,.14);color:var(--tx)}
+body.modo-claro .fsec{background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,.05)}
+body.modo-claro .card{background:var(--card)}
+body.modo-claro #sb{background:var(--card)}
 body.modo-claro .sb-head{border-bottom-color:rgba(0,0,0,.09)}
-body.modo-claro .sb-head h2{color:#111}
+body.modo-claro .sb-head h2{color:var(--tx)}
 body.modo-claro .sb-close{background:rgba(0,0,0,.06);color:rgba(0,0,0,.5)}
 body.modo-claro .sb-back{background:rgba(0,0,0,.06)}
-body.modo-claro .parte-card,body.modo-claro .cli-card,body.modo-claro .notif-card,body.modo-claro .arch-card{background:#ffffff;box-shadow:0 1px 4px rgba(0,0,0,.05)}
-body.modo-claro html,body.modo-claro body{background:#f2f2f7;color:#111}
-body.modo-claro .drawer-name{color:#fff}
+body.modo-claro .parte-card,body.modo-claro .cli-card,body.modo-claro .notif-card,body.modo-claro .arch-card{background:var(--card);box-shadow:0 1px 4px rgba(0,0,0,.05)}
+body.modo-claro html,body.modo-claro body{background:var(--bg);color:var(--tx)}
+body.modo-claro .drawer-name{color:var(--card)}
 body.modo-claro .drawer-sub{color:rgba(255,255,255,.75)}
 body.modo-claro .d-section{color:rgba(0,0,0,.3)}
 body.modo-claro .d-sep{background:rgba(0,0,0,.08)}
 body.modo-claro .d-item{color:rgba(0,0,0,.5)}
-body.modo-claro .d-item:hover{color:#111;background:rgba(var(--theme-rgb),.08)}
+body.modo-claro .d-item:hover{color:var(--tx);background:rgba(var(--theme-rgb),.08)}
 body.modo-claro .d-item.active{color:#0b5c56;background:rgba(15,118,110,.08);border-left-color:#0f766e;font-weight:800}
-body.modo-claro .toast{background:#fff;color:#111;border-color:rgba(0,0,0,.12);box-shadow:0 4px 20px rgba(0,0,0,.15)}
-body.modo-claro .btn-s{background:rgba(0,0,0,.05);color:#111;border-color:rgba(0,0,0,.12)}
+body.modo-claro .toast{background:var(--card);color:var(--tx);border-color:rgba(0,0,0,.12);box-shadow:0 4px 20px rgba(0,0,0,.15)}
+body.modo-claro .btn-s{background:rgba(0,0,0,.05);color:var(--tx);border-color:rgba(0,0,0,.12)}
 body.modo-claro .btn-s:hover{border-color:var(--r);color:var(--r)}
-body.modo-claro .gtabs{background:#f2f2f7;border-color:rgba(0,0,0,.09)}
+body.modo-claro .gtabs{background:var(--bg);border-color:var(--border)}
 body.modo-claro .gtab{background:transparent}
 body.modo-claro .gtab .gtab-txt{color:rgba(0,0,0,.4)}
 body.modo-claro .stab{background:#f7f7f7;border-color:rgba(0,0,0,.09);color:rgba(0,0,0,.5)}
 body.modo-claro .cal-task{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.08)}
-body.modo-claro .cal-sem-label{color:#111}
+body.modo-claro .cal-sem-label{color:var(--tx)}
 body.modo-claro .cal-sem-dates{color:rgba(0,0,0,.45)}
 body.modo-claro .volver-btn{color:rgba(0,0,0,.45)}
 body.modo-claro .volver-btn:hover{color:var(--r)}
-body.modo-claro .login-title{color:#111}
+body.modo-claro .login-title{color:var(--tx)}
 body.modo-claro .empty{color:rgba(0,0,0,.4)}
 body.modo-claro ::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15)}
 body.modo-claro ::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.28)}
 body.modo-claro .fbtn{color:rgba(0,0,0,.45);border-color:rgba(0,0,0,.15)}
-body.modo-claro .fbtn:hover:not(.active){border-color:rgba(0,0,0,.3);color:#111}
+body.modo-claro .fbtn:hover:not(.active){border-color:rgba(0,0,0,.3);color:var(--tx)}
 body.modo-claro .pchip{background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.12);color:rgba(0,0,0,.5)}
-body.modo-claro .det-val{color:#111}
+body.modo-claro .det-val{color:var(--tx)}
 body.modo-claro .det-label{color:rgba(0,0,0,.45)}
 body.modo-claro .det-row{border-bottom-color:rgba(0,0,0,.08)}
 body.modo-claro .toggle-track{background:rgba(0,0,0,.15)}
-body.modo-claro #installBanner{background:linear-gradient(135deg,#ffffff,#f7f7f7);border-top-color:rgba(var(--theme-rgb),.2)}
+body.modo-claro #installBanner{background:linear-gradient(135deg,var(--card),#f7f7f7);border-top-color:rgba(var(--theme-rgb),.2)}
 
 
 body.modo-claro .func-step-txt{color:rgba(0,0,0,.7)}
-body.modo-claro .func-step-txt strong{color:#111}
+body.modo-claro .func-step-txt strong{color:var(--tx)}
 
-body.modo-claro .cli-name{color:#111}
-body.modo-claro .parte-title{color:#111}
-body.modo-claro .arch-name{color:#111}
-body.modo-claro .notif-title{color:#111}
+body.modo-claro .cli-name{color:var(--tx)}
+body.modo-claro .parte-title{color:var(--tx)}
+body.modo-claro .arch-name{color:var(--tx)}
+body.modo-claro .notif-title{color:var(--tx)}
 
-body.modo-claro .stat-num{color:#111}
-body.modo-claro .grupo-title{color:#fff}
+body.modo-claro .stat-num{color:var(--tx)}
+body.modo-claro .grupo-title{color:var(--card)}
 body.modo-claro #topbar .logo{color:var(--r)}
 
-body.modo-claro .tl-card{background:#ffffff;border-color:rgba(0,0,0,.09)}
-body.modo-claro .dash-item{background:#ffffff}
-body.modo-claro .chart-wrap{background:#ffffff}
-body.modo-claro .ficha-row{background:#ffffff}
+body.modo-claro .tl-card{background:var(--card);border-color:rgba(0,0,0,.09)}
+body.modo-claro .dash-item{background:var(--card)}
+body.modo-claro .chart-wrap{background:var(--card)}
+body.modo-claro .ficha-row{background:var(--card)}
 body.modo-claro .log-item{border-color:rgba(0,0,0,.08)}
-body.modo-claro .log-msg{color:#111}
-body.modo-claro .stat2-card{background:#ffffff}
-body.modo-claro .stat2-num{color:#111}
+body.modo-claro .log-msg{color:var(--tx)}
+body.modo-claro .stat2-card{background:var(--card)}
+body.modo-claro .stat2-num{color:var(--tx)}
 
 /* ── MODO CLARO: FIXES DESKTOP ── */
 @media(min-width:600px){
-  body.modo-claro .scroll-pad{background:#f2f2f7}
+  body.modo-claro .scroll-pad{background:var(--bg)}
   body.modo-claro #app{box-shadow:0 2px 12px rgba(0,0,0,.08)}
   body.modo-claro .grupos-grid .gtile-name{text-shadow:0 1px 4px rgba(0,0,0,.7)}
   body.modo-claro .cal-semana{box-shadow:0 1px 4px rgba(0,0,0,.06)}
@@ -197,7 +197,7 @@ body.modo-claro .stat2-num{color:#111}
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{height:100%;height:100dvh}
 body{height:100%;height:100dvh;overflow:hidden;background:#0d0d0d;font-family:var(--font);color:var(--tx);font-size:15px;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility;overscroll-behavior-y:none;transition:background .2s,color .2s}
-body.modo-claro{background:#f2f2f7 !important}
+body.modo-claro{background:#f2f3f1 !important}
 ::-webkit-scrollbar{width:3px;height:3px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:12px;transition:background .2s}::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.3)}
 
 /* ── LAYOUT ── */
@@ -324,7 +324,7 @@ body.modo-claro .skel{background:linear-gradient(90deg,rgba(0,0,0,.06) 25%,rgba(
 .cli-sel-wrap{position:relative;width:100%}
 .cli-sel-trigger{width:100%;background:rgba(255,255,255,.06);border:1px solid var(--border);border-radius:12px;padding:10px 36px 10px 12px;color:var(--tx);font-size:14px;font-family:var(--font);cursor:pointer;display:flex;align-items:center;gap:8px;transition:.15s;min-height:44px;box-sizing:border-box;user-select:none}
 .cli-sel-trigger:focus,.cli-sel-trigger.open{border-color:var(--r);box-shadow:0 0 0 3px rgba(var(--theme-rgb),.15);outline:none}
-body.modo-claro .cli-sel-trigger{background:#f7f7f7;border-color:rgba(0,0,0,.14);color:#111}
+body.modo-claro .cli-sel-trigger{background:#f7f7f7;border-color:rgba(0,0,0,.14);color:var(--tx)}
 .cli-sel-trigger::after{content:'';position:absolute;right:12px;top:50%;transform:translateY(-50%);width:12px;height:8px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='rgba(255,255,255,.3)'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center;pointer-events:none}
 body.modo-claro .cli-sel-trigger::after{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='rgba(0,0,0,.4)'/%3E%3C/svg%3E")}
 .cli-sel-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;display:inline-block}
@@ -334,12 +334,12 @@ body.modo-claro .cli-sel-trigger::after{background-image:url("data:image/svg+xml
 .cli-sel-opt{display:flex;align-items:center;gap:9px;padding:10px 14px;cursor:pointer;transition:.12s;font-size:14px;color:var(--tx)}
 .cli-sel-opt:hover{background:rgba(var(--theme-rgb),.1)}
 .cli-sel-opt.selected{background:rgba(var(--theme-rgb),.15);font-weight:700}
-body.modo-claro .cli-sel-dropdown{background:#fff;border-color:rgba(0,0,0,.12);box-shadow:0 8px 32px rgba(0,0,0,.15)}
-body.modo-claro .cli-sel-opt{color:#111;background:#fff}
+body.modo-claro .cli-sel-dropdown{background:var(--card);border-color:rgba(0,0,0,.12);box-shadow:0 8px 32px rgba(0,0,0,.15)}
+body.modo-claro .cli-sel-opt{color:var(--tx);background:var(--card)}
 body.modo-claro .cli-sel-opt:hover{background:rgba(0,0,0,.05)}
-body.modo-claro .cli-sel-opt.selected{background:rgba(var(--theme-rgb),.12);color:#111}
-body.modo-claro .cli-sel-trigger{background:#f5f5f5;border-color:rgba(0,0,0,.18);color:#111}
-body.modo-claro .cli-sel-dropdown{background:#fff}
+body.modo-claro .cli-sel-opt.selected{background:rgba(var(--theme-rgb),.12);color:var(--tx)}
+body.modo-claro .cli-sel-trigger{background:#f5f5f5;border-color:rgba(0,0,0,.18);color:var(--tx)}
+body.modo-claro .cli-sel-dropdown{background:var(--card)}
 .cli-sel-opt{background:transparent}
 .fsec{background:var(--card);border:1px solid var(--border);border-radius:var(--rd);padding:18px;margin-bottom:14px}
 .fsec-title{font-size:10px;font-weight:800;color:var(--r);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
@@ -596,7 +596,7 @@ body.sel-mode [data-sel-id]:not(.sel-checked){transform:scale(.97)}
 .swipe-item .sel-check{top:9px;right:9px}
 .sel-action-bar{
   position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom,0px));
-  z-index:520;display:flex;align-items:center;gap:10px;padding:11px 12px 11px 16px;
+  z-index:950;display:flex;align-items:center;gap:10px;padding:11px 12px 11px 16px;
   background:var(--glass-bg2);backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);
   border:1px solid var(--glass-border);border-radius:var(--rd-lg);
   box-shadow:inset 0 1px 0 var(--glass-hi),var(--sh-3);
@@ -604,11 +604,20 @@ body.sel-mode [data-sel-id]:not(.sel-checked){transform:scale(.97)}
 }
 @keyframes selBarIn{from{transform:translateY(24px) scale(.96);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
 .sel-action-bar .sel-count{flex:1;font-size:13px;font-weight:700;color:var(--tx)}
-.sel-action-bar .sel-cancel{width:32px;height:32px;border-radius:50%;border:1px solid var(--glass-border);background:transparent;color:var(--tx2);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .16s var(--ease-spring),background .15s ease}
+.sel-action-bar .sel-cancel{width:44px;height:44px;border-radius:50%;border:1px solid var(--glass-border);background:transparent;color:var(--tx2);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .16s var(--ease-spring),background .15s ease}
 .sel-action-bar .sel-cancel:active{transform:scale(.9)}
-.sel-action-bar .sel-delete-btn{border:none;border-radius:var(--rd-sm);padding:10px 16px;background:linear-gradient(135deg,var(--danger2),var(--danger));color:#fff;font-size:12.5px;font-weight:800;cursor:pointer;font-family:var(--font);flex-shrink:0;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px -2px rgba(239,68,68,.4);transition:transform .16s var(--ease-spring)}
+.sel-action-bar .sel-delete-btn{border:none;border-radius:var(--rd-sm);padding:14px 22px;background:linear-gradient(135deg,var(--danger2),var(--danger));color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:var(--font);flex-shrink:0;display:flex;align-items:center;gap:7px;box-shadow:0 3px 10px -2px rgba(239,68,68,.4);transition:transform .16s var(--ease-spring)}
 .sel-action-bar .sel-delete-btn:active{transform:scale(.95)}
 .sel-action-bar .sel-delete-btn:disabled{opacity:.4;cursor:default}
+/* Mientras el modo selección está activo, el FAB de acciones rápidas se
+   oculta: si no, queda encima de la barra de selección (mismo rincón
+   inferior derecho) y bloquea los toques sobre "Eliminar". El !important
+   es necesario porque _fabUpdateVisibility fija display por estilo en línea. */
+body.sel-mode #fabWrap{display:none!important}
+/* Deja hueco de sobra bajo la lista para que ninguna tarjeta quede
+   permanentemente tapada por la barra de selección fija. */
+body.sel-mode .scroll-pad{padding-bottom:140px}
+
 
 /* ── PARTE CARDS ── */
 .parte-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease,border-color .2s ease;margin-bottom:8px;position:relative;overflow:hidden}
@@ -648,7 +657,7 @@ body.sel-mode [data-sel-id]:not(.sel-checked){transform:scale(.97)}
 #presuModalHead h2{flex:1;font-size:16px;font-weight:900;color:var(--tx);margin:0}
 #presuModalHead .pm-close{background:rgba(255,255,255,.08);border:none;border-radius:12px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tx2);font-size:18px;font-family:var(--font)}
 #presuModalBody{overflow-y:auto;padding:18px;flex:1}
-body.modo-claro #presuModalBox{background:#ffffff}
+body.modo-claro #presuModalBox{background:var(--card)}
 body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
 
 #sb{position:fixed;bottom:-100%;left:0;right:0;max-height:92vh;background:rgba(17,17,17,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:24px 24px 0 0;z-index:1190;display:flex;flex-direction:column;transition:bottom .38s cubic-bezier(.16,1,.3,1),box-shadow .38s ease;border-top:1px solid var(--border);box-shadow:none}
@@ -963,13 +972,14 @@ body.modo-claro .stab.active{box-shadow:0 2px 6px rgba(16,24,22,.1),0 0 0 1px rg
 .swipe-bg[data-action="delete"]{background:linear-gradient(100deg,var(--danger),var(--danger2) 75%)}
 .swipe-bg[data-action="complete"]{background:linear-gradient(100deg,var(--r2),var(--r3) 75%)}
 .swipe-bg[data-action="restore"]{background:linear-gradient(100deg,var(--info),#60a5fa 75%)}
+.swipe-bg[data-action="archive"]{background:linear-gradient(100deg,var(--r2),var(--r) 75%)}
 .swipe-bg .swipe-bg-ico{display:inline-flex;transition:transform .18s var(--ease-spring)}
 .swipe-bg.holding .swipe-bg-ico{animation:swipeHoldPulse .42s var(--ease-spring) infinite}
 @keyframes swipeHoldPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
 .swipe-content{position:relative;touch-action:pan-y;z-index:1;background:transparent}
 .swipe-content.dragging{transition:none!important;will-change:transform}
 .swipe-content:not(.dragging){transition:transform .32s var(--ease-spring)}
-.swipe-content .presu-card,.swipe-content .averia-card{margin-bottom:0;border:none;border-radius:0;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
+.swipe-content .presu-card,.swipe-content .averia-card,.swipe-content .cli-card{margin-bottom:0;border:none;border-radius:0;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
 
 /* ── FAB — acciones rápidas ── */
 #fabOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:890;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
@@ -1016,8 +1026,7 @@ body.modo-claro .stab.active{box-shadow:0 2px 6px rgba(16,24,22,.1),0 0 0 1px rg
   .grupo-ava,.hero-ava{overflow:visible !important;background:transparent !important}
   /* Hover keeps dark bg */
       /* Light mode: still keep black for avatars */
-  body.modo-claro body.modo-claro 
-  body.modo-claro .grupo-ava,body.modo-claro body.modo-claro .hero-ava{background:transparent !important}
+  body.modo-claro .grupo-ava,body.modo-claro .hero-ava{background:transparent !important}
 
 @keyframes fadeInDrop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 /* ── Historial Mantenimientos Sheet ── */
@@ -1289,7 +1298,7 @@ body.modo-claro .stab.active{box-shadow:0 2px 6px rgba(16,24,22,.1),0 0 0 1px rg
    ══════════════════════════════════════════════════════════ */
 @media(min-width:860px){
   html,body{background:#070b0a}
-  body.modo-claro{background:#e6e8eb !important}
+  body.modo-claro{background:#e6e7e3 !important}
   body{align-items:center;justify-content:center;padding:0}
   #authWrap,#app{
     width:100%;max-width:560px;
@@ -2562,32 +2571,31 @@ window._fabSetDefault=(key)=>{
 })();
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// DESLIZAR Y MANTENER PULSADO — mecanismo genérico de swipe-to-act
+// DESLIZAR PARA ACTUAR — mecanismo genérico de swipe-to-act
 // Aplica a cualquier lista que envuelva sus tarjetas en:
 //   <div class="swipe-item" data-swipe-id="…"
-//        data-right-fn="…" data-right-action="delete|complete|restore" data-right-label="…"
-//        data-left-fn="…"  data-left-action="delete|complete|restore"  data-left-label="…">
+//        data-right-fn="…" data-right-action="delete|complete|restore|archive" data-right-label="…"
+//        data-left-fn="…"  data-left-action="delete|complete|restore|archive"  data-left-label="…">
 //     <div class="swipe-bg"></div>
 //     <div class="swipe-content">…tarjeta visible…</div>
 //   </div>
 // Deslizar en una dirección revela un fondo de color con el icono/etiqueta
-// de la acción configurada para esa dirección. Si se mantiene el dedo
-// pasado el umbral durante unas milésimas, la acción se dispara sola: no
-// hace falta soltar ni confirmar con un botón aparte.
+// de la acción configurada para esa dirección. En cuanto se supera el
+// umbral la acción queda "armada" (el fondo se resalta): si en ese momento
+// se suelta el dedo, la acción se ejecuta al instante. Si en vez de soltar
+// se mantiene pulsado, la tarjeta se queda mostrando la acción a realizar
+// hasta que el dedo se levanta, momento en el que se dispara.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 (()=>{
   const MAX_DRAG=100;   // px máximos de desplazamiento visual
   const THRESH=62;      // px a partir de los cuales se "arma" la acción
-  const HOLD_MS=420;    // ms manteniendo pulsado para confirmar
   const EDGE_GUARD=24;  // px desde el borde izquierdo: se cede al gesto nativo de "atrás"
-  const ACT_ICO={delete:ICO.trash(19,'#fff'),complete:ICO.check(19,'#fff'),restore:ICO.undo(19,'#fff')};
+  const ACT_ICO={delete:ICO.trash(19,'#fff'),complete:ICO.check(19,'#fff'),restore:ICO.undo(19,'#fff'),archive:ICO.box(19,'#fff')};
 
-  let curItem=null,startX=0,startY=0,curX=0,dragging=false,locked=null,dir=null,holdTimer=null,holding=false;
+  let curItem=null,startX=0,startY=0,curX=0,dragging=false,locked=null,dir=null,armed=false;
 
   const contentOf=item=>item.querySelector('.swipe-content');
   const bgOf=item=>item.querySelector('.swipe-bg');
-
-  const cancelHold=()=>{ if(holdTimer){ clearTimeout(holdTimer); holdTimer=null; } holding=false; };
 
   const resetItem=item=>{
     const c=contentOf(item), b=bgOf(item);
@@ -2599,7 +2607,7 @@ window._fabSetDefault=(key)=>{
   // (p.ej. al navegar atrás) para asegurarse de que no quede ninguna tarjeta
   // a medio arrastrar.
   window._closeAllSwipes=()=>{
-    if(curItem){ cancelHold(); resetItem(curItem); curItem=null; dragging=false; dir=null; holding=false; }
+    if(curItem){ resetItem(curItem); curItem=null; dragging=false; dir=null; armed=false; }
     document.querySelectorAll('.swipe-content').forEach(c=>{ c.classList.remove('dragging'); c.style.transform='translateX(0)'; });
     document.querySelectorAll('.swipe-bg').forEach(b=>{ b.classList.remove('show','holding'); });
   };
@@ -2618,7 +2626,10 @@ window._fabSetDefault=(key)=>{
       ? `<span class="swipe-bg-ico">${ACT_ICO[cfg.action]||''}</span><span>${cfg.label||''}</span>`
       : `<span>${cfg.label||''}</span><span class="swipe-bg-ico">${ACT_ICO[cfg.action]||''}</span>`;
     b.classList.add('show');
-    b.classList.toggle('holding', Math.abs(dist)>=THRESH && !!holdTimer);
+    const nowArmed=Math.abs(dist)>=THRESH;
+    if(nowArmed && !armed && navigator.vibrate) navigator.vibrate(10);
+    armed=nowArmed;
+    b.classList.toggle('holding', armed);
   };
 
   const triggerAction=(item,direction)=>{
@@ -2627,7 +2638,7 @@ window._fabSetDefault=(key)=>{
     item.dataset.justDragged='1';
     setTimeout(()=>{ delete item.dataset.justDragged; },400);
     if(curItem===item){ curItem=null; dragging=false; dir=null; }
-    holding=false;
+    armed=false;
     if(fn && typeof window[fn]==='function'){
       if(navigator.vibrate) navigator.vibrate([12,30,14]);
       window[fn](item.dataset.swipeId);
@@ -2640,7 +2651,7 @@ window._fabSetDefault=(key)=>{
     const t=e.touches[0];
     // Cerca del borde izquierdo: dejamos paso al gesto nativo de "volver atrás".
     if(t.clientX<EDGE_GUARD){ curItem=null; return; }
-    curItem=item; locked=null; dragging=false; dir=null; cancelHold();
+    curItem=item; locked=null; dragging=false; dir=null; armed=false;
     startX=t.clientX; startY=t.clientY; curX=0;
   },{passive:true});
 
@@ -2651,36 +2662,27 @@ window._fabSetDefault=(key)=>{
     if(locked===null){
       if(Math.abs(dx)>8||Math.abs(dy)>8) locked=Math.abs(dx)>Math.abs(dy)?'x':'y';
     }
-    if(locked==='y'){ if(curItem)resetItem(curItem); curItem=null; cancelHold(); return; }
+    if(locked==='y'){ if(curItem)resetItem(curItem); curItem=null; armed=false; return; }
     if(locked!=='x')return;
     dragging=true;
     curX=Math.max(-MAX_DRAG,Math.min(MAX_DRAG,dx));
     const c=contentOf(curItem);
     if(c){ c.classList.add('dragging'); c.style.transform=`translateX(${curX}px)`; }
     const newDir = curX>4?'right':curX<-4?'left':null;
-    if(newDir!==dir){ cancelHold(); dir=newDir; }
+    if(newDir!==dir){ armed=false; dir=newDir; }
     updateBg(curItem,dir,curX);
-    const fn = dir==='right'?curItem.dataset.rightFn:dir==='left'?curItem.dataset.leftFn:null;
-    if(fn && Math.abs(curX)>=THRESH){
-      if(!holdTimer && !holding){
-        const itemRef=curItem, dirRef=dir;
-        holdTimer=setTimeout(()=>{
-          holdTimer=null;
-          if(curItem===itemRef && dir===dirRef) triggerAction(itemRef,dirRef);
-        },HOLD_MS);
-        updateBg(curItem,dir,curX);
-      }
-    } else {
-      cancelHold();
-      updateBg(curItem,dir,curX);
-    }
   },{passive:true});
 
   const endDrag=()=>{
     if(!curItem)return;
-    cancelHold();
-    if(dragging) resetItem(curItem);
-    curItem=null; dragging=false; dir=null; holding=false;
+    // Si al soltar la acción estaba "armada" (se superó el umbral), se
+    // ejecuta en este mismo instante — deslizar y soltar es la confirmación.
+    if(dragging && armed && dir && (dir==='right'?curItem.dataset.rightFn:curItem.dataset.leftFn)){
+      triggerAction(curItem,dir);
+    } else if(dragging){
+      resetItem(curItem);
+    }
+    curItem=null; dragging=false; dir=null; armed=false;
   };
   document.addEventListener('touchend',endDrag);
   document.addEventListener('touchcancel',endDrag);
@@ -2750,12 +2752,16 @@ window._fabSetDefault=(key)=>{
       window._selMode={active:true,type,ids:new Set()};
       document.body.classList.add('sel-mode');
       document.body.setAttribute('data-sel-type',type);
+      if(typeof window.toggleFabMenu==='function') window.toggleFabMenu(false);
     }
     if(window._selMode.type!==type)return; // solo una lista a la vez
     const ids=window._selMode.ids;
     if(ids.has(id)){ ids.delete(id); item.classList.remove('sel-checked'); }
     else { ids.add(id); item.classList.add('sel-checked'); }
     if(navigator.vibrate) navigator.vibrate(14);
+    // Si se deseleccionan todos los elementos (sin usar la X), se sale del
+    // modo selección automáticamente, igual que si se pulsara cancelar.
+    if(ids.size===0){ window._selCancel(); return; }
     renderBar();
   };
 
@@ -5437,14 +5443,19 @@ const htmlListaClis=(clis,preview=false)=>{
       ? `<img src="${avaUrl}" alt="${c.nombre}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block">`
       : `<div class="cli-ava-initials" style="background:${temaColor||col}">${avaIni}</div>`;
     const avaBg=avaUrl?'transparent':(temaColor||col);
-    return`<div class="cli-card" data-sel-id="${c.id}" data-sel-type="cliente" onclick="verCliente('${c.id}')">
-      <div class="sel-check"></div>
-      <div class="cli-ava" style="background:${avaBg}">${avaHtml}</div>
-      <div class="cli-info">
-        <div class="cli-name">${c.nombre} <span>${colEmo}</span></div>
-        <div class="cli-sub">${subParts.join(' · ')||'Sin datos de contacto'}</div>
+    return`<div class="swipe-item" data-swipe-id="${c.id}" data-sel-id="${c.id}" data-sel-type="cliente" data-right-fn="swipeArchivarCli" data-right-action="archive" data-right-label="Archivar">
+      <div class="swipe-bg"></div>
+      <div class="swipe-content">
+        <div class="cli-card" onclick="verCliente('${c.id}')">
+          <div class="sel-check"></div>
+          <div class="cli-ava" style="background:${avaBg}">${avaHtml}</div>
+          <div class="cli-info">
+            <div class="cli-name">${c.nombre} <span>${colEmo}</span></div>
+            <div class="cli-sub">${subParts.join(' · ')||'Sin datos de contacto'}</div>
+          </div>
+          <div class="cli-arrow">${ICO.chevron(17)}</div>
+        </div>
       </div>
-      <div class="cli-arrow">${ICO.chevron(17)}</div>
     </div>`;
   }).join('');
   const total=allClientes.filter(c=>!c.archivado).length;
@@ -6805,6 +6816,24 @@ window.archivarCli=async(id)=>{
     _sbReturnCli=null;
     cerrarSB();toast('Cliente archivado','i');
   }catch(e){toast('Error','e')}
+};
+
+// Archivar directamente desde el gesto de deslizar hacia la derecha en la
+// lista de clientes. No es una acción destructiva (el cliente se conserva
+// en Archivos), así que se ejecuta al soltar sin diálogo de confirmación.
+window.swipeArchivarCli=async(id)=>{
+  if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
+  const c=allClientes.find(x=>x.id===id);if(!c)return;
+  try{
+    await addDoc(collection(db,'grupos',CGID,'archivos'),{...c,id:c.id,tipo:'cliente',eliminadoEn:serverTimestamp()});
+    await deleteDoc(doc(db,'grupos',CGID,'clientes',id));
+    allClientes=allClientes.filter(x=>x.id!==id);
+    if(document.getElementById('clisList')) filtrarClis(document.getElementById('cliSearchBox')?.value||'');
+    toast('🗄️ Cliente archivado','i');
+  }catch(e){
+    console.error('swipeArchivarCli',e);
+    toast('Sin conexión: se archivará al recuperar internet','i');
+  }
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -12225,11 +12254,12 @@ window.swipeRestaurarPresupuesto=async(prId)=>{
   await toggleEstadoPresupuesto(prId,'espera');
 };
 
-// Eliminar directamente desde el gesto de deslizar+mantener pulsado en la
-// lista. El propio gesto sostenido es la confirmación, así que no se
-// interrumpe con un diálogo: solo se avisa con un aviso (toast) del resultado.
+// Eliminar directamente desde el gesto de deslizar en la lista. Al ser una
+// acción destructiva se confirma siempre con un aviso del sistema antes de
+// borrar nada.
 window.swipeEliminarPresupuesto=async(prId)=>{
   if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
+  if(!confirm('¿Seguro que quieres eliminar este presupuesto?'))return;
   _quitarPresupuestoLocal(prId);
   try{
     await deleteDoc(doc(db,'grupos',CGID,'presupuestos',prId));
@@ -13632,9 +13662,9 @@ window.restaurarAviso=async(id)=>{
   }catch(e){toast('Error: '+e.message,'e');}
 };
 
-// ── Acciones desde el gesto de deslizar+mantener pulsado (lista de avisos) ──
-// El propio gesto sostenido es la confirmación: no se interrumpe con un
-// diálogo, solo se avisa el resultado con un toast.
+// ── Acciones desde el gesto de deslizar (lista de avisos) ──
+// Resolver/restaurar se ejecutan al soltar el dedo. Eliminar, al ser
+// destructivo, siempre se confirma con un aviso del sistema antes de borrar.
 window.swipeResolverAviso=async(id)=>{
   if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
   await resolverAviso(id);
@@ -13645,6 +13675,7 @@ window.swipeRestaurarAviso=async(id)=>{
 };
 window.swipeEliminarAviso=async(id)=>{
   if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
+  if(!confirm('¿Seguro que quieres eliminar este aviso?'))return;
   try{
     await deleteDoc(doc(db,'grupos',CGID,'avisos',id));
     toast('🗑️ Aviso eliminado','o');
