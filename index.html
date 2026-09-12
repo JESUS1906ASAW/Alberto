@@ -1020,11 +1020,31 @@ body.modo-claro .stab.active{box-shadow:0 2px 6px rgba(16,24,22,.1),0 0 0 1px rg
 .swipe-content.dragging{transition:none!important;will-change:transform}
 .swipe-content:not(.dragging){transition:transform .32s var(--ease-spring)}
 .swipe-content .presu-card,.swipe-content .averia-card,.swipe-content .cli-card{margin-bottom:0;border:none;border-radius:0;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
+/* ── Rendimiento de scroll en Android: el desenfoque de cristal (backdrop-filter)
+   de cada tarjeta es muy costoso de recalcular en tiempo real. Con muchas
+   tarjetas visibles el navegador puede "atascarse" recalculando el blur justo
+   cuando el dedo se está moviendo, haciendo que el scroll no responda a la
+   primera. Solución habitual: mientras se detecta scroll activo (clase
+   is-scrolling en <body>, ver JS más abajo) se desactiva el blur de las
+   tarjetas y se restaura en cuanto el dedo se detiene. */
+body.is-scrolling .swipe-item,
+body.is-scrolling .averia-card,
+body.is-scrolling .cli-card,
+body.is-scrolling .presu-card{
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
 
 /* ── FAB — acciones rápidas ── */
 #fabOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:890;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
 #fabOverlay.open{display:block;animation:fadeIn .2s ease}
-#fabWrap{display:none;position:fixed;right:18px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:900;flex-direction:column;align-items:flex-end;gap:12px}
+/* pointer-events:none en el contenedor: aunque el menú (fabMenu) está
+   cerrado con opacity:0 (no display:none, para poder animarlo), sigue
+   ocupando espacio en el flex-column por encima del botón. Sin esta línea,
+   ese espacio invisible interceptaba toques y arrastres cercanos al FAB
+   (no solo justo debajo de él), impidiendo desplazar o pulsar tarjetas en
+   esa zona. Los hijos que sí deben responder (fabMain siempre, fabMenu solo
+   cuando está abierto) recuperan el pointer-events explícitamente. */
+#fabWrap{display:none;position:fixed;right:18px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:900;flex-direction:column;align-items:flex-end;gap:12px;pointer-events:none}
 #fabMenu{display:flex;flex-direction:column;align-items:flex-end;gap:10px;pointer-events:none}
 #fabWrap.open #fabMenu{pointer-events:auto}
 .fab-opt{display:flex;align-items:center;gap:9px;background:var(--glass-bg2);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);border:1px solid var(--glass-border);box-shadow:inset 0 1px 0 var(--glass-hi),var(--sh-2);border-radius:var(--rd-lg);padding:11px 18px 11px 15px;opacity:0;transform:translateY(10px) scale(.9);transition:opacity .2s ease,transform .28s var(--ease-spring);cursor:pointer;font-family:var(--font)}
@@ -1038,7 +1058,7 @@ body.modo-claro .stab.active{box-shadow:0 2px 6px rgba(16,24,22,.1),0 0 0 1px rg
 .fab-opt-star{display:none;font-size:11px}
 .fab-opt.fab-default{border-color:rgba(var(--theme-rgb),.5)}
 .fab-opt.fab-default .fab-opt-star{display:inline}
-#fabMain{width:56px;height:56px;border-radius:var(--rd-lg);background:linear-gradient(150deg,var(--r3) -20%,var(--r) 45%,var(--r2) 100%);border:none;box-shadow:0 10px 24px -6px rgba(var(--theme-rgb),.5),0 2px 8px rgba(0,0,0,.3),inset 0 1px 1px rgba(255,255,255,.25);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .22s var(--ease-spring),box-shadow .2s ease}
+#fabMain{width:56px;height:56px;border-radius:var(--rd-lg);background:linear-gradient(150deg,var(--r3) -20%,var(--r) 45%,var(--r2) 100%);border:none;box-shadow:0 10px 24px -6px rgba(var(--theme-rgb),.5),0 2px 8px rgba(0,0,0,.3),inset 0 1px 1px rgba(255,255,255,.25);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .22s var(--ease-spring),box-shadow .2s ease;pointer-events:auto}
 #fabMain:active{transform:scale(.92)}
 #fabMain svg{transition:transform .3s var(--ease-spring)}
 #fabWrap.open #fabMain svg{transform:rotate(45deg)}
@@ -2745,6 +2765,24 @@ window._fabSetDefault=(key)=>{
     const item=e.target.closest?.('.swipe-item');
     if(item && item.dataset.justDragged==='1'){ e.stopPropagation(); e.preventDefault(); }
   },true);
+})();
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// RENDIMIENTO DE SCROLL — desactivar el desenfoque de cristal de las tarjetas
+// mientras se está desplazando activamente la lista, y restaurarlo en cuanto
+// el dedo se detiene. El backdrop-filter es caro de recalcular en Android y
+// con muchas tarjetas visibles puede hacer que el scroll no responda hasta
+// insistir varias veces.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+(()=>{
+  let scrollEndTimer=null;
+  document.addEventListener('scroll',e=>{
+    const t=e.target;
+    if(!t || !(t.classList && t.classList.contains('scroll-pad')))return;
+    if(!document.body.classList.contains('is-scrolling')) document.body.classList.add('is-scrolling');
+    clearTimeout(scrollEndTimer);
+    scrollEndTimer=setTimeout(()=>{ document.body.classList.remove('is-scrolling'); },120);
+  },{capture:true,passive:true});
 })();
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -5516,11 +5554,10 @@ const renderTabClientes=()=>{
   const ultimos=clis.slice().reverse();
 
   return `
-  <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap">
-    <button class="btn-nuevo" style="margin-left:0;padding:8px 13px;font-size:12px" onclick="exportarBackupZIP()">☁️ Backup</button>
-    <button class="btn-nuevo" style="padding:8px 13px;font-size:12px" onclick="abrirFCli()">+ Añadir</button>
-    <button class="btn-nuevo" onclick="abrirCliExpress()" style="background:rgba(var(--theme-rgb),.1);border:1px solid rgba(var(--theme-rgb),.35);color:var(--r);padding:8px 13px;font-size:12px">⚡ Express</button>
-    ${('contacts' in navigator)?`<button class="btn-nuevo" onclick="abrirFCli();setTimeout(importarContactoAgenda,100)" style="background:rgba(var(--theme-rgb),.1);border:1px solid rgba(var(--theme-rgb),.3);color:var(--r);padding:8px 13px;font-size:12px">📋 Agenda</button>`:''}
+  <div style="display:flex;align-items:stretch;gap:6px;margin-bottom:8px">
+    <button class="btn-nuevo" style="margin-left:0;flex:1;padding:8px 6px;font-size:12px;text-align:center" onclick="abrirFCli()">+ Añadir</button>
+    <button class="btn-nuevo" onclick="abrirCliExpress()" style="flex:1;margin-left:0;background:rgba(var(--theme-rgb),.1);border:1px solid rgba(var(--theme-rgb),.35);color:var(--r);padding:8px 6px;font-size:12px;text-align:center">⚡ Express</button>
+    ${('contacts' in navigator)?`<button class="btn-nuevo" onclick="importarContactosAgendaDirecto()" style="flex:1;margin-left:0;background:rgba(var(--theme-rgb),.1);border:1px solid rgba(var(--theme-rgb),.3);color:var(--r);padding:8px 6px;font-size:12px;text-align:center">📋 Agenda</button>`:''}
   </div>
   <input class="sbox" placeholder="Buscar cliente..." oninput="filtrarClis(this.value)" id="cliSearchBox">
   <div id="clisList">${htmlListaClis(ultimos,false)}</div>`;
@@ -5566,6 +5603,21 @@ const htmlListaClis=(clis,preview=false)=>{
   const total=allClientes.filter(c=>!c.archivado).length;
   const footer='';
   return html+footer;
+};
+
+// La imagen de banner del cliente a veces no llega a cargar (red lenta, URL
+// caducada, etc.). Si eso ocurre, se sustituye por el mismo aviso de
+// "añadir imagen" que se usa cuando el cliente no tiene foto, en vez de
+// dejar un hueco roto en la cabecera de la ficha.
+window._cliBannerErr=id=>{
+  const wrap=document.getElementById('cliBannerWrap-'+id);
+  if(!wrap)return;
+  wrap.outerHTML=`<div style="position:relative;width:calc(100% + 40px);margin:-18px -20px 16px -20px;overflow:hidden;flex-shrink:0">
+      <button onclick="abrirImagenesClienteDesdeCli('${id}')" style="width:100%;height:80px;background:rgba(var(--theme-rgb),.06);border:2px dashed rgba(var(--theme-rgb),.3);border-radius:0;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;font-family:var(--font);transition:.15s" onmouseover="this.style.background='rgba(var(--theme-rgb),.12)'" onmouseout="this.style.background='rgba(var(--theme-rgb),.06)'">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--r)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        <span style="font-size:13px;font-weight:800;color:var(--r)">La imagen no se pudo cargar · Toca para cambiarla</span>
+      </button>
+    </div>`;
 };
 
 window.filtrarClis=v=>{
@@ -5776,8 +5828,8 @@ window.verCliente=async id=>{
   :`<div class="empty" style="padding:20px"><p>Sin actividad registrada</p></div>`;
 
   abrirSB(c.nombre,`
-    ${primeraFoto?`<div style="position:relative;width:calc(100% + 40px);margin:-18px -20px 16px -20px;height:180px;overflow:hidden;flex-shrink:0">
-      <img src="${primeraFoto.url||primeraFoto.dataURL||''}" style="width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s ease" onclick="abrirImgViewer('${primeraFoto.id}','${id}')" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" style="cursor:pointer">
+    ${primeraFoto?`<div class="cli-banner-wrap" id="cliBannerWrap-${id}" style="position:relative;width:calc(100% + 40px);margin:-18px -20px 16px -20px;height:180px;overflow:hidden;flex-shrink:0">
+      <img src="${primeraFoto.url||primeraFoto.dataURL||''}" style="width:100%;height:100%;object-fit:cover;display:block;cursor:pointer;transition:transform .3s ease" onclick="abrirImgViewer('${primeraFoto.id}','${id}')" onmouseover="this.style.transform='scale(1.03)'" onmouseout="this.style.transform='scale(1)'" onerror="window._cliBannerErr('${id}')">
       <div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 50%,rgba(0,0,0,.5) 100%);pointer-events:none"></div>
       <div style="position:absolute;bottom:10px;right:12px;display:flex;align-items:center;gap:6px">
         <button onclick="abrirImagenesClienteDesdeCli('${id}')" style="background:rgba(0,0,0,.55);border:none;border-radius:20px;padding:5px 12px;display:flex;align-items:center;gap:5px;cursor:pointer;backdrop-filter:blur(4px)">
@@ -5847,10 +5899,6 @@ window.verCliente=async id=>{
         <div style="text-align:left"><div style="font-size:12px;font-weight:900;color:var(--tx)">Fotos</div><div style="font-size:10px;color:var(--tx2)">Instalación</div></div>
       </button>
     </div>
-    <button onclick="mostrarQRCliente('${id}')" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:14px;padding:10px;cursor:pointer;font-family:var(--font);color:var(--tx2);font-size:12px;font-weight:700;margin-bottom:18px;transition:.15s" onmouseover="this.style.borderColor='var(--r)';this.style.color='var(--r)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--tx2)'">
-      📱 Ver código QR del cliente
-    </button>
-
     <div style="margin-top:18px">
       <div style="font-size:10px;font-weight:800;color:var(--tx2);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Registro completo del cliente</div>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px" id="fichaHistFiltros">
@@ -6865,6 +6913,52 @@ window.usarUbicacionActualCliente=()=>{
     {enableHighAccuracy:true,timeout:15000,maximumAge:0}
   );
 };
+// Desde la sección de Clientes, el botón "Agenda" permite seleccionar varios
+// contactos a la vez y se añaden directamente como clientes (nombre +
+// teléfono), sin pasar por el formulario de edición.
+window.importarContactosAgendaDirecto=async()=>{
+  if(!('contacts' in navigator)){
+    toast('Tu dispositivo no soporta esta función','e');return;
+  }
+  let contactos;
+  try{
+    contactos=await navigator.contacts.select(['name','tel'],{multiple:true});
+  }catch(e){
+    if(e.name!=='AbortError') toast('No se pudo acceder a la agenda','e');
+    return;
+  }
+  if(!contactos||!contactos.length){toast('Sin contactos seleccionados','i');return;}
+
+  let añadidos=0,duplicados=0;
+  for(const ct of contactos){
+    const nombre=((ct.name&&ct.name[0])||'').trim();
+    const tel=((ct.tel&&ct.tel[0])||'').trim();
+    if(!nombre)continue;
+    const dup=allClientes.find(c=>!c.archivado&&c.nombre.trim().toLowerCase()===nombre.toLowerCase());
+    if(dup){duplicados++;continue;}
+    const data={nombre,direccion:'',color:'verde',edificio:'',telefono:tel,email:'',notas:'',creado:serverTimestamp(),actualizado:serverTimestamp(),lat:null,lng:null};
+    const tempCliId='local_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);
+    allClientes=[...allClientes,{id:tempCliId,...data}];
+    _addPending(tempCliId,'clientes');
+    añadidos++;
+    addDoc(collection(db,'grupos',CGID,'clientes'),data)
+      .then(ref=>{
+        _removePending(tempCliId);
+        const ci=allClientes.findIndex(x=>x.id===tempCliId);
+        if(ci>=0){allClientes[ci]={...allClientes[ci],id:ref.id};_lcSave('clientes',CGID,allClientes);}
+        registrarLog('nuevo_cli','Nuevo cliente desde agenda: '+nombre,{clienteId:ref.id}).catch(()=>{});
+      })
+      .catch(()=>{/* Firestore reintentará al volver la conexión */});
+  }
+  _lcSave('clientes',CGID,allClientes);
+  if(document.getElementById('clisList')) filtrarClis(document.getElementById('cliSearchBox')?.value||'');
+
+  if(añadidos&&duplicados) toast(`✓ ${añadidos} cliente${añadidos!==1?'s':''} añadido${añadidos!==1?'s':''} · ${duplicados} ya existía${duplicados!==1?'n':''}`,'o');
+  else if(añadidos) toast(`✓ ${añadidos} cliente${añadidos!==1?'s':''} añadido${añadidos!==1?'s':''}`,'o');
+  else if(duplicados) toast('Ya existía'+(duplicados!==1?'n todos los contactos seleccionados':' ese contacto'),'i');
+  else toast('Ningún contacto tenía nombre','i');
+};
+
 window.importarContactoAgenda=async()=>{
   if(!('contacts' in navigator)){
     toast('Tu dispositivo no soporta esta función','e');return;
