@@ -869,7 +869,6 @@ body.offline .dash-offline-bar{display:flex}
 .swipe-actions{position:absolute;inset:0;display:flex;align-items:stretch;justify-content:flex-end;border-radius:16px;overflow:hidden}
 .swipe-act{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;width:78px;border:none;background:#607d8b;color:#fff;font-family:var(--font);font-size:10px;font-weight:800;cursor:pointer;flex-shrink:0}
 .swipe-act.wa{background:linear-gradient(135deg,#25d366,#1ebe5d)}
-.swipe-act.gm{background:linear-gradient(135deg,#4285f4,#3367d6)}
 .swipe-act.del{background:linear-gradient(135deg,#ef5350,#e53935)}
 .swipe-content{position:relative;touch-action:pan-y;will-change:transform;z-index:1;background:var(--bg)}
 .swipe-content.dragging{transition:none!important}
@@ -10889,10 +10888,6 @@ const _presuCard = (p, comp=false) => {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
         <span>Eliminar</span>
       </button>
-      <button class="swipe-act gm" onclick="event.stopPropagation();compartirPresupuestoPDFGmail('${p.id}')">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 4h16v16H4z"/><path d="M22 6l-10 7L2 6"/></svg>
-        <span>Gmail</span>
-      </button>
       <button class="swipe-act wa" onclick="event.stopPropagation();enviarPresupuestoWhatsAppPDF('${p.id}')">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.8-.7-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 20.2 12 8.2 8.2 0 0 1 12 20.2z"/></svg>
         <span>WhatsApp</span>
@@ -11316,7 +11311,7 @@ window._cargarHtml2Pdf=()=>{
   return _html2pdfLoading;
 };
 
-// ── Generación del PDF del presupuesto (compartida por WhatsApp y Gmail) ──
+// ── Generación del PDF del presupuesto (usada al compartir por WhatsApp) ──
 // Usa exactamente la misma plantilla (_presuHTML) que el botón "PDF" del
 // detalle, para que el diseño sea idéntico. Antes se veía "menos bonito" al
 // compartir porque el motor de captura (html2canvas) tomaba la foto antes de
@@ -11380,49 +11375,40 @@ window._generarPresupuestoPDF=async(prId)=>{
 };
 
 // ── Enviar presupuesto por WhatsApp en PDF (deslizar en la lista, o botón en el detalle) ──
-// Genera el PDF (misma estética que "PDF" del detalle) y va DIRECTO a
-// WhatsApp: descarga el PDF y abre el chat listo para adjuntarlo, sin pasar
-// por el panel genérico de "compartir con..." del sistema.
+// Genera el PDF (misma estética que "PDF" del detalle) y lo manda a WhatsApp.
+// IMPORTANTE: un enlace wa.me solo puede llevar TEXTO, nunca un archivo — no
+// existe ninguna URL que adjunte un PDF directamente al chat. La única forma
+// de que WhatsApp reciba el PDF de verdad (y no solo el mensaje) es entregar
+// el fichero al sistema con la API de compartir nativa (navigator.share),
+// que es quien se lo pasa a la app. Por eso se usa aquí cuando el dispositivo
+// lo soporta. Solo si el dispositivo no lo soporta (por ejemplo, un
+// navegador de escritorio) se recurre a descargar el PDF y abrir el chat
+// solo con el texto, para que el usuario lo adjunte a mano.
 window.enviarPresupuestoWhatsAppPDF=async(prId)=>{
   toast('📄 Generando PDF...','i');
   try{
     const res=await window._generarPresupuestoPDF(prId);
     if(!res){toast('Presupuesto no encontrado','e');return;}
-    const {blob,nombreArchivo,p,c}=res;
+    const {blob,file,nombreArchivo,p,c}=res;
     const tel=(p.clienteTelefono||c?.telefono||'').replace(/\s/g,'');
+    const msg=`Hola ${p.clienteNombre||c?.nombre||''}, te adjunto el presupuesto "${p.titulo||''}". Un saludo.`;
 
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;a.download=nombreArchivo;a.click();
-    URL.revokeObjectURL(url);
-    const msg=encodeURIComponent(`Hola ${p.clienteNombre||c?.nombre||''}, te adjunto el presupuesto "${p.titulo||''}". Un saludo.`);
-    window.open(tel?`https://wa.me/34${tel}?text=${msg}`:`https://wa.me/?text=${msg}`,'_blank');
-    toast('📥 PDF descargado — adjúntalo en el chat de WhatsApp','i');
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      // Esto es lo que realmente adjunta el PDF al chat de WhatsApp.
+      await navigator.share({ files:[file], text:msg });
+    }else{
+      // Sin soporte para compartir ficheros en este navegador: descargamos el
+      // PDF y abrimos el chat solo con el texto; el PDF hay que adjuntarlo
+      // a mano desde el chat (limitación del propio navegador, no de la app).
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement('a');a.href=url;a.download=nombreArchivo;a.click();
+      URL.revokeObjectURL(url);
+      window.open(tel?`https://wa.me/34${tel}?text=${encodeURIComponent(msg)}`:`https://wa.me/?text=${encodeURIComponent(msg)}`,'_blank');
+      toast('📥 PDF descargado — adjúntalo a mano en el chat de WhatsApp','i');
+    }
   }catch(e){
-    console.error('enviarPresupuestoWhatsAppPDF',e); toast('Error al generar el PDF','e');
-  }
-};
-
-// ── Enviar presupuesto por Gmail en PDF (deslizar en la lista) ──
-// Igual que WhatsApp: genera el PDF con la misma estética y abre Gmail
-// DIRECTAMENTE (borrador ya preparado), sin panel de "compartir con...".
-window.compartirPresupuestoPDFGmail=async(prId)=>{
-  toast('📄 Generando PDF...','i');
-  try{
-    const res=await window._generarPresupuestoPDF(prId);
-    if(!res){toast('Presupuesto no encontrado','e');return;}
-    const {blob,nombreArchivo,p,c}=res;
-    const destinatario=(p.clienteEmail||c?.email||'');
-    const asunto=`Presupuesto: ${p.titulo||''}`;
-    const cuerpo=`Hola ${p.clienteNombre||c?.nombre||''},\n\nTe adjunto el presupuesto "${p.titulo||''}".\nUn saludo.`;
-
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;a.download=nombreArchivo;a.click();
-    URL.revokeObjectURL(url);
-    const gmailUrl=`https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(destinatario)}&su=${encodeURIComponent(asunto)}&body=${encodeURIComponent(cuerpo)}`;
-    window.open(gmailUrl,'_blank');
-    toast('📥 PDF descargado — adjúntalo en el borrador de Gmail','i');
-  }catch(e){
-    console.error('compartirPresupuestoPDFGmail',e); toast('Error al generar el PDF','e');
+    if(e?.name==='AbortError'){ /* el usuario cerró el panel de compartir: no es un error */ }
+    else{ console.error('enviarPresupuestoWhatsAppPDF',e); toast('Error al generar el PDF','e'); }
   }
 };
 
