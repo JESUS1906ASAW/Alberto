@@ -997,9 +997,37 @@ body.modo-claro .stab.active{box-shadow:0 2px 6px rgba(16,24,22,.1),0 0 0 1px rg
 @keyframes swipeHoldPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
 .swipe-content{position:relative;touch-action:pan-y;z-index:1;background:transparent}
 .swipe-content *{touch-action:pan-y}
+/* ── Evitar que "mantener pulsado" seleccione texto o abra el menú nativo ──
+   Las tarjetas seleccionables (avisos, presupuestos, clientes) usan un gesto
+   propio de "pulsación larga" para activar la selección múltiple (ver más
+   abajo, sección SELECCIÓN MÚLTIPLE). Sin estas reglas, el navegador compite
+   con ese gesto y a menudo gana él, seleccionando el texto de la tarjeta o
+   mostrando el menú contextual nativo en vez de activar la selección. */
+[data-sel-id],[data-sel-id] *{
+  -webkit-touch-callout:none;
+  -webkit-user-select:none;
+  -moz-user-select:none;
+  user-select:none;
+}
+/* Los campos de texto dentro de una tarjeta seleccionable (poco frecuente,
+   pero por si acaso) deben seguir permitiendo seleccionar/editar su texto. */
+[data-sel-id] input,[data-sel-id] textarea{
+  -webkit-user-select:text;-moz-user-select:text;user-select:text;-webkit-touch-callout:default;
+}
 .swipe-content.dragging{transition:none!important;will-change:transform}
 .swipe-content:not(.dragging){transition:transform .32s var(--ease-spring)}
 .swipe-content .presu-card,.swipe-content .averia-card,.swipe-content .cli-card{margin-bottom:0;border:none;border-radius:0;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
+/* ── Mitigar el "primer toque" que no deja hacer scroll vertical ──
+   Chrome/WebView en Android a veces tarda en registrar la regla
+   touch-action:pan-y de una tarjeta hasta que esta tiene ya una capa de
+   composición propia (promovida por transform/will-change). Si esa capa se
+   crea de forma perezosa (solo al empezar a arrastrar, como pasaba antes
+   con ".dragging"), el primer gesto de scroll iniciado con el dedo ENCIMA
+   de la tarjeta puede ser ignorado la primera vez. Forzando la capa desde
+   el principio (permanente, no solo durante el arrastre) el navegador ya
+   conoce touch-action:pan-y desde el primer toque y el scroll responde a
+   la primera, de forma consistente empieces donde empieces. */
+.swipe-content{will-change:transform}
 
 /* ── FAB — acciones rápidas ── */
 #fabOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:890;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
@@ -5959,43 +5987,26 @@ window._crearAvisoRapidoCli=(cliId)=>{
   abrirNuevoAviso('',cliId);
 };
 
+// Reutiliza EXACTAMENTE la misma plantilla que "+ Nuevo presupuesto" desde la
+// pestaña Presupuestos (abrirNuevoPresupuesto), en vez de un formulario propio
+// simplificado — así el activador de IVA, notas y demás campos son idénticos
+// se acceda desde donde se acceda. Solo se pre-selecciona el cliente y se
+// rellenan sus datos de contacto.
 window._crearPresupuestoRapidoCli=(cliId)=>{
   const cli=allClientes.find(c=>c.id===cliId);
   if(!cli){toast('Cliente no encontrado','e');return;}
   _sbReturnCli=cliId;
-  _partidasPresupuesto=[{desc:'Trabajo',importe:0}];
-  const renderPartidas=()=>_partidasPresupuesto.map((pt,i)=>`
-    <div class="partida-row" id="ptrow${i}">
-      <input class="partida-desc" placeholder="Descripción" value="${pt.desc}" oninput="_partidasPresupuesto[${i}].desc=this.value">
-      <input class="partida-importe" type="number" placeholder="0.00" value="${pt.importe||''}" step="0.01" min="0" oninput="_partidasPresupuesto[${i}].importe=parseFloat(this.value)||0;calcPresuTotal()">
-      <button class="partida-del" onclick="_partidasPresupuesto.splice(${i},1);document.getElementById('partidasWrap').innerHTML=renderPartidas();calcPresuTotal()">✕</button>
-    </div>`).join('');
-  abrirSB(`Nuevo presupuesto — ${cli.nombre}`,`
-    <div style="background:rgba(66,133,244,.08);border:1px solid rgba(66,133,244,.2);border-radius:12px;padding:9px 12px;margin-bottom:14px;font-size:12px;color:#4285f4;font-weight:800">
-      💶 Cliente pre-rellenado: <strong>${cli.nombre}</strong>
-    </div>
-    <div class="fsec">
-      <div class="fgrp"><label>Cliente</label><div id="prCli-wrap"></div></div>
-      <div class="fgrp"><label>Título del trabajo</label><input id="prTitulo" placeholder="Ej: Reparación bomba piso 3"></div>
-    </div>
-    <div class="fsec"><div class="fsec-title">Partidas</div>
-      <div id="partidasWrap">${renderPartidas()}</div>
-      <button class="btn btn-s btn-sm" style="width:100%;margin-top:6px" onclick="_partidasPresupuesto.push({desc:'',importe:0});document.getElementById('partidasWrap').innerHTML=renderPartidas();calcPresuTotal()">+ Añadir partida</button>
-    </div>
-    <div class="fsec">
-      <div class="fgrp"><label>Mano de obra (€)</label><input type="number" id="prMO" placeholder="0.00" min="0" step="0.01" oninput="calcPresuTotal()"></div>
-      <div class="fgrp"><label>Materiales (€)</label><input type="number" id="prMat" placeholder="0.00" min="0" step="0.01" oninput="calcPresuTotal()"></div>
-      <div class="fgrp"><label>Desplazamiento (€)</label><input type="number" id="prDesp" placeholder="0.00" min="0" step="0.01" oninput="calcPresuTotal()"></div>
-    </div>
-    <div class="card" style="margin:12px 0;padding:14px">
-      <div style="border-top:1px solid var(--border);padding-top:12px">
-        <div class="importe-row"><span class="il">Total</span><span id="prTot">—</span></div>
-      </div>
-    </div>
-    <button class="btn btn-p" onclick="_gClick(this,()=>guardarPresupuesto())">💾 Guardar presupuesto</button>
-  `);
-  setTimeout(()=>_buildCliSelect('prCli',cliId,()=>{}),0);
-  setTimeout(()=>calcPresuTotal(),50);
+  abrirNuevoPresupuesto();
+  setTimeout(()=>{
+    _buildCliSelect('prCli',cliId,id=>{
+      const c=allClientes.find(x=>x.id===id);
+      if(c){const d=$('prDir'),e=$('prEdif'),t=$('prTel');if(d)d.value=c.direccion||'';if(e)e.value=c.edificio||'';if(t)t.value=c.telefono||'';}
+    });
+    const d=$('prDir'),e=$('prEdif'),t=$('prTel');
+    if(d)d.value=cli.direccion||'';
+    if(e)e.value=cli.edificio||'';
+    if(t)t.value=cli.telefono||'';
+  },20);
 };
 
 window._crearMantRapidoCli=async(cliId)=>{
@@ -11958,6 +11969,7 @@ window.editarFirmaPresupuesto=async(prId)=>{
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <button class="btn btn-s btn-sm" onclick="limpiarFirma()" style="flex:1">🗑️ Limpiar</button>
+      ${CUD?.firmaUrl?`<button class="btn btn-s btn-sm" onclick="_usarMiFirmaEnCanvas()" style="flex:1;color:var(--r);border-color:rgba(var(--theme-rgb),.35)">✍️ Usar mi firma</button>`:''}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn btn-s" onclick="verPresupuesto('${prId}')">Cancelar</button>
@@ -12197,6 +12209,7 @@ window.enviarPresupuestoWhatsAppPDF=async(prId)=>{
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <button class="btn btn-s btn-sm" onclick="limpiarFirma()" style="flex:1">🗑️ Limpiar</button>
+      ${CUD?.firmaUrl?`<button class="btn btn-s btn-sm" onclick="_usarMiFirmaEnCanvas()" style="flex:1;color:var(--r);border-color:rgba(var(--theme-rgb),.35)">✍️ Usar mi firma</button>`:''}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn btn-s" onclick="_enviarPresuWA('${prId}',null)" style="font-size:13px">Omitir firma</button>
@@ -12441,6 +12454,9 @@ const _presuHTML=(p,grp,c,iva,total,firmaDataURL)=>{
 };
 
 // Exportar presupuesto a PDF con firma (ventana HTML igual que partes)
+// Si el presupuesto YA tiene una firma guardada (p.firmaCliente), se usa
+// directamente esa firma y se genera el PDF sin volver a pedirla — pedirla
+// de nuevo cada vez sería redundante y confuso para quien ya firmó.
 window.exportarPresupuestoPDF=async(prId)=>{
   const snap=await getDoc(doc(db,'grupos',CGID,'presupuestos',prId));
   if(!snap.exists())return;
@@ -12448,6 +12464,13 @@ window.exportarPresupuestoPDF=async(prId)=>{
   const c=allClientes.find(x=>x.id===p.clienteId);
   const iva=p.aplicarIVA?((parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+(parseFloat(p.importeDesplazamiento)||0))*0.21:0;
   const total=(parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+iva+(parseFloat(p.importeDesplazamiento)||0)+((p.partidas||[]).reduce((a,b)=>a+(parseFloat(b.importe)||0),0));
+
+  // Ya firmado: generar el PDF directamente con la firma ya guardada.
+  if(p.firmaCliente){
+    window._presuPDFData={p,c,iva,total,grp:CG};
+    _generarPresuPDFConFirma(prId,p.firmaCliente);
+    return;
+  }
 
   // Mostrar panel de firma (igual que partes)
   abrirSB('✍️ Firma del presupuesto',`
@@ -12462,6 +12485,7 @@ window.exportarPresupuestoPDF=async(prId)=>{
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <button class="btn btn-s btn-sm" onclick="limpiarFirma()" style="flex:1">🗑️ Limpiar</button>
+      ${CUD?.firmaUrl?`<button class="btn btn-s btn-sm" onclick="_usarMiFirmaEnCanvas()" style="flex:1;color:var(--r);border-color:rgba(var(--theme-rgb),.35)">✍️ Usar mi firma</button>`:''}
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn btn-s" onclick="_generarPresuPDFConFirma('${prId}',null)" style="font-size:13px">Omitir firma</button>
@@ -13104,6 +13128,23 @@ const renderPerfil=()=>{
     ${_fotoPerfil?`<button onclick="borrarFotoPerfil()" style="margin-top:6px;width:100%;padding:9px;border-radius:12px;border:1px solid rgba(229,57,53,.3);background:rgba(229,57,53,.07);color:#e53935;font-size:12px;font-weight:800;cursor:pointer;font-family:var(--font)">🗑️ Eliminar foto</button>`:''}
   </div>
 
+  <!-- ── MI FIRMA ── -->
+  <div class="fsec">
+    <div class="fsec-title">✍️ Mi firma</div>
+    <div style="font-size:12px;color:var(--tx2);margin-bottom:10px;line-height:1.5">Dibuja tu firma una vez y guárdala aquí. Luego, al firmar un presupuesto, podrás pulsar <strong style="color:var(--tx)">"Usar mi firma"</strong> para aplicar siempre la misma plantilla sin tener que dibujarla cada vez.</div>
+    ${CUD?.firmaUrl?`
+      <div style="background:#fff;border-radius:14px;padding:10px;margin-bottom:10px">
+        <img src="${CUD.firmaUrl}" style="width:100%;max-height:120px;object-fit:contain;display:block">
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-s btn-sm" style="flex:1" onclick="editarFirmaPerfil()">✏️ Rehacer firma</button>
+        <button class="btn btn-del btn-sm" style="flex:1" onclick="borrarFirmaPerfil()">🗑️ Eliminar</button>
+      </div>
+    `:`
+      <button class="btn btn-p" style="width:100%" onclick="editarFirmaPerfil()">✍️ Dibujar mi firma</button>
+    `}
+  </div>
+
   <!-- ── CUENTA ── -->
   <div class="fsec">
     <div class="fsec-title">👤 Cuenta</div>
@@ -13258,6 +13299,105 @@ window.borrarFotoPerfil=async()=>{
     toast('Foto eliminada','o');
     renderPerfil();
   }catch(e){toast('Error','e');}
+};
+
+// ── Firma personal guardada en el perfil (plantilla reutilizable) ──
+// Se guarda como dataURL en usuarios/{uid}.firmaUrl y luego se puede
+// aplicar con un solo toque ("Usar mi firma") en cualquier presupuesto,
+// en vez de tener que dibujarla cada vez.
+window.editarFirmaPerfil=()=>{
+  abrirSB('✍️ Mi firma',`
+    <div style="text-align:center;margin-bottom:12px">
+      <div style="font-size:12px;color:var(--tx2)">Esta firma se guardará en tu perfil y podrás reutilizarla en tus presupuestos.</div>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border:2px dashed var(--border);border-radius:16px;padding:10px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:1.5px;text-align:center;margin-bottom:8px">Firme aquí con el dedo</div>
+      <canvas id="firmaCanvas" width="380" height="160" style="width:100%;height:160px;background:#fff;border-radius:12px;cursor:crosshair;touch-action:none;display:block"></canvas>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn btn-s btn-sm" onclick="limpiarFirma()" style="flex:1">🗑️ Limpiar</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn btn-s" onclick="renderPerfil()">Cancelar</button>
+      <button class="btn btn-ok" style="background:linear-gradient(135deg,#1fae54,#25d366);color:#fff" onclick="_guardarFirmaPerfil()">💾 Guardar firma</button>
+    </div>
+  `);
+  setTimeout(()=>{
+    const canvas=document.getElementById('firmaCanvas');
+    if(!canvas)return;
+    const ctx=canvas.getContext('2d');
+    const rect=canvas.getBoundingClientRect();
+    canvas.width=rect.width*window.devicePixelRatio||380;
+    canvas.height=160*window.devicePixelRatio||160;
+    ctx.scale(window.devicePixelRatio||1,window.devicePixelRatio||1);
+    ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle='#1a1a1a';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.lineJoin='round';
+    let drawing=false;
+    const getPos=(e)=>{
+      const r=canvas.getBoundingClientRect();
+      if(e.touches){return{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top};}
+      return{x:e.clientX-r.left,y:e.clientY-r.top};
+    };
+    canvas.addEventListener('mousedown',e=>{drawing=true;ctx.beginPath();const p=getPos(e);ctx.moveTo(p.x,p.y);});
+    canvas.addEventListener('mousemove',e=>{if(!drawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();});
+    canvas.addEventListener('mouseup',()=>drawing=false);
+    canvas.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;ctx.beginPath();const p=getPos(e);ctx.moveTo(p.x,p.y);},{passive:false});
+    canvas.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();},{passive:false});
+    canvas.addEventListener('touchend',()=>drawing=false);
+    window._firmaCanvasActivo=canvas;
+  },300);
+};
+window._guardarFirmaPerfil=async()=>{
+  const canvas=document.getElementById('firmaCanvas');
+  if(!canvas){toast('Error con la firma','e');return;}
+  const dataURL=canvas.toDataURL('image/png');
+  const ctx=canvas.getContext('2d');
+  const datos=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+  const hayFirma=Array.from(datos).some((v,i)=>i%4!==3&&v<240);
+  if(!hayFirma){toast('Dibuja tu firma antes de guardar','e');return;}
+  try{
+    if(!CU?.uid) throw new Error('Sin sesión');
+    await setDoc(doc(db,'usuarios',CU.uid),{firmaUrl:dataURL},{merge:true});
+    CUD={...CUD,firmaUrl:dataURL};
+    toast('✅ Firma guardada en tu perfil','o');
+    renderPerfil();
+  }catch(e){
+    console.error('_guardarFirmaPerfil',e);
+    toast('Error al guardar la firma','e');
+  }
+};
+window.borrarFirmaPerfil=async()=>{
+  if(!confirm('¿Eliminar tu firma guardada?'))return;
+  try{
+    await setDoc(doc(db,'usuarios',CU.uid),{firmaUrl:''},{merge:true});
+    CUD={...CUD,firmaUrl:''};
+    toast('🗑️ Firma eliminada','o');
+    renderPerfil();
+  }catch(e){toast('Error','e');}
+};
+
+// ── Aplicar la firma guardada del perfil sobre el canvas #firmaCanvas activo ──
+// Se usa desde el botón "Usar mi firma" en los presupuestos, para no tener
+// que dibujarla a mano cada vez y usar siempre la misma plantilla.
+window._usarMiFirmaEnCanvas=()=>{
+  if(!CUD?.firmaUrl){toast('No tienes una firma guardada — ve a tu perfil para dibujarla','i');return;}
+  const canvas=document.getElementById('firmaCanvas');
+  if(!canvas){toast('Error al cargar el lienzo de firma','e');return;}
+  const ctx=canvas.getContext('2d');
+  const rect=canvas.getBoundingClientRect();
+  const cw=rect.width||380, ch=160;
+  const img=new Image();
+  img.onload=()=>{
+    ctx.fillStyle='#ffffff';
+    ctx.fillRect(0,0,cw,ch);
+    const scale=Math.min(cw/img.width,ch/img.height)*0.85;
+    const w=img.width*scale, h=img.height*scale;
+    ctx.drawImage(img,(cw-w)/2,(ch-h)/2,w,h);
+    if(typeof marcarSiHayFirma==='function') marcarSiHayFirma();
+    toast('✍️ Tu firma aplicada','o');
+  };
+  img.onerror=()=>toast('Error al cargar tu firma','e');
+  img.src=CUD.firmaUrl;
 };
 
 window.guardarPerfil=async()=>{
