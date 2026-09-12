@@ -11313,12 +11313,12 @@ window._cargarHtml2Pdf=()=>{
 
 // ── Generación del PDF del presupuesto (usada al compartir por WhatsApp) ──
 // Usa exactamente la misma plantilla (_presuHTML) que el botón "PDF" del
-// detalle, para que el diseño sea idéntico. Antes se veía "menos bonito" al
-// compartir porque el motor de captura (html2canvas) tomaba la foto antes de
-// que terminara de cargar la tipografía Inter — aquí esperamos a que las
-// fuentes estén listas antes de generar el PDF.
-// Devuelve {blob,file,nombreArchivo,p,c} o null si no se encontró el presupuesto.
-window._generarPresupuestoPDF=async(prId)=>{
+// detalle, para que el diseño sea idéntico (banner azul, logo, desglose, etc.),
+// incluyendo la firma del cliente si se ha capturado o guardado antes.
+// Acepta firmaDataURL opcional: si no se pasa, se usa la firma ya guardada en
+// el presupuesto (si existe), igual que hace el botón "PDF" normal.
+// Devuelve {blob,file,nombreArchivo,p,c,iva,total} o null si no se encontró.
+window._generarPresupuestoPDF=async(prId,firmaDataURL)=>{
   let p=(_presusPend||[]).find(x=>x.id===prId)||(_presusComp||[]).find(x=>x.id===prId);
   if(!p){
     const snap=await getDoc(doc(db,'grupos',CGID,'presupuestos',prId));
@@ -11328,7 +11328,8 @@ window._generarPresupuestoPDF=async(prId)=>{
   const c=allClientes.find(x=>x.id===p.clienteId);
   const iva=p.aplicarIVA?((parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+(parseFloat(p.importeDesplazamiento)||0))*0.21:0;
   const total=(parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+iva+(parseFloat(p.importeDesplazamiento)||0)+((p.partidas||[]).reduce((a,b)=>a+(parseFloat(b.importe)||0),0));
-  const html=_presuHTML(p,CG,c,iva,total,null);
+  const firma=(firmaDataURL!==undefined?firmaDataURL:(p.firmaCliente||null));
+  const html=_presuHTML(p,CG,c,iva,total,firma);
 
   await _cargarHtml2Pdf();
 
@@ -11341,9 +11342,12 @@ window._generarPresupuestoPDF=async(prId)=>{
     document.body.appendChild(ifr);
     await new Promise(res=>{ ifr.onload=res; ifr.srcdoc=html; });
 
-    // Esperar a que la tipografía (Inter, cargada por @import en _presuHTML)
+    // Esperar a que la tipografía (Inter, cargada con <link> en _presuHTML)
     // esté realmente lista antes de capturar: si no, html2canvas dibuja con
     // la fuente de reserva del sistema y el PDF sale con otra estética.
+    // (Antes se cargaba con @import dentro de <style>, lo que hacía que
+    // html2canvas descartara la hoja de estilos entera al clonar el
+    // documento y el PDF saliera sin ningún diseño — de ahí el aspecto feo.)
     try{
       if(ifr.contentDocument.fonts && ifr.contentDocument.fonts.ready){
         await ifr.contentDocument.fonts.ready;
@@ -11351,7 +11355,7 @@ window._generarPresupuestoPDF=async(prId)=>{
     }catch(eF){}
     // Pequeño margen extra para que termine de aplicarse el layout con la
     // fuente ya cargada (gradientes, sombras, etc.)
-    await new Promise(res=>setTimeout(res,200));
+    await new Promise(res=>setTimeout(res,300));
 
     const bodyEl=ifr.contentDocument.body;
     const blob=await window.html2pdf().from(bodyEl).set({
@@ -11359,6 +11363,7 @@ window._generarPresupuestoPDF=async(prId)=>{
       html2canvas:{
         scale:2,
         useCORS:true,
+        allowTaint:true,
         backgroundColor:'#ffffff',
         windowWidth:bodyEl.scrollWidth,
         windowHeight:bodyEl.scrollHeight
@@ -11368,14 +11373,18 @@ window._generarPresupuestoPDF=async(prId)=>{
 
     const nombreArchivo=`Presupuesto_${(p.clienteNombre||c?.nombre||'cliente').replace(/[^\w\-]+/g,'_')}.pdf`;
     const file=new File([blob],nombreArchivo,{type:'application/pdf'});
-    return {blob,file,nombreArchivo,p,c};
+    return {blob,file,nombreArchivo,p,c,iva,total};
   }finally{
     if(ifr && ifr.parentNode) ifr.parentNode.removeChild(ifr);
   }
 };
 
 // ── Enviar presupuesto por WhatsApp en PDF (deslizar en la lista, o botón en el detalle) ──
-// Genera el PDF (misma estética que "PDF" del detalle) y lo manda a WhatsApp.
+// Mismo flujo que el botón "PDF" del detalle: primero se pide la firma del
+// cliente (o se omite), y el PDF resultante tiene exactamente el mismo diseño
+// (banner azul, logo, desglose...). La diferencia es que aquí, en vez de abrir
+// el diálogo de impresión, el PDF se entrega directamente al panel nativo de
+// compartir para elegir WhatsApp — sin pasar por "Guardar/Imprimir".
 // IMPORTANTE: un enlace wa.me solo puede llevar TEXTO, nunca un archivo — no
 // existe ninguna URL que adjunte un PDF directamente al chat. La única forma
 // de que WhatsApp reciba el PDF de verdad (y no solo el mensaje) es entregar
@@ -11385,16 +11394,99 @@ window._generarPresupuestoPDF=async(prId)=>{
 // navegador de escritorio) se recurre a descargar el PDF y abrir el chat
 // solo con el texto, para que el usuario lo adjunte a mano.
 window.enviarPresupuestoWhatsAppPDF=async(prId)=>{
+  let p=(_presusPend||[]).find(x=>x.id===prId)||(_presusComp||[]).find(x=>x.id===prId);
+  if(!p){
+    const snap=await getDoc(doc(db,'grupos',CGID,'presupuestos',prId));
+    if(snap.exists()) p={id:snap.id,...snap.data()};
+  }
+  if(!p){toast('Presupuesto no encontrado','e');return;}
+  // Si ya está firmado, no hace falta volver a pedir la firma: se usa la que
+  // ya hay guardada, igual que hace el botón "PDF" del detalle.
+  if(p.firmado&&p.firmaCliente){
+    window._enviarPresuWA(prId,p.firmaCliente);
+    return;
+  }
+  const c=allClientes.find(x=>x.id===p.clienteId);
+  const iva=p.aplicarIVA?((parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+(parseFloat(p.importeDesplazamiento)||0))*0.21:0;
+  const total=(parseFloat(p.importeManoObra)||0)+(parseFloat(p.importeMateriales)||0)+iva+(parseFloat(p.importeDesplazamiento)||0)+((p.partidas||[]).reduce((a,b)=>a+(parseFloat(b.importe)||0),0));
+
+  // Mostrar panel de firma (igual que el botón "PDF" del detalle)
+  abrirSB('✍️ Firma del cliente — Presupuesto',`
+    <div style="text-align:center;margin-bottom:12px">
+      <div style="font-size:13px;color:var(--tx2);margin-bottom:4px">Presupuesto: <strong style="color:var(--tx)">${p.titulo}</strong></div>
+      <div style="font-size:12px;color:var(--tx2)">Cliente: <strong style="color:var(--tx)">${p.clienteNombre||'—'}</strong></div>
+      <div style="font-size:12px;color:var(--tx2);margin-top:2px">Total: <strong style="color:var(--r)">${fmtM(total)}</strong></div>
+    </div>
+    <div style="background:rgba(255,255,255,.06);border:2px dashed var(--border);border-radius:16px;padding:10px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:1.5px;text-align:center;margin-bottom:8px">Firme aquí con el dedo</div>
+      <canvas id="firmaCanvas" width="380" height="160" style="width:100%;height:160px;background:#fff;border-radius:12px;cursor:crosshair;touch-action:none;display:block"></canvas>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="btn btn-s btn-sm" onclick="limpiarFirma()" style="flex:1">🗑️ Limpiar</button>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <button class="btn btn-s" onclick="_enviarPresuWA('${prId}',null)" style="font-size:13px">Omitir firma</button>
+      <button class="btn btn-ok" style="background:linear-gradient(135deg,#1fae54,#25d366)" onclick="_capturarFirmaPresuWA('${prId}')">📲 Generar y enviar</button>
+    </div>
+  `);
+  // Reusar el mismo canvas de firma que el flujo de "PDF"
+  setTimeout(()=>{
+    const canvas=document.getElementById('firmaCanvas');
+    if(!canvas)return;
+    const ctx=canvas.getContext('2d');
+    const rect=canvas.getBoundingClientRect();
+    canvas.width=rect.width*window.devicePixelRatio||380;
+    canvas.height=160*window.devicePixelRatio||160;
+    ctx.scale(window.devicePixelRatio||1,window.devicePixelRatio||1);
+    ctx.fillStyle='#ffffff';ctx.fillRect(0,0,canvas.width,canvas.height);
+    ctx.strokeStyle='#1a1a1a';ctx.lineWidth=2.5;ctx.lineCap='round';ctx.lineJoin='round';
+    let drawing=false;
+    const getPos=(e)=>{
+      const r=canvas.getBoundingClientRect();
+      if(e.touches){return{x:e.touches[0].clientX-r.left,y:e.touches[0].clientY-r.top};}
+      return{x:e.clientX-r.left,y:e.clientY-r.top};
+    };
+    canvas.addEventListener('mousedown',e=>{drawing=true;ctx.beginPath();const p=getPos(e);ctx.moveTo(p.x,p.y);});
+    canvas.addEventListener('mousemove',e=>{if(!drawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();});
+    canvas.addEventListener('mouseup',()=>drawing=false);
+    canvas.addEventListener('touchstart',e=>{e.preventDefault();drawing=true;ctx.beginPath();const p=getPos(e);ctx.moveTo(p.x,p.y);},{passive:false});
+    canvas.addEventListener('touchmove',e=>{e.preventDefault();if(!drawing)return;const p=getPos(e);ctx.lineTo(p.x,p.y);ctx.stroke();},{passive:false});
+    canvas.addEventListener('touchend',()=>drawing=false);
+    window._firmaCanvasActivo=canvas;
+  },300);
+};
+
+// Comprueba si hay trazo dibujado en el canvas de firma y lanza el envío
+window._capturarFirmaPresuWA=(prId)=>{
+  const canvas=document.getElementById('firmaCanvas');
+  if(!canvas){window._enviarPresuWA(prId,null);return;}
+  const dataURL=canvas.toDataURL('image/png');
+  const tmpCtx=canvas.getContext('2d');
+  const datos=tmpCtx.getImageData(0,0,canvas.width,canvas.height).data;
+  const hayFirma=Array.from(datos).some((v,i)=>i%4!==3&&v<240);
+  window._enviarPresuWA(prId,hayFirma?dataURL:null);
+};
+
+// Genera el PDF (con o sin firma) y lo entrega directamente al panel nativo
+// de compartir para WhatsApp, sin pasar por el diálogo de impresión.
+window._enviarPresuWA=async(prId,firmaDataURL)=>{
+  cerrarSB();
   toast('📄 Generando PDF...','i');
   try{
-    const res=await window._generarPresupuestoPDF(prId);
+    const res=await window._generarPresupuestoPDF(prId,firmaDataURL);
     if(!res){toast('Presupuesto no encontrado','e');return;}
     const {blob,file,nombreArchivo,p,c}=res;
+    // Si se capturó una firma nueva, guardarla también en el presupuesto
+    // para que quede registrada (igual que hace el botón "PDF").
+    if(firmaDataURL){
+      updateDoc(doc(db,'grupos',CGID,'presupuestos',prId),{firmaCliente:firmaDataURL,firmado:true,firmadoEn:serverTimestamp()}).catch(()=>{});
+    }
     const tel=(p.clienteTelefono||c?.telefono||'').replace(/\s/g,'');
     const msg=`Hola ${p.clienteNombre||c?.nombre||''}, te adjunto el presupuesto "${p.titulo||''}". Un saludo.`;
 
     if(navigator.canShare && navigator.canShare({files:[file]})){
-      // Esto es lo que realmente adjunta el PDF al chat de WhatsApp.
+      // Esto es lo que realmente adjunta el PDF al chat de WhatsApp,
+      // abriendo el típico panel de "Compartir con..." del sistema.
       await navigator.share({ files:[file], text:msg });
     }else{
       // Sin soporte para compartir ficheros en este navegador: descargamos el
@@ -11493,8 +11585,10 @@ const _presuHTML=(p,grp,c,iva,total,firmaDataURL)=>{
   if((parseFloat(p.importeDesplazamiento)||0)>0)filasConceptos.push(['Desplazamiento',fmtM(p.importeDesplazamiento)]);
   (p.partidas||[]).filter(pt=>pt.desc||pt.importe).forEach(pt=>filasConceptos.push([pt.desc||'—',fmtM(pt.importe)]));
   return`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Presupuesto: ${p.titulo}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
   <style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;font-family:'Inter',sans-serif;background:#fff;color:#222}
   @page{margin:0;size:A4 portrait}
