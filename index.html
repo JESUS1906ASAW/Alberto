@@ -34,20 +34,42 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 :root{
-  --r:#0f766e;--r2:#0b5c56;--r3:#5eead4;--r4:#08403c;
-  --bg:#0b1210;--card:#121c1a;--card2:#182420;
-  --tx:#eef2fa;--tx2:rgba(238,242,250,.48);--tx3:rgba(238,242,250,.2);
-  --border:rgba(255,255,255,.08);--rd:16px;
+  --r:#14b8a6;--r2:#0d9488;--r3:#5eead4;--r4:#0f766e;
+  --bg:#15171a;--bg2:#1b1e22;--card:#212427;--card2:#2a2d31;
+  --tx:#f1f3f5;--tx2:rgba(241,243,245,.58);--tx3:rgba(241,243,245,.28);
+  --border:rgba(255,255,255,.09);--rd:11px;--rd-sm:9px;--rd-lg:14px;
   --font:'Inter',sans-serif;
   --font-head:'Space Grotesk',sans-serif;
-  --shadow:0 10px 30px rgba(0,0,0,.5);
-  --shadow2:0 10px 32px rgba(var(--theme-rgb),.32);
-  --shadow-sm:0 3px 12px rgba(0,0,0,.3);
-  --theme-rgb:15,118,110;
-  --ease-spring:cubic-bezier(.16,1,.3,1);
+
+  /* ── Superficies de cristal ── */
+  --glass-bg:rgba(255,255,255,.045);
+  --glass-bg2:rgba(255,255,255,.065);
+  --glass-border:rgba(255,255,255,.09);
+  --glass-hi:rgba(255,255,255,.14);
+  --glass-blur:18px;
+
+  /* ── Sombras (3 niveles, difusas, nunca negro puro) ── */
+  --sh-1:0 1px 2px rgba(8,10,12,.24),0 6px 16px -8px rgba(8,10,12,.4);
+  --sh-2:0 2px 6px rgba(8,10,12,.28),0 12px 28px -10px rgba(8,10,12,.48);
+  --sh-3:0 8px 24px rgba(8,10,12,.34),0 24px 56px -16px rgba(8,10,12,.6);
+  --shadow:var(--sh-3);
+  --shadow2:0 10px 32px rgba(var(--theme-rgb),.28);
+  --shadow-sm:var(--sh-1);
+
+  /* ── Estados (paleta compacta, uso puntual) ── */
+  --ok:#22c55e;--ok-bg:rgba(34,197,94,.13);--ok-bd:rgba(34,197,94,.28);
+  --danger:#ef4444;--danger2:#f87171;--danger-bg:rgba(239,68,68,.12);--danger-bd:rgba(239,68,68,.26);
+  --warn:#f59e0b;--warn-bg:rgba(245,158,11,.13);--warn-bd:rgba(245,158,11,.28);
+  --info:#3b82f6;--info-bg:rgba(59,130,246,.13);--info-bd:rgba(59,130,246,.28);
+  --urgent:#fb7185;--urgent-bg:rgba(251,113,133,.14);--urgent-bd:rgba(251,113,133,.3);
+
+  --theme-rgb:20,184,166;
+  --ease-spring:cubic-bezier(.34,1.3,.64,1);
   --ease-out:cubic-bezier(.4,0,.2,1);
   --dur-fast:.18s;--dur-med:.28s;--dur-slow:.42s;
 }
+html,body{background:radial-gradient(ellipse 120% 60% at 20% -10%,#1c2024 0%,var(--bg) 45%) var(--bg) fixed;}
+
 
 
 /* ── MODO CLARO ── */
@@ -57,8 +79,13 @@ body.modo-claro{
   --tx:#161b19;--tx2:rgba(22,27,25,.52);--tx3:rgba(22,27,25,.24);
   --border:rgba(22,27,25,.08);
   --shadow:0 1px 3px rgba(16,24,22,.06),0 8px 24px rgba(16,24,22,.05);
+  --glass-bg:#ffffff;--glass-bg2:#f6f6f4;--glass-border:rgba(22,27,25,.08);--glass-hi:rgba(255,255,255,.9);--glass-blur:0px;
+  --sh-1:0 1px 2px rgba(16,24,22,.05),0 4px 10px -6px rgba(16,24,22,.08);
+  --sh-2:0 2px 6px rgba(16,24,22,.06),0 10px 22px -10px rgba(16,24,22,.1);
+  --sh-3:0 8px 20px rgba(16,24,22,.08),0 20px 44px -16px rgba(16,24,22,.14);
   background:#fafaf9;color:#161b19;
 }
+html:has(body.modo-claro),body.modo-claro{background:#fafaf9}
 body.modo-claro #topbar{background:rgba(255,255,255,.88);backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);border-bottom:1px solid rgba(0,0,0,.07);box-shadow:0 1px 0 rgba(255,255,255,.8),0 2px 12px rgba(0,0,0,.06)}
 body.modo-claro #drawer{background:#ffffff;border-left:1px solid rgba(0,0,0,.09)}
 body.modo-claro #authWrap{background:#fafaf9}
@@ -158,13 +185,14 @@ body.modo-claro .stat2-num{color:#111}
 /* Switch toggle modo claro */
 .toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0}
 .toggle-label{font-size:14px;font-weight:700;color:var(--tx)}
-.toggle-sw{position:relative;width:50px;height:28px;flex-shrink:0}
+.toggle-sw{position:relative;width:46px;height:26px;flex-shrink:0}
 .toggle-sw input{opacity:0;width:0;height:0}
-.toggle-track{position:absolute;cursor:pointer;inset:0;background:rgba(255,255,255,.15);border-radius:28px;transition:.25s}
+.toggle-track{position:absolute;cursor:pointer;inset:0;background:var(--glass-bg2);border:1px solid var(--glass-border);border-radius:20px;transition:background .22s var(--ease-out),border-color .22s ease}
 
-.toggle-track::before{content:'';position:absolute;height:22px;width:22px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
-.toggle-sw input:checked+.toggle-track{background:var(--r)}
-.toggle-sw input:checked+.toggle-track::before{transform:translateX(22px)}
+.toggle-track::before{content:'';position:absolute;height:18px;width:18px;left:3px;top:4px;background:#fff;border-radius:50%;transition:transform .3s var(--ease-spring);box-shadow:0 1px 3px rgba(0,0,0,.35)}
+.toggle-sw input:checked+.toggle-track{background:linear-gradient(135deg,var(--r2),var(--r));border-color:transparent}
+.toggle-sw input:checked+.toggle-track::before{transform:translateX(20px)}
+.toggle-sw:active .toggle-track::before{width:21px}
 
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{height:100%;height:100dvh}
@@ -317,22 +345,32 @@ body.modo-claro .cli-sel-dropdown{background:#fff}
 .fsec-title{font-size:10px;font-weight:800;color:var(--r);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
 
 /* ── BUTTONS ── */
-.btn{width:100%;padding:13px;border-radius:14px;border:none;font-size:15px;font-weight:800;font-family:var(--font);cursor:pointer;transition:transform .18s cubic-bezier(.16,1,.3,1),box-shadow .18s ease,background .15s ease,filter .15s ease;display:flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden}
-.btn::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(255,255,255,.1),transparent);pointer-events:none;border-radius:inherit}
+.btn{width:100%;padding:13px;border-radius:var(--rd-sm);border:none;font-size:15px;font-weight:800;font-family:var(--font);cursor:pointer;transition:transform .16s var(--ease-spring),box-shadow .18s ease,background .15s ease,filter .15s ease,border-color .15s ease;display:flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden}
+.btn::after{content:'';position:absolute;inset:0;background:linear-gradient(to bottom,rgba(255,255,255,.08),transparent);pointer-events:none;border-radius:inherit}
 .btn:hover{transform:translateY(-1px);filter:brightness(1.06)}
-.btn:active{transform:translateY(1px) scale(.99);filter:brightness(.95)}
-.btn-p{background:linear-gradient(135deg,var(--r2),var(--r));color:#fff;box-shadow:0 4px 16px rgba(var(--theme-rgb),.3)}
-.btn-p:hover{box-shadow:0 6px 20px rgba(var(--theme-rgb),.4)}
-.btn-s{background:rgba(255,255,255,.08);color:var(--tx);border:1px solid var(--border)}
-.btn-s:hover{border-color:var(--r);color:var(--r)}
-.btn-ok{background:rgba(76,175,80,.15);color:#4caf50;border:1px solid rgba(76,175,80,.3)}
-.btn-del{background:rgba(var(--theme-rgb),.12);color:var(--r);border:1px solid rgba(var(--theme-rgb),.25)}
-.btn-sm{padding:8px 14px;width:auto;font-size:13px;border-radius:12px}
-.btn-nuevo{background:linear-gradient(135deg,var(--r) 0%,var(--r2) 100%);color:#fff;border:none;padding:9px 18px;border-radius:20px;font-size:13px;font-weight:800;font-family:var(--font);cursor:pointer;margin-left:auto;transition:transform .18s cubic-bezier(.16,1,.3,1),box-shadow .18s ease,filter .15s;white-space:nowrap;box-shadow:0 3px 12px rgba(var(--theme-rgb),.3)}
-.btn-nuevo:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 5px 18px rgba(var(--theme-rgb),.4)}
+.btn:active{transform:scale(.97);filter:brightness(.95)}
+.btn-p{background:linear-gradient(135deg,var(--r2),var(--r));color:#fff;box-shadow:0 3px 10px -2px rgba(var(--theme-rgb),.45),0 1px 2px rgba(0,0,0,.2)}
+.btn-p:hover{box-shadow:0 5px 16px -2px rgba(var(--theme-rgb),.55),0 1px 2px rgba(0,0,0,.2)}
+.btn-s{background:var(--glass-bg);backdrop-filter:blur(var(--glass-blur)) saturate(140%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(140%);color:var(--tx);border:1px solid var(--glass-border);box-shadow:inset 0 1px 0 var(--glass-hi)}
+.btn-s:hover{border-color:rgba(var(--theme-rgb),.5);color:var(--r)}
+.btn-ok{background:var(--ok-bg);color:var(--ok);border:1px solid var(--ok-bd)}
+.btn-ok:active{background:var(--ok);color:#0b2016}
+.btn-del{background:var(--danger-bg);color:var(--danger2);border:1px solid var(--danger-bd)}
+.btn-del:active{background:var(--danger);color:#2a0d0d}
+.btn-ghost{background:transparent;color:var(--r);border:none;box-shadow:none;font-weight:700}
+.btn-ghost:hover{filter:none;background:rgba(var(--theme-rgb),.08)}
+.btn-sm{padding:8px 14px;width:auto;font-size:13px;border-radius:var(--rd-sm)}
+.btn-nuevo{background:linear-gradient(135deg,var(--r) 0%,var(--r2) 100%);color:#fff;border:none;padding:9px 18px;border-radius:var(--rd-sm);font-size:13px;font-weight:800;font-family:var(--font);cursor:pointer;margin-left:auto;transition:transform .16s var(--ease-spring),box-shadow .18s ease,filter .15s;white-space:nowrap;box-shadow:0 3px 10px -2px rgba(var(--theme-rgb),.4)}
+.btn-nuevo:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 5px 14px -2px rgba(var(--theme-rgb),.5)}
+.btn-nuevo:active{transform:scale(.96)}
 .btn[disabled]{opacity:.5;cursor:not-allowed;transform:none}
 .btn-saving[disabled]{opacity:.85;cursor:wait}
 .btn-saving-spinner{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;display:inline-block;animation:_gspin .7s linear infinite;flex-shrink:0}
+.icon-btn{border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-radius:var(--rd-sm);width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:transform .16s var(--ease-spring),background .15s ease,border-color .15s ease;color:var(--tx2)}
+.icon-btn:hover{background:var(--glass-bg2);color:var(--tx)}
+.icon-btn:active{transform:scale(.9)}
+.icon-btn.wa{color:#25d366;border-color:rgba(37,211,102,.28);background:rgba(37,211,102,.09)}
+.icon-btn.wa:hover{background:rgba(37,211,102,.16)}
 @keyframes _gspin{to{transform:rotate(360deg)}}
 
 /* ── CARDS ── */
@@ -419,17 +457,6 @@ body.modo-claro .sbox:focus{box-shadow:inset 0 1px 2px rgba(0,0,0,.03),0 0 0 3px
 /* ── QR CLIENTE ── */
 .qr-wrap{text-align:center;padding:12px 0}
 .qr-img{width:200px;height:200px;margin:0 auto 10px;display:block;border-radius:14px;background:#fff;padding:8px}
-
-/* ── MODO TEXTO GRANDE ── */
-body.texto-grande{font-size:17px}
-body.texto-grande .cli-name,.texto-grande .parte-title,.texto-grande .averia-title{font-size:17px}
-body.texto-grande .det-val{font-size:16px}
-body.texto-grande .d-item{font-size:15px;padding:13px 20px}
-body.texto-grande .btn{font-size:17px;padding:15px}
-
-/* ── ALTO CONTRASTE ── */
-body.alto-contraste{--card:#000;--card2:#0a0a0a;--border:rgba(255,255,255,.25);--tx:#ffffff;--tx2:rgba(255,255,255,.8)}
-body.alto-contraste .cli-card,body.alto-contraste .parte-card,body.alto-contraste .averia-card{border-width:2px}
 
 /* ── LOG DE ACTIVIDAD ── */
 .log-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
@@ -539,17 +566,49 @@ body.modo-claro .gtab-item.gt-avis{background:rgba(239,83,80,.13);border-color:r
 body.modo-claro .gtab-item.gt-presu{background:rgba(66,165,245,.13);border-color:rgba(66,165,245,.28)}
 
 /* ── CLIENTE CARDS ── */
-.cli-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease,background .15s ease,border-color .2s ease;margin-bottom:8px}
+.cli-card{position:relative;background:var(--glass-bg);backdrop-filter:blur(var(--glass-blur)) saturate(140%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(140%);border:1px solid var(--glass-border);box-shadow:inset 0 1px 0 var(--glass-hi);border-radius:var(--rd);padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .18s var(--ease-spring),box-shadow .18s ease,background .15s ease,border-color .2s ease;margin-bottom:8px}
 .cli-card-banner{display:flex!important;flex-direction:column!important;align-items:stretch!important;padding:0!important;overflow:hidden}
-.cli-card-banner:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.35);border-color:rgba(255,255,255,.15)}
-.cli-card:hover{transform:translateY(-2px);background:var(--card2);box-shadow:0 6px 20px rgba(0,0,0,.35);border-color:rgba(255,255,255,.11)}
-.cli-ava{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;flex-shrink:0}
+.cli-card-banner:hover{transform:translateY(-2px);background:var(--glass-bg2)}
+.cli-card:hover{transform:translateY(-1px);background:var(--glass-bg2)}
+.cli-card:active{transform:scale(.985)}
+.cli-ava{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.25)}
 .cli-ava img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
 .cli-ava-initials{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#fff;border-radius:50%}
 .cli-info{flex:1;min-width:0}
-.cli-name{font-size:15px;font-weight:800;color:#fff;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.cli-sub{font-size:12px;color:var(--tx2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.cli-arrow{color:var(--tx3);font-size:20px}
+.cli-name{font-size:15px;font-weight:700;color:var(--tx);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.cli-sub{font-size:12.5px;color:var(--tx2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cli-arrow{color:var(--tx3);display:flex;align-items:center;transition:transform .18s var(--ease-spring)}
+.cli-card:hover .cli-arrow{transform:translateX(2px);color:var(--r)}
+
+/* ── SELECCIÓN MÚLTIPLE (mantener pulsado un cliente/aviso/presupuesto) ── */
+[data-sel-id]{transition:transform .2s var(--ease-spring),box-shadow .18s ease}
+[data-sel-id] .sel-check{
+  display:none;position:absolute;top:9px;right:9px;width:22px;height:22px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.45);background:rgba(0,0,0,.28);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;z-index:5;transition:background .18s var(--ease-spring),border-color .18s ease,transform .22s var(--ease-spring);
+}
+body.sel-mode [data-sel-id] .sel-check{display:flex}
+body.sel-mode [data-sel-id]:not(.sel-checked){transform:scale(.97)}
+[data-sel-id].sel-checked{box-shadow:0 0 0 2px var(--r),var(--sh-2)}
+[data-sel-id].sel-checked .sel-check{background:var(--r);border-color:var(--r);transform:scale(1.1)}
+[data-sel-id].sel-checked .sel-check::after{content:'';width:10px;height:5px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg) translate(1px,-1px)}
+/* En presupuestos/avisos el check va sobre .swipe-content para quedar encima de la tarjeta visible */
+.swipe-item .sel-check{top:9px;right:9px}
+.sel-action-bar{
+  position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom,0px));
+  z-index:520;display:flex;align-items:center;gap:10px;padding:11px 12px 11px 16px;
+  background:var(--glass-bg2);backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);
+  border:1px solid var(--glass-border);border-radius:var(--rd-lg);
+  box-shadow:inset 0 1px 0 var(--glass-hi),var(--sh-3);
+  animation:selBarIn .32s var(--ease-spring);
+}
+@keyframes selBarIn{from{transform:translateY(24px) scale(.96);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
+.sel-action-bar .sel-count{flex:1;font-size:13px;font-weight:700;color:var(--tx)}
+.sel-action-bar .sel-cancel{width:32px;height:32px;border-radius:50%;border:1px solid var(--glass-border);background:transparent;color:var(--tx2);cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .16s var(--ease-spring),background .15s ease}
+.sel-action-bar .sel-cancel:active{transform:scale(.9)}
+.sel-action-bar .sel-delete-btn{border:none;border-radius:var(--rd-sm);padding:10px 16px;background:linear-gradient(135deg,var(--danger2),var(--danger));color:#fff;font-size:12.5px;font-weight:800;cursor:pointer;font-family:var(--font);flex-shrink:0;display:flex;align-items:center;gap:6px;box-shadow:0 3px 10px -2px rgba(239,68,68,.4);transition:transform .16s var(--ease-spring)}
+.sel-action-bar .sel-delete-btn:active{transform:scale(.95)}
+.sel-action-bar .sel-delete-btn:disabled{opacity:.4;cursor:default}
 
 /* ── PARTE CARDS ── */
 .parte-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease,border-color .2s ease;margin-bottom:8px;position:relative;overflow:hidden}
@@ -847,63 +906,70 @@ body.modo-claro .stab.active{box-shadow:0 2px 6px rgba(16,24,22,.1),0 0 0 1px rg
 .mant-foto-thumb img{width:100%;height:100%;object-fit:cover}
 .mant-foto-thumb .del-btn{position:absolute;top:4px;right:4px;background:rgba(var(--theme-rgb),.85);border:none;color:#fff;border-radius:6px;width:22px;height:22px;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1}
 
-/* ── AVERÍAS ── */
-.averia-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:.15s}
-.averia-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
-.averia-card.resuelta{opacity:.6;border-color:rgba(76,175,80,.4);background:rgba(76,175,80,.06)}
+/* ── AVERÍAS / AVISOS ── */
+.averia-card{background:var(--glass-bg);backdrop-filter:blur(var(--glass-blur)) saturate(140%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(140%);border:1px solid var(--glass-border);box-shadow:inset 0 1px 0 var(--glass-hi);border-radius:var(--rd);padding:14px 16px;margin-bottom:10px;cursor:pointer;transition:transform .18s var(--ease-spring),box-shadow .18s ease,background .15s ease}
+.averia-card:hover{transform:translateY(-1px);background:var(--glass-bg2)}
+.averia-card.resuelta{opacity:.62;border-color:var(--ok-bd);background:var(--ok-bg)}
 .averia-header{display:flex;align-items:center;gap:12px;margin-bottom:6px}
-.averia-ico{font-size:22px;min-width:32px;text-align:center}
-.averia-title{font-size:15px;font-weight:800;color:var(--tx);flex:1}
+.averia-ico{width:34px;height:34px;min-width:34px;border-radius:var(--rd-sm);display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.06);border:1px solid var(--glass-border)}
+.averia-title{font-size:15px;font-weight:700;color:var(--tx);flex:1;letter-spacing:-.1px}
 .averia-sub{font-size:12px;color:var(--tx2)}
-.averia-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap}
-.averia-badge.pend{background:rgba(255,152,0,.15);color:#ff9800}
-.averia-badge.resuelta{background:rgba(76,175,80,.15);color:#4caf50}
+.averia-badge{font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:20px;white-space:nowrap;letter-spacing:.2px}
+.averia-badge.pend{background:var(--warn-bg);color:var(--warn)}
+.averia-badge.resuelta{background:var(--ok-bg);color:var(--ok)}
 
 /* ── PRESUPUESTOS ── */
-.presu-card{position:relative;background:var(--card);padding:15px 16px 15px 19px;cursor:pointer;transition:background .18s ease}
-.presu-card::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:3px;background:linear-gradient(180deg,#ffb74d,#ff9800)}
-.presu-card.aceptado::before{background:linear-gradient(180deg,#81c784,#4caf50)}
-.presu-card.aceptado{background:rgba(76,175,80,.055)}
+.presu-card{position:relative;background:transparent;padding:15px 16px 15px 19px;cursor:pointer;transition:background .18s ease}
+.presu-card::before{content:'';position:absolute;left:0;top:10px;bottom:10px;width:3px;border-radius:3px;background:linear-gradient(180deg,var(--warn),#d97706)}
+.presu-card.aceptado::before{background:linear-gradient(180deg,var(--ok),#16a34a)}
 .presu-header{display:flex;align-items:center;gap:10px}
-.presu-title{font-size:14.5px;font-weight:800;color:var(--tx);flex:1;line-height:1.35;letter-spacing:-.1px}
+.presu-title{font-size:14.5px;font-weight:700;color:var(--tx);flex:1;line-height:1.35;letter-spacing:-.1px}
 .presu-total{font-size:19px;font-weight:900;color:var(--r);letter-spacing:-.2px;font-variant-numeric:tabular-nums;margin-top:9px}
 .presu-badge{font-size:10.5px;font-weight:800;padding:4px 10px 4px 8px;border-radius:20px;display:inline-flex;align-items:center;gap:5px;letter-spacing:.15px}
 .presu-badge::before{content:'';width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.presu-badge.espera{background:rgba(255,152,0,.14);color:#ffa726}
-.presu-badge.espera::before{background:#ffa726;box-shadow:0 0 0 3px rgba(255,167,38,.18)}
-.presu-badge.aceptado{background:rgba(76,175,80,.14);color:#4caf50}
-.presu-badge.aceptado::before{background:#4caf50;box-shadow:0 0 0 3px rgba(76,175,80,.18)}
+.presu-badge.espera{background:var(--warn-bg);color:var(--warn)}
+.presu-badge.espera::before{background:var(--warn);box-shadow:0 0 0 3px var(--warn-bg)}
+.presu-badge.aceptado{background:var(--ok-bg);color:var(--ok)}
+.presu-badge.aceptado::before{background:var(--ok);box-shadow:0 0 0 3px var(--ok-bg)}
 
-/* ── Deslizar para actuar (swipe-to-act) ── */
-/* Nota: swipe-item es la ÚNICA capa que define forma (radio+recorte+sombra);
-   swipe-content y presu-card van sin bordes/radio propios para que nunca haya
-   un desajuste de esquinas entre capas que deje asomar el color de las
-   acciones ocultas debajo. contain:paint + su propia capa de composición
-   (translateZ) evitan el "sangrado" de 1px típico en overflow:hidden con
-   hijos animados por transform.*/
+/* ── Deslizar para actuar (swipe-to-act, versión simple con "mantener pulsado") ── */
+/* Gesto: deslizar a la derecha o izquierda revela un fondo de color con el
+   icono/etiqueta de la acción; si se mantiene el dedo unas milésimas de
+   segundo pasado el umbral, la acción se dispara sola (sin botones ni
+   diálogos de confirmación — el propio gesto sostenido es la confirmación).
+   El recorte se refuerza con clip-path ADEMÁS de overflow:hidden — así el
+   fondo de la acción queda garantizado invisible en reposo, sin depender de
+   un único mecanismo de clipping que algunos motores de render pueden
+   "saltarse" por un píxel en capas con transform. */
 .swipe-item{
-  position:relative;overflow:hidden;border-radius:17px;margin-bottom:11px;
-  background:var(--card);border:1px solid var(--border);
-  box-shadow:0 1px 2px rgba(0,0,0,.14),0 8px 20px -6px rgba(0,0,0,.28);
+  position:relative;overflow:hidden;border-radius:var(--rd);margin-bottom:10px;
+  background:var(--glass-bg);backdrop-filter:blur(var(--glass-blur)) saturate(140%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(140%);
+  border:1px solid var(--glass-border);
+  box-shadow:inset 0 1px 0 var(--glass-hi),var(--sh-1);
+  clip-path:inset(0 round var(--rd));
   contain:paint;isolation:isolate;
   transform:translateZ(0);-webkit-transform:translateZ(0);
-  transition:box-shadow .2s ease,transform .2s cubic-bezier(.16,1,.3,1);
+  transition:box-shadow .2s ease,background .15s ease;
 }
-.swipe-item:has(.presu-card.aceptado){border-color:rgba(76,175,80,.35)}
-.swipe-actions{position:absolute;inset:0;display:flex;align-items:stretch;justify-content:flex-end;overflow:hidden}
-.swipe-act{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;width:78px;border:none;background:#607d8b;color:#fff;font-family:var(--font);font-size:10px;font-weight:800;cursor:pointer;flex-shrink:0;position:relative;letter-spacing:.15px;transition:filter .12s ease}
-.swipe-act::before{content:'';position:absolute;inset:0;background:linear-gradient(160deg,rgba(255,255,255,.16),transparent 55%)}
-.swipe-act+.swipe-act{box-shadow:inset 1px 0 0 rgba(255,255,255,.14)}
-.swipe-act svg,.swipe-act span{position:relative;filter:drop-shadow(0 1px 2px rgba(0,0,0,.12))}
-.swipe-act:active{filter:brightness(.9)}
-.swipe-act.wa{background:linear-gradient(160deg,#2be374,#1ebe5d)}
-.swipe-act.del{background:linear-gradient(160deg,#ff6f6e,#e53935)}
-.swipe-act.done{background:linear-gradient(160deg,#2dd4bf,#00897b)}
-.swipe-act.restore{background:linear-gradient(160deg,#64b8ff,#1e88e5)}
-.swipe-content{position:relative;touch-action:pan-y;z-index:1;background:var(--card)}
+.swipe-item:hover{background:var(--glass-bg2)}
+.swipe-item:has(.presu-card.aceptado){border-color:var(--ok-bd)}
+.swipe-bg{
+  position:absolute;inset:0;display:flex;align-items:center;gap:9px;
+  padding:0 22px;font-family:var(--font);font-weight:800;font-size:12.5px;
+  color:#fff;letter-spacing:.2px;opacity:0;transform:scale(.94);
+  transition:opacity .16s var(--ease-out),transform .22s var(--ease-spring);pointer-events:none;z-index:0;
+}
+.swipe-bg.show{opacity:1;transform:scale(1)}
+.swipe-bg[data-action="delete"]{background:linear-gradient(100deg,var(--danger),var(--danger2) 75%)}
+.swipe-bg[data-action="complete"]{background:linear-gradient(100deg,var(--r2),var(--r3) 75%)}
+.swipe-bg[data-action="restore"]{background:linear-gradient(100deg,var(--info),#60a5fa 75%)}
+.swipe-bg .swipe-bg-ico{display:inline-flex;transition:transform .18s var(--ease-spring)}
+.swipe-bg.holding .swipe-bg-ico{animation:swipeHoldPulse .42s var(--ease-spring) infinite}
+@keyframes swipeHoldPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+.swipe-content{position:relative;touch-action:pan-y;z-index:1;background:transparent}
 .swipe-content.dragging{transition:none!important;will-change:transform}
-.swipe-content:not(.dragging){transition:transform .32s cubic-bezier(.16,1,.3,1)}
-.swipe-content .presu-card{margin-bottom:0}
+.swipe-content:not(.dragging){transition:transform .32s var(--ease-spring)}
+.swipe-content .presu-card,.swipe-content .averia-card{margin-bottom:0;border:none;border-radius:0;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
 
 /* ── FAB — acciones rápidas ── */
 #fabOverlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:890;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
@@ -911,29 +977,32 @@ body.modo-claro .stab.active{box-shadow:0 2px 6px rgba(16,24,22,.1),0 0 0 1px rg
 #fabWrap{display:none;position:fixed;right:18px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:900;flex-direction:column;align-items:flex-end;gap:12px}
 #fabMenu{display:flex;flex-direction:column;align-items:flex-end;gap:10px;pointer-events:none}
 #fabWrap.open #fabMenu{pointer-events:auto}
-.fab-opt{display:flex;align-items:center;gap:9px;background:var(--card);border:1px solid var(--border);border-radius:30px;padding:11px 18px 11px 15px;box-shadow:0 6px 22px rgba(0,0,0,.4);opacity:0;transform:translateY(10px) scale(.9);transition:opacity .2s ease,transform .22s cubic-bezier(.16,1,.3,1);cursor:pointer;font-family:var(--font)}
+.fab-opt{display:flex;align-items:center;gap:9px;background:var(--glass-bg2);backdrop-filter:blur(20px) saturate(150%);-webkit-backdrop-filter:blur(20px) saturate(150%);border:1px solid var(--glass-border);box-shadow:inset 0 1px 0 var(--glass-hi),var(--sh-2);border-radius:var(--rd-lg);padding:11px 18px 11px 15px;opacity:0;transform:translateY(10px) scale(.9);transition:opacity .2s ease,transform .28s var(--ease-spring);cursor:pointer;font-family:var(--font)}
 #fabWrap.open .fab-opt{opacity:1;transform:translateY(0) scale(1)}
 #fabWrap.open .fab-opt:nth-child(1){transition-delay:.02s}
 #fabWrap.open .fab-opt:nth-child(2){transition-delay:.06s}
 #fabWrap.open .fab-opt:nth-child(3){transition-delay:.1s}
+.fab-opt:active{transform:scale(.95)}
 .fab-opt-ico{font-size:17px;line-height:1}
-.fab-opt-txt{font-size:13px;font-weight:800;color:var(--tx);white-space:nowrap}
+.fab-opt-txt{font-size:13px;font-weight:700;color:var(--tx);white-space:nowrap}
 .fab-opt-star{display:none;font-size:11px}
-.fab-opt.fab-default{border-color:rgba(var(--theme-rgb),.55)}
+.fab-opt.fab-default{border-color:rgba(var(--theme-rgb),.5)}
 .fab-opt.fab-default .fab-opt-star{display:inline}
-#fabMain{width:58px;height:58px;border-radius:50%;background:linear-gradient(150deg,var(--r3) -20%,var(--r) 45%,var(--r2) 100%);border:none;box-shadow:0 10px 28px -4px rgba(var(--theme-rgb),.55),0 2px 8px rgba(0,0,0,.35),inset 0 1px 1px rgba(255,255,255,.25);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease}
-#fabMain:active{transform:scale(.94)}
-#fabMain svg{transition:transform .25s cubic-bezier(.16,1,.3,1)}
+#fabMain{width:56px;height:56px;border-radius:var(--rd-lg);background:linear-gradient(150deg,var(--r3) -20%,var(--r) 45%,var(--r2) 100%);border:none;box-shadow:0 10px 24px -6px rgba(var(--theme-rgb),.5),0 2px 8px rgba(0,0,0,.3),inset 0 1px 1px rgba(255,255,255,.25);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:transform .22s var(--ease-spring),box-shadow .2s ease}
+#fabMain:active{transform:scale(.92)}
+#fabMain svg{transition:transform .3s var(--ease-spring)}
 #fabWrap.open #fabMain svg{transform:rotate(45deg)}
-#fabWrap.open #fabMain{transform:scale(1.05)}
-.fab-pref-card{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 6px;border-radius:14px;border:2px solid var(--border);background:transparent;color:var(--tx2);font-size:20px;cursor:pointer;font-family:var(--font)}
-.fab-pref-card span{font-size:11px;font-weight:800}
+#fabWrap.open #fabMain{transform:scale(1.05) rotate(0deg)}
+.fab-pref-card{display:flex;flex-direction:column;align-items:center;gap:5px;padding:12px 6px;border-radius:var(--rd);border:2px solid var(--glass-border);background:var(--glass-bg);color:var(--tx2);font-size:20px;cursor:pointer;font-family:var(--font);transition:transform .16s var(--ease-spring),border-color .15s ease,background .15s ease}
+.fab-pref-card:active{transform:scale(.95)}
+.fab-pref-card span{font-size:11px;font-weight:700}
 .fab-pref-card.active{border-color:var(--r);background:rgba(var(--theme-rgb),.12);color:var(--r)}
-.partida-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;background:var(--card2);border-radius:12px;padding:10px 12px}
+.partida-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--rd-sm);padding:10px 12px}
 .partida-row input{background:transparent;border:none;color:var(--tx);font-family:var(--font);font-size:13px;outline:none}
 .partida-desc{flex:2;min-width:0}
 .partida-importe{width:90px;text-align:right;font-weight:700}
-.partida-del{background:rgba(229,57,53,.12);border:none;color:#e53935;border-radius:10px;width:28px;height:28px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.partida-del{background:var(--danger-bg);border:none;color:var(--danger2);border-radius:var(--rd-sm);width:28px;height:28px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:transform .16s var(--ease-spring)}
+.partida-del:active{transform:scale(.9)}
 
   /* ── Avatar & Icon containers: fondo siempre negro ── */
   .grupo-ava,.hero-ava{background:transparent !important;background-color:transparent !important}
@@ -1668,6 +1737,33 @@ const FB_CFG = {
   appId: "1:983553127204:web:bef3cffa1b3f308979b9b1",
   measurementId: "G-RE1M0FCR38"
 };
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ICONOS — set de líneas finas y consistentes (sustituyen a los emojis
+// en botones, cabeceras y badges dentro del nuevo sistema visual).
+// Uso: ICO.trash(18) / ICO.trash(18,'var(--danger2)')
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const _icoWrap=(size,body,color)=>`<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="${color||'currentColor'}" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;display:block">${body}</svg>`;
+const ICO={
+  trash:(s=18,c)=>_icoWrap(s,`<path d="M4 7h16"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/><path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/><path d="M10 11v6"/><path d="M14 11v6"/>`,c),
+  check:(s=18,c)=>_icoWrap(s,`<path d="M4 12.5l5 5L20 6"/>`,c),
+  checkCircle:(s=18,c)=>_icoWrap(s,`<circle cx="12" cy="12" r="9"/><path d="M8 12.5l2.6 2.6L16 9.5"/>`,c),
+  undo:(s=18,c)=>_icoWrap(s,`<path d="M4 12a8 8 0 1 1 3 6.2"/><path d="M4 12V6"/><path d="M4 12h6"/>`,c),
+  chevron:(s=18,c)=>_icoWrap(s,`<path d="M9 5l7 7-7 7"/>`,c),
+  edit:(s=18,c)=>_icoWrap(s,`<path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>`,c),
+  money:(s=18,c)=>_icoWrap(s,`<rect x="2.5" y="6" width="19" height="13" rx="2.5"/><path d="M2.5 10.5h19"/><path d="M6 14.5h3"/>`,c),
+  message:(s=18,c)=>_icoWrap(s,`<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8a2.5 2.5 0 0 1-2.5 2.5H10l-4.5 4v-4H6.5A2.5 2.5 0 0 1 4 13.5v-8z"/>`,c),
+  box:(s=18,c)=>_icoWrap(s,`<path d="M21 8.5L12 3 3 8.5v7L12 21l9-5.5v-7z"/><path d="M3 8.5l9 5 9-5"/><path d="M12 13.5V21"/>`,c),
+  user:(s=18,c)=>_icoWrap(s,`<circle cx="12" cy="8" r="4"/><path d="M4 20c1.6-4 5-6 8-6s6.4 2 8 6"/>`,c),
+  phone:(s=18,c)=>_icoWrap(s,`<path d="M6.5 3h3l1.5 4.5-2 1.5a13 13 0 0 0 6 6l1.5-2 4.5 1.5v3a2 2 0 0 1-2.2 2A17.5 17.5 0 0 1 4.5 5.2 2 2 0 0 1 6.5 3z"/>`,c),
+  mapPin:(s=18,c)=>_icoWrap(s,`<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>`,c),
+  alert:(s=18,c)=>_icoWrap(s,`<path d="M10.6 3.9L2.9 18a2 2 0 0 0 1.7 3h14.8a2 2 0 0 0 1.7-3L13.4 3.9a2 2 0 0 0-2.8 0z"/><path d="M12 9.5v4.2"/><path d="M12 17h.01"/>`,c),
+  plus:(s=18,c)=>_icoWrap(s,`<path d="M12 5v14"/><path d="M5 12h14"/>`,c),
+  x:(s=18,c)=>_icoWrap(s,`<path d="M18 6L6 18"/><path d="M6 6l12 12"/>`,c),
+  search:(s=18,c)=>_icoWrap(s,`<circle cx="11" cy="11" r="7.5"/><path d="M21 21l-4.4-4.4"/>`,c),
+  building:(s=18,c)=>_icoWrap(s,`<rect x="4" y="3" width="16" height="18" rx="1.5"/><path d="M9 8h.01M15 8h.01M9 12h.01M15 12h.01M9 16h6"/>`,c),
+};
+
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // IMPORTS FIREBASE (v10 ESM CDN)
@@ -2466,47 +2562,88 @@ window._fabSetDefault=(key)=>{
 })();
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// DESLIZAR PARA ACTUAR — mecanismo genérico de swipe-to-act
+// DESLIZAR Y MANTENER PULSADO — mecanismo genérico de swipe-to-act
 // Aplica a cualquier lista que envuelva sus tarjetas en:
-//   <div class="swipe-item"><div class="swipe-actions">…botones…</div>
-//        <div class="swipe-content">…tarjeta visible…</div></div>
+//   <div class="swipe-item" data-swipe-id="…"
+//        data-right-fn="…" data-right-action="delete|complete|restore" data-right-label="…"
+//        data-left-fn="…"  data-left-action="delete|complete|restore"  data-left-label="…">
+//     <div class="swipe-bg"></div>
+//     <div class="swipe-content">…tarjeta visible…</div>
+//   </div>
+// Deslizar en una dirección revela un fondo de color con el icono/etiqueta
+// de la acción configurada para esa dirección. Si se mantiene el dedo
+// pasado el umbral durante unas milésimas, la acción se dispara sola: no
+// hace falta soltar ni confirmar con un botón aparte.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 (()=>{
-  const ACT_W=78; // debe coincidir con el ancho de .swipe-act en CSS
-  const EDGE_GUARD=24; // px desde el borde izquierdo: se cede al gesto nativo de "atrás"
-  let curItem=null,startX=0,startY=0,curX=0,dragging=false,locked=null,baseX=0,swipeW=ACT_W;
-  const content=item=>item.querySelector('.swipe-content');
-  const widthOf=item=>{
-    const n=item.querySelectorAll('.swipe-act').length;
-    return (n||1)*ACT_W;
+  const MAX_DRAG=100;   // px máximos de desplazamiento visual
+  const THRESH=62;      // px a partir de los cuales se "arma" la acción
+  const HOLD_MS=420;    // ms manteniendo pulsado para confirmar
+  const EDGE_GUARD=24;  // px desde el borde izquierdo: se cede al gesto nativo de "atrás"
+  const ACT_ICO={delete:ICO.trash(19,'#fff'),complete:ICO.check(19,'#fff'),restore:ICO.undo(19,'#fff')};
+
+  let curItem=null,startX=0,startY=0,curX=0,dragging=false,locked=null,dir=null,holdTimer=null,holding=false;
+
+  const contentOf=item=>item.querySelector('.swipe-content');
+  const bgOf=item=>item.querySelector('.swipe-bg');
+
+  const cancelHold=()=>{ if(holdTimer){ clearTimeout(holdTimer); holdTimer=null; } holding=false; };
+
+  const resetItem=item=>{
+    const c=contentOf(item), b=bgOf(item);
+    if(c){ c.classList.remove('dragging'); c.style.transform='translateX(0)'; }
+    if(b){ b.classList.remove('show','holding'); b.removeAttribute('data-action'); b.innerHTML=''; }
   };
-  const closeItem=it=>{
-    it.classList.remove('swipe-open');
-    const c=content(it); if(c) c.style.transform='translateX(0)';
+
+  // Compatibilidad: otras partes del código llaman a window._closeAllSwipes()
+  // (p.ej. al navegar atrás) para asegurarse de que no quede ninguna tarjeta
+  // a medio arrastrar.
+  window._closeAllSwipes=()=>{
+    if(curItem){ cancelHold(); resetItem(curItem); curItem=null; dragging=false; dir=null; holding=false; }
+    document.querySelectorAll('.swipe-content').forEach(c=>{ c.classList.remove('dragging'); c.style.transform='translateX(0)'; });
+    document.querySelectorAll('.swipe-bg').forEach(b=>{ b.classList.remove('show','holding'); });
   };
-  const closeAllExcept=(except)=>{
-    document.querySelectorAll('.swipe-item.swipe-open').forEach(it=>{
-      if(it!==except) closeItem(it);
-    });
+
+  const updateBg=(item,direction,dist)=>{
+    const b=bgOf(item); if(!b)return;
+    const cfg = direction==='right'
+      ? {fn:item.dataset.rightFn,action:item.dataset.rightAction,label:item.dataset.rightLabel}
+      : direction==='left'
+        ? {fn:item.dataset.leftFn,action:item.dataset.leftAction,label:item.dataset.leftLabel}
+        : null;
+    if(!cfg || !cfg.fn){ b.classList.remove('show','holding'); return; }
+    b.dataset.action=cfg.action||'';
+    b.style.justifyContent = direction==='right' ? 'flex-start' : 'flex-end';
+    b.innerHTML = direction==='right'
+      ? `<span class="swipe-bg-ico">${ACT_ICO[cfg.action]||''}</span><span>${cfg.label||''}</span>`
+      : `<span>${cfg.label||''}</span><span class="swipe-bg-ico">${ACT_ICO[cfg.action]||''}</span>`;
+    b.classList.add('show');
+    b.classList.toggle('holding', Math.abs(dist)>=THRESH && !!holdTimer);
   };
-  window._closeAllSwipes=()=>closeAllExcept(null);
+
+  const triggerAction=(item,direction)=>{
+    const fn = direction==='right' ? item.dataset.rightFn : item.dataset.leftFn;
+    resetItem(item);
+    item.dataset.justDragged='1';
+    setTimeout(()=>{ delete item.dataset.justDragged; },400);
+    if(curItem===item){ curItem=null; dragging=false; dir=null; }
+    holding=false;
+    if(fn && typeof window[fn]==='function'){
+      if(navigator.vibrate) navigator.vibrate([12,30,14]);
+      window[fn](item.dataset.swipeId);
+    }
+  };
 
   document.addEventListener('touchstart',e=>{
     const item=e.target.closest('.swipe-item');
-    // Tocar uno de los botones de acción: no iniciar arrastre ni cerrar la fila
-    // que se está tocando (antes esto cerraba la propia fila y el botón dejaba
-    // de recibir el "click", pareciendo que no funcionaba).
-    if(item && e.target.closest('.swipe-actions')){ curItem=null; return; }
-    if(!item){ closeAllExcept(null); curItem=null; return; }
+    if(!item){ curItem=null; return; }
     const t=e.touches[0];
-    // Cerca del borde izquierdo: dejamos paso al gesto nativo de "volver atrás"
-    // del sistema (edge-swipe de Android/iOS) en vez de competir con él.
+    // Cerca del borde izquierdo: dejamos paso al gesto nativo de "volver atrás".
     if(t.clientX<EDGE_GUARD){ curItem=null; return; }
-    curItem=item; locked=null; dragging=false;
-    swipeW=widthOf(item);
-    baseX = item.classList.contains('swipe-open') ? -swipeW : 0;
-    startX=t.clientX; startY=t.clientY; curX=baseX;
+    curItem=item; locked=null; dragging=false; dir=null; cancelHold();
+    startX=t.clientX; startY=t.clientY; curX=0;
   },{passive:true});
+
   document.addEventListener('touchmove',e=>{
     if(!curItem)return;
     const t=e.touches[0];
@@ -2514,50 +2651,182 @@ window._fabSetDefault=(key)=>{
     if(locked===null){
       if(Math.abs(dx)>8||Math.abs(dy)>8) locked=Math.abs(dx)>Math.abs(dy)?'x':'y';
     }
-    if(locked==='y'){ curItem=null; return; }
-    if(locked==='x'){
-      dragging=true;
-      curX=Math.min(0,Math.max(-swipeW-14,baseX+dx));
-      const c=content(curItem);
-      if(c){ c.classList.add('dragging'); c.style.transform=`translateX(${curX}px)`; }
+    if(locked==='y'){ if(curItem)resetItem(curItem); curItem=null; cancelHold(); return; }
+    if(locked!=='x')return;
+    dragging=true;
+    curX=Math.max(-MAX_DRAG,Math.min(MAX_DRAG,dx));
+    const c=contentOf(curItem);
+    if(c){ c.classList.add('dragging'); c.style.transform=`translateX(${curX}px)`; }
+    const newDir = curX>4?'right':curX<-4?'left':null;
+    if(newDir!==dir){ cancelHold(); dir=newDir; }
+    updateBg(curItem,dir,curX);
+    const fn = dir==='right'?curItem.dataset.rightFn:dir==='left'?curItem.dataset.leftFn:null;
+    if(fn && Math.abs(curX)>=THRESH){
+      if(!holdTimer && !holding){
+        const itemRef=curItem, dirRef=dir;
+        holdTimer=setTimeout(()=>{
+          holdTimer=null;
+          if(curItem===itemRef && dir===dirRef) triggerAction(itemRef,dirRef);
+        },HOLD_MS);
+        updateBg(curItem,dir,curX);
+      }
+    } else {
+      cancelHold();
+      updateBg(curItem,dir,curX);
     }
   },{passive:true});
-  document.addEventListener('touchend',()=>{
-    if(!curItem){ return; }
-    if(!dragging){ curItem=null; return; }
-    const c=content(curItem);
-    const shouldOpen = curX < -swipeW/2;
-    const curItem2=curItem;
-    if(c){
-      c.classList.remove('dragging');
-      c.style.transform = shouldOpen?`translateX(-${swipeW}px)`:'translateX(0)';
-      curItem2.dataset.justDragged='1';
-      setTimeout(()=>{ delete curItem2.dataset.justDragged; },300);
-    }
-    curItem2.classList.toggle('swipe-open',shouldOpen);
-    if(shouldOpen){ closeAllExcept(curItem2); if(navigator.vibrate) navigator.vibrate(8); }
-    curItem=null; dragging=false;
-  });
-  document.addEventListener('touchcancel',()=>{ curItem=null; dragging=false; },{passive:true});
-  // Evita que el "tap" que cierra un drag dispare el onclick de la tarjeta
+
+  const endDrag=()=>{
+    if(!curItem)return;
+    cancelHold();
+    if(dragging) resetItem(curItem);
+    curItem=null; dragging=false; dir=null; holding=false;
+  };
+  document.addEventListener('touchend',endDrag);
+  document.addEventListener('touchcancel',endDrag);
+
+  // Evita que el "tap" que suelta un arrastre dispare el onclick de la tarjeta.
   document.addEventListener('click',e=>{
     const item=e.target.closest?.('.swipe-item');
-    if(!item)return;
-    // El "justDragged" solo debe bloquear el tap sobre el CONTENIDO (para no
-    // abrir el detalle sin querer justo tras arrastrar). Si el toque es sobre
-    // un botón de acción (Eliminar, WhatsApp, Completar...), nunca se bloquea:
-    // antes esto obligaba a pulsar dos veces el botón cuando se tocaba justo
-    // después de deslizar, porque la marca "justDragged" seguía activa y
-    // tragaba también ese primer clic sobre el propio botón.
-    if(item.dataset.justDragged==='1' && !e.target.closest('.swipe-actions')){ e.stopPropagation(); e.preventDefault(); return; }
-    // Si la fila ya está abierta y el toque fue en el contenido (no en un botón
-    // de acción), el primer tap solo la cierra: evita abrir el detalle por error.
-    if(item.classList.contains('swipe-open') && !e.target.closest('.swipe-actions')){
+    if(item && item.dataset.justDragged==='1'){ e.stopPropagation(); e.preventDefault(); }
+  },true);
+})();
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SELECCIÓN MÚLTIPLE — mantener pulsado un cliente, aviso o presupuesto
+// activa el modo selección; tocar otros elementos del mismo tipo los añade
+// o los quita; aparece una barra flotante con el botón "Eliminar".
+// Funciona sobre cualquier elemento con data-sel-id + data-sel-type.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+(()=>{
+  const LP_MS=480;   // ms manteniendo pulsado, sin mover el dedo, para activar la selección
+  const MOVE_TOL=9;  // px de tolerancia antes de considerar que hay arrastre
+  let lpTimer=null,lpItem=null,sx=0,sy=0,moved=false;
+
+  const TYPE_CONF={
+    cliente:{deleteFn:'_selDeleteClientes',label:'cliente',plural:'clientes'},
+    aviso:{deleteFn:'_selDeleteAvisos',label:'aviso',plural:'avisos'},
+    presupuesto:{deleteFn:'_selDeletePresupuestos',label:'presupuesto',plural:'presupuestos'},
+  };
+
+  window._selMode={active:false,type:null,ids:new Set()};
+
+  const renderBar=()=>{
+    let bar=document.getElementById('selActionBar');
+    if(!window._selMode.active){ if(bar)bar.remove(); return; }
+    const n=window._selMode.ids.size;
+    if(!bar){
+      bar=document.createElement('div');
+      bar.id='selActionBar';
+      bar.className='sel-action-bar';
+      document.body.appendChild(bar);
+    }
+    bar.innerHTML=`
+      <button class="sel-cancel" onclick="window._selCancel()">${ICO.x(15)}</button>
+      <span class="sel-count">${n?`${n} seleccionado${n!==1?'s':''}`:'Toca para seleccionar'}</span>
+      <button class="sel-delete-btn" onclick="window._selDeleteConfirm()" ${n?'':'disabled'}>${ICO.trash(15)} Eliminar</button>`;
+  };
+
+  window._selCancel=()=>{
+    window._selMode={active:false,type:null,ids:new Set()};
+    document.querySelectorAll('.sel-checked').forEach(el=>el.classList.remove('sel-checked'));
+    document.body.classList.remove('sel-mode');
+    document.body.removeAttribute('data-sel-type');
+    renderBar();
+  };
+
+  window._selDeleteConfirm=async()=>{
+    const {type,ids}=window._selMode;
+    if(!ids||!ids.size)return;
+    const conf=TYPE_CONF[type]; if(!conf)return;
+    if(!confirm(`¿Eliminar ${ids.size} ${ids.size!==1?conf.plural:conf.label}? Esta acción no tiene vuelta atrás.`))return;
+    const idArr=[...ids];
+    window._selCancel();
+    if(typeof window[conf.deleteFn]==='function') await window[conf.deleteFn](idArr);
+  };
+
+  const toggleSelect=(item,type,id)=>{
+    if(!window._selMode.active){
+      window._selMode={active:true,type,ids:new Set()};
+      document.body.classList.add('sel-mode');
+      document.body.setAttribute('data-sel-type',type);
+    }
+    if(window._selMode.type!==type)return; // solo una lista a la vez
+    const ids=window._selMode.ids;
+    if(ids.has(id)){ ids.delete(id); item.classList.remove('sel-checked'); }
+    else { ids.add(id); item.classList.add('sel-checked'); }
+    if(navigator.vibrate) navigator.vibrate(14);
+    renderBar();
+  };
+
+  document.addEventListener('touchstart',e=>{
+    const item=e.target.closest('[data-sel-id]');
+    if(!item){ lpItem=null; clearTimeout(lpTimer); return; }
+    const t=e.touches[0];
+    lpItem=item; sx=t.clientX; sy=t.clientY; moved=false;
+    clearTimeout(lpTimer);
+    lpTimer=setTimeout(()=>{
+      if(moved||!lpItem)return;
+      const type=lpItem.dataset.selType, id=lpItem.dataset.selId;
+      if(!type||!id)return;
+      const itemRef=lpItem;
+      itemRef.dataset.justSelected='1';
+      setTimeout(()=>{ delete itemRef.dataset.justSelected; },400);
+      toggleSelect(itemRef,type,id);
+    },LP_MS);
+  },{passive:true});
+
+  document.addEventListener('touchmove',e=>{
+    if(!lpItem)return;
+    const t=e.touches[0];
+    if(Math.abs(t.clientX-sx)>MOVE_TOL||Math.abs(t.clientY-sy)>MOVE_TOL){ moved=true; clearTimeout(lpTimer); }
+  },{passive:true});
+
+  const endLP=()=>{ clearTimeout(lpTimer); lpItem=null; };
+  document.addEventListener('touchend',endLP);
+  document.addEventListener('touchcancel',endLP);
+
+  // Mientras el modo selección está activo, cualquier tap sobre un elemento
+  // del mismo tipo alterna su selección en vez de abrir el detalle.
+  document.addEventListener('click',e=>{
+    const item=e.target.closest?.('[data-sel-id]');
+    if(item && item.dataset.justSelected==='1'){ e.stopPropagation(); e.preventDefault(); return; }
+    if(window._selMode.active && item && item.dataset.selType===window._selMode.type){
       e.stopPropagation(); e.preventDefault();
-      closeItem(item);
+      toggleSelect(item,item.dataset.selType,item.dataset.selId);
     }
   },true);
 })();
+
+// ── Borrado en bloque para cada tipo seleccionable ──
+window._selDeleteClientes=async(ids)=>{
+  toast('Eliminando…','i');
+  for(const id of ids){
+    try{
+      const c=allClientes.find(x=>x.id===id);
+      if(c) await addDoc(collection(db,'grupos',CGID,'archivos'),{...c,id:c.id,tipo:'cliente',eliminadoEn:serverTimestamp()});
+      await deleteDoc(doc(db,'grupos',CGID,'clientes',id));
+    }catch(e){ console.warn('_selDeleteClientes',id,e); }
+  }
+  toast(`🗑️ ${ids.length>1?'Clientes eliminados':'Cliente eliminado'}`,'o');
+};
+window._selDeleteAvisos=async(ids)=>{
+  toast('Eliminando…','i');
+  for(const id of ids){
+    try{ await deleteDoc(doc(db,'grupos',CGID,'avisos',id)); }catch(e){ console.warn('_selDeleteAvisos',id,e); }
+  }
+  toast(`🗑️ ${ids.length>1?'Avisos eliminados':'Aviso eliminado'}`,'o');
+};
+window._selDeletePresupuestos=async(ids)=>{
+  toast('Eliminando…','i');
+  for(const id of ids){
+    try{
+      if(typeof _quitarPresupuestoLocal==='function') _quitarPresupuestoLocal(id);
+      await deleteDoc(doc(db,'grupos',CGID,'presupuestos',id));
+    }catch(e){ console.warn('_selDeletePresupuestos',id,e); }
+  }
+  toast(`🗑️ ${ids.length>1?'Presupuestos eliminados':'Presupuesto eliminado'}`,'o');
+};
 
 window.goScreen=id=>{
   if($('sb').classList.contains('open')){cerrarSB();return;}
@@ -4365,9 +4634,16 @@ window.guardarSimple=async(tipo,editId)=>{
 
 window.verSimple=(tipo,itemId)=>{
   const conf=_SIMPLE_CONF[tipo];
-  const completado=!!(_simpleComp[tipo]||[]).find(x=>x.id===itemId);
-  const item=completado?(_simpleComp[tipo]||[]).find(x=>x.id===itemId):(_simplePend[tipo]||[]).find(x=>x.id===itemId);
+  let item=(_simpleComp[tipo]||[]).find(x=>x.id===itemId)||(_simplePend[tipo]||[]).find(x=>x.id===itemId);
+  if(!item){
+    // Puede que la pestaña Cobros/Entregas aún no se haya cargado (p.ej. al
+    // abrir el elemento desde el registro completo de un cliente). Usamos
+    // los datos ya cargados en la ficha del cliente como respaldo.
+    const fhKey=tipo==='cobro'?'cobros':'entregas';
+    item=((window._fichaHistData&&window._fichaHistData[fhKey])||[]).find(x=>x.id===itemId);
+  }
   if(!item){ toast('No encontrado','e'); return; }
+  const completado=item.estado==='completado';
   const cli=allClientes.find(c=>c.id===item.clienteId);
   const prio=item.prioridad||'normal';
   const pc=_averPrioConf[prio]||_averPrioConf.normal;
@@ -5161,13 +5437,14 @@ const htmlListaClis=(clis,preview=false)=>{
       ? `<img src="${avaUrl}" alt="${c.nombre}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block">`
       : `<div class="cli-ava-initials" style="background:${temaColor||col}">${avaIni}</div>`;
     const avaBg=avaUrl?'transparent':(temaColor||col);
-    return`<div class="cli-card" onclick="verCliente('${c.id}')">
+    return`<div class="cli-card" data-sel-id="${c.id}" data-sel-type="cliente" onclick="verCliente('${c.id}')">
+      <div class="sel-check"></div>
       <div class="cli-ava" style="background:${avaBg}">${avaHtml}</div>
       <div class="cli-info">
         <div class="cli-name">${c.nombre} <span>${colEmo}</span></div>
         <div class="cli-sub">${subParts.join(' · ')||'Sin datos de contacto'}</div>
       </div>
-      <div class="cli-arrow">›</div>
+      <div class="cli-arrow">${ICO.chevron(17)}</div>
     </div>`;
   }).join('');
   const total=allClientes.filter(c=>!c.archivado).length;
@@ -5506,12 +5783,19 @@ window._htmlFichaHistLista=(tipo)=>{
       </div>`;
     }).join('');
   }
-  // avisos / entregas / cobros
+  // avisos / entregas / cobros — se abren igual que desde su sección nativa
+  // (mismo visor/editor que en Avisos, Entregas o Cobros), permitiendo hacer
+  // con ellos todo lo que se podría hacer desde ahí.
   const icoMap={avisos:'💬',entregas:'📦',cobros:'💰'};
+  const nativeOpen=(tipo,id)=>{
+    if(tipo==='avisos') return `editarAviso('${id}')`;
+    if(tipo==='entregas') return `verSimple('entrega','${id}')`;
+    return `verSimple('cobro','${id}')`;
+  };
   return items.map(it=>{
     const completado=it.estado==='completado'||it.estado==='resuelto';
     const importeTxt=(tipo==='cobros'&&it.importe)?` · ${fmtM(it.importe)}`:'';
-    return`<div class="averia-card ${completado?'resuelta':''}" style="cursor:pointer" onclick="window._verFichaHistItem('${tipo}','${it.id}')">
+    return`<div class="averia-card ${completado?'resuelta':''}" style="cursor:pointer" onclick="${nativeOpen(tipo,it.id)}">
       <div class="averia-header">
         <div class="averia-ico">${icoMap[tipo]}</div>
         <div style="flex:1;min-width:0">
@@ -11013,34 +11297,18 @@ const _presuCard = (p, comp=false) => {
   if(!comp&&p.estado==='espera'&&p.creado){
     const tsC=p.creado?.toDate?p.creado.toDate():new Date(p.creado);
     const dias=Math.floor((Date.now()-tsC.getTime())/(1000*60*60*24));
-    if(dias>=7) diasBadge=`<span style="font-size:10px;font-weight:900;background:rgba(255,152,0,.15);color:#ff9800;border-radius:10px;padding:2px 7px;margin-left:5px">${dias}d sin respuesta</span>`;
+    if(dias>=7) diasBadge=`<span style="font-size:10px;font-weight:800;background:var(--warn-bg);color:var(--warn);border-radius:10px;padding:2px 7px;margin-left:5px">${dias}d sin respuesta</span>`;
   }
-  const accionesPend = `
-      <button class="swipe-act del" onclick="event.stopPropagation();swipeEliminarPresupuesto('${p.id}')">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-        <span>Eliminar</span>
-      </button>
-      <button class="swipe-act done" onclick="event.stopPropagation();swipeCompletarPresupuesto('${p.id}')">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <span>Completar</span>
-      </button>
-      <button class="swipe-act wa" onclick="event.stopPropagation();enviarPresupuestoWhatsAppPDF('${p.id}')">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.8-.7-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 20.2 12 8.2 8.2 0 0 1 12 20.2z"/></svg>
-        <span>WhatsApp</span>
-      </button>`;
-  const accionesComp = `
-      <button class="swipe-act del" onclick="event.stopPropagation();swipeEliminarPresupuesto('${p.id}')">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-        <span>Eliminar</span>
-      </button>
-      <button class="swipe-act restore" onclick="event.stopPropagation();swipeRestaurarPresupuesto('${p.id}')">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 12a9 9 0 1 0 3-6.7"/><polyline points="3 4 3 9 8 9"/></svg>
-        <span>Restaurar</span>
-      </button>`;
-  return `<div class="swipe-item" data-swipe-id="${p.id}">
-    <div class="swipe-actions">
-      ${comp?accionesComp:accionesPend}
-    </div>
+  // Gesto simplificado: deslizar a la derecha y mantener pulsado elimina;
+  // deslizar a la izquierda y mantener pulsado completa (pendientes) o
+  // restaura a pendiente (completados). Sin botones que revelar.
+  const rightAttrs = `data-right-fn="swipeEliminarPresupuesto" data-right-action="delete" data-right-label="Eliminar"`;
+  const leftAttrs = comp
+    ? `data-left-fn="swipeRestaurarPresupuesto" data-left-action="restore" data-left-label="Restaurar"`
+    : `data-left-fn="swipeCompletarPresupuesto" data-left-action="complete" data-left-label="Completar"`;
+  return `<div class="swipe-item" data-swipe-id="${p.id}" data-sel-id="${p.id}" data-sel-type="presupuesto" ${rightAttrs} ${leftAttrs}>
+    <div class="swipe-bg"></div>
+    <div class="sel-check"></div>
     <div class="swipe-content" onclick="verPresupuesto('${p.id}')">
       <div class="presu-card ${comp?'aceptado':''}">
         <div class="presu-header">
@@ -11049,8 +11317,10 @@ const _presuCard = (p, comp=false) => {
             <div style="font-size:12px;color:var(--tx2)">${c?.nombre||p.clienteNombre||'—'} · ${fmtF(p.creado)}</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-
-            ${!comp?`<button onclick="event.stopPropagation();_recordarPresupuesto('${p.id}')" style="border:none;background:rgba(37,211,102,.1);color:#25d366;border-radius:12px;padding:5px 8px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font)">💬</button>`:''}
+            ${!comp?`<button class="icon-btn wa" onclick="event.stopPropagation();_recordarPresupuesto('${p.id}')" title="Recordatorio">${ICO.message(14)}</button>`:''}
+            <button class="icon-btn wa" onclick="event.stopPropagation();enviarPresupuestoWhatsAppPDF('${p.id}')" title="Enviar por WhatsApp">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.8-.7-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 20.2 12 8.2 8.2 0 0 1 12 20.2z"/></svg>
+            </button>
             <span class="presu-badge ${comp?'aceptado':'espera'}">${comp?'Completado':'Pendiente'}</span>
           </div>
         </div>
@@ -11955,15 +12225,15 @@ window.swipeRestaurarPresupuesto=async(prId)=>{
   await toggleEstadoPresupuesto(prId,'espera');
 };
 
-// Eliminar directamente desde el gesto de deslizar en la lista (sin abrir el
-// detalle primero).
+// Eliminar directamente desde el gesto de deslizar+mantener pulsado en la
+// lista. El propio gesto sostenido es la confirmación, así que no se
+// interrumpe con un diálogo: solo se avisa con un aviso (toast) del resultado.
 window.swipeEliminarPresupuesto=async(prId)=>{
   if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
-  if(!confirm('¿Eliminar este presupuesto?'))return;
   _quitarPresupuestoLocal(prId);
   try{
     await deleteDoc(doc(db,'grupos',CGID,'presupuestos',prId));
-    toast('Eliminado','i');
+    toast('🗑️ Presupuesto eliminado','o');
   }catch(e){
     console.error('swipeEliminarPresupuesto',e);
     toast('Sin conexión: se eliminará al recuperar internet','i');
@@ -12751,7 +13021,7 @@ const renderPerfil=()=>{
       <div class="theme-picker-label">Color de la interfaz</div>
       <div class="theme-picker">
         ${[
-          {k:'azul',       c1:'#0f766e', c2:'#0b5c56', lbl:'Turquesa'},
+          {k:'azul',       c1:'#14b8a6', c2:'#0d9488', lbl:'Turquesa'},
           {k:'rojo',       c1:'#c2452f', c2:'#9a3620', lbl:'Terracota'},
           {k:'lila',       c1:'#6d5a8a', c2:'#4f3f68', lbl:'Ciruela'},
           {k:'verde',      c1:'#2f6b4f', c2:'#204a38', lbl:'Bosque'},
@@ -12766,8 +13036,6 @@ const renderPerfil=()=>{
   <!-- ── ACCESIBILIDAD ── -->
   <div class="fsec">
     <div class="fsec-title">♿ Accesibilidad</div>
-    <div class="toggle-row"><span class="toggle-label">🔤 Texto grande</span><label class="toggle-sw"><input type="checkbox" id="toggleTextoGrande" onchange="toggleTextoGrande(this.checked)" ${document.body.classList.contains('texto-grande')?'checked':''}><span class="toggle-track"></span></label></div>
-    <div class="toggle-row"><span class="toggle-label">🌗 Alto contraste</span><label class="toggle-sw"><input type="checkbox" id="toggleAltoContraste" onchange="toggleAltoContraste(this.checked)" ${document.body.classList.contains('alto-contraste')?'checked':''}><span class="toggle-track"></span></label></div>
     <div class="toggle-row"><span class="toggle-label">📳 Vibración</span><label class="toggle-sw"><input type="checkbox" id="toggleHaptic" onchange="toggleHaptic(this.checked)" ${localStorage.getItem('alberto_haptic')!=='0'?'checked':''}><span class="toggle-track"></span></label></div>
   </div>
   </div>
@@ -12803,6 +13071,8 @@ const renderPerfil=()=>{
     </div>`:''}
   </div>
   `;
+  const _esAdminGrupo = !!(CG && CU && CG.adminUid===CU.uid);
+  if(_esAdminGrupo){
   const _autoBackupActive=localStorage.getItem('alberto_autobackup')==='1';
   const _autoBackupDirName=localStorage.getItem('alberto_autobackup_dir_name')||'';
   const _fsa='showDirectoryPicker' in window;
@@ -12810,6 +13080,7 @@ const renderPerfil=()=>{
   html+=`
   <div class="fsec" style="margin-top:8px">
     <div class="fsec-title">💾 Copia de seguridad automática</div>
+    <div style="font-size:11px;color:var(--tx2);margin-bottom:6px;font-weight:800;letter-spacing:.3px">👑 Solo visible para el admin del grupo</div>
     <div style="font-size:12px;color:var(--tx2);margin-bottom:14px;line-height:1.6">
       El backup se guarda automáticamente <strong style="color:var(--tx)">dentro de la app</strong> (sin permisos, sin diálogos) y también en la <strong style="color:var(--tx)">carpeta que elijas</strong> si hay permiso activo.
       Nombre: <code style="font-size:10px;background:rgba(255,255,255,.06);padding:1px 5px;border-radius:4px">alberto_backup_GRUPO_AAAA-MM-DD.json</code>
@@ -12817,7 +13088,7 @@ const renderPerfil=()=>{
     <div class="toggle-row" style="margin-bottom:10px">
       <div>
         <div class="toggle-label">🔄 Backup automático diario</div>
-        <div style="font-size:11px;color:var(--tx2);margin-top:3px;max-width:220px">Se ejecuta una vez al día al abrir la app.</div>
+        <div style="font-size:11px;color:var(--tx2);margin-top:3px;max-width:220px">Se ejecuta una vez al día, en silencio, la primera vez que se abre la app.</div>
       </div>
       <label class="toggle-sw" style="flex-shrink:0"><input type="checkbox" id="toggleAutoBackup" onchange="toggleAutoBackup(this.checked)" ${_autoBackupActive?'checked':''}><span class="toggle-track"></span></label>
     </div>
@@ -12833,8 +13104,11 @@ const renderPerfil=()=>{
     </div>
     <button onclick="verBackupsGuardados()" style="margin-top:6px;width:100%;padding:9px;border-radius:12px;border:1px solid rgba(255,255,255,.08);background:transparent;color:var(--tx2);font-size:11px;font-weight:700;cursor:pointer;font-family:var(--font)">📋 Ver backups guardados en la app</button>
     `:''}
-  </div>
+  </div>`;
+  }
+  html+=`
   <button class="btn btn-del" style="margin-top:8px" onclick="doLogout()">🚪 Cerrar sesión</button>`;
+
 
   $('perfilContent').innerHTML = html;
 
@@ -12926,9 +13200,9 @@ window._setAvisoPrio = (val, suffix) => {
   });
 };
 const _avisPrioridad={
-  baja:  {label:'Baja',   color:'#29b6f6', bg:'rgba(41,182,246,.13)',  ico:'🔵'},
-  media: {label:'Media',  color:'#ffa726', bg:'rgba(255,167,38,.13)',  ico:'🟠'},
-  alta:  {label:'Alta',   color:'#ef5350', bg:'rgba(239,83,80,.13)',   ico:'🔴'},
+  baja:  {label:'Baja',   color:'var(--info)', bg:'var(--info-bg)',  ico:''},
+  media: {label:'Media',  color:'var(--warn)', bg:'var(--warn-bg)',  ico:''},
+  alta:  {label:'Alta',   color:'var(--danger2)', bg:'var(--danger-bg)',   ico:''},
 };
 
 // ── Helpers de fecha de alerta ──
@@ -13050,10 +13324,10 @@ const _renderAvisBody=()=>{
   // Banner de alertas activas hoy (solo en tab pendientes)
   const alertasHoy=_avisTab==='pend'?lista.filter(_alertaHoy):[];
   const bannerHTML=alertasHoy.length?`
-    <div style="background:rgba(255,87,34,.12);border:1px solid rgba(255,87,34,.35);border-radius:14px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
-      <span style="font-size:18px">🔔</span>
+    <div style="background:var(--urgent-bg);border:1px solid var(--urgent-bd);border-radius:var(--rd);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
+      <span style="color:var(--urgent);display:flex">${ICO.alert(19)}</span>
       <div>
-        <div style="font-size:13px;font-weight:800;color:#ff5722">${alertasHoy.length===1?'1 aviso requiere tu atención hoy':`${alertasHoy.length} avisos requieren tu atención hoy`}</div>
+        <div style="font-size:13px;font-weight:700;color:var(--urgent)">${alertasHoy.length===1?'1 aviso requiere tu atención hoy':`${alertasHoy.length} avisos requieren tu atención hoy`}</div>
         <div style="font-size:11px;color:var(--tx2);margin-top:1px">Están destacados a continuación</div>
       </div>
     </div>`:'';
@@ -13065,39 +13339,51 @@ const _renderAvisBody=()=>{
     const esAlertaHoy=_alertaHoy(a);
     const esAlertaFutura=_alertaFutura(a);
 
-    const borderColor=esResuelto?'#4caf50':esAlertaHoy?'#ff5722':prio.color;
-    const cardBg=esAlertaHoy&&!esResuelto?'background:rgba(255,87,34,.06);':esResuelto?'opacity:.55;':'';
+    const borderColor=esResuelto?'var(--ok)':esAlertaHoy?'var(--urgent)':prio.color;
+    const cardBg=esAlertaHoy&&!esResuelto?'background:var(--urgent-bg);':esResuelto?'opacity:.55;':'';
 
-    const prioChip=!esResuelto?`<span style="display:inline-flex;align-items:center;gap:3px;background:${prio.bg};color:${prio.color};border-radius:20px;padding:2px 8px;font-size:10px;font-weight:800;letter-spacing:.3px">${prio.ico} ${prio.label}</span>`:'';
+    const prioChip=!esResuelto?`<span style="display:inline-flex;align-items:center;gap:5px;background:${prio.bg};color:${prio.color};border-radius:20px;padding:3px 9px 3px 7px;font-size:10px;font-weight:800;letter-spacing:.3px"><span style="width:5px;height:5px;border-radius:50%;background:currentColor;flex-shrink:0"></span>${prio.label}</span>`:'';
 
     let alertaChip='';
     if(!esResuelto&&a.fechaAlerta){
       if(esAlertaHoy){
-        alertaChip=`<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(255,87,34,.15);color:#ff5722;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:800;animation:notifPop .5s cubic-bezier(.16,1,.3,1)">${_alarmIco} ¡Hoy!</span>`;
+        alertaChip=`<span style="display:inline-flex;align-items:center;gap:4px;background:var(--urgent-bg);color:var(--urgent);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:800;animation:notifPop .5s var(--ease-spring)">${_alarmIco} ¡Hoy!</span>`;
       } else if(esAlertaFutura){
-        alertaChip=`<span style="display:inline-flex;align-items:center;gap:4px;background:rgba(41,182,246,.12);color:#29b6f6;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:800">${_alarmIco} ${a.fechaAlerta}</span>`;
+        alertaChip=`<span style="display:inline-flex;align-items:center;gap:4px;background:var(--info-bg);color:var(--info);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:800">${_alarmIco} ${a.fechaAlerta}</span>`;
       }
     }
 
-    return`<div class="averia-card${esResuelto?' resuelta':''}" style="border-left:4px solid ${borderColor};${cardBg}${esAlertaHoy?'box-shadow:0 0 0 1px rgba(255,87,34,.2);':''}">
+    // Gesto simplificado: deslizar a la derecha y mantener pulsado elimina;
+    // deslizar a la izquierda y mantener pulsado resuelve (pendientes) o
+    // restaura a pendiente (resueltos). El botón "Editar" se mantiene aparte
+    // porque no es una acción destructiva ni de cambio de estado.
+    const rightAttrs=`data-right-fn="swipeEliminarAviso" data-right-action="delete" data-right-label="Eliminar"`;
+    const leftAttrs=esResuelto
+      ? `data-left-fn="swipeRestaurarAviso" data-left-action="restore" data-left-label="Restaurar"`
+      : `data-left-fn="swipeResolverAviso" data-left-action="complete" data-left-label="Resolver"`;
+    return`<div class="swipe-item" data-swipe-id="${a.id}" data-sel-id="${a.id}" data-sel-type="aviso" ${rightAttrs} ${leftAttrs}>
+      <div class="swipe-bg"></div>
+      <div class="sel-check"></div>
+      <div class="swipe-content">
+      <div class="averia-card${esResuelto?' resuelta':''}" style="border-left:3px solid ${borderColor};${cardBg}${esAlertaHoy?'box-shadow:0 0 0 1px var(--urgent-bd);':''}">
       <div class="averia-header" style="align-items:flex-start">
-        <div class="averia-ico" style="color:${esResuelto?'#4caf50':prio.color}">${_avisIco}</div>
+        <div class="averia-ico" style="color:${esResuelto?'var(--ok)':borderColor}">${_avisIco}</div>
         <div style="flex:1;min-width:0">
           <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;align-items:center">
             ${prioChip}${alertaChip}
           </div>
           <div class="averia-title" style="white-space:normal;line-height:1.4">${a.descripcion||'Sin descripción'}</div>
           <div class="averia-sub" style="margin-top:4px">
-            ${cli?`<span style="color:var(--r);font-weight:700">👤 ${cli.nombre}</span> · `:''}
+            ${cli?`<span style="color:var(--r);font-weight:700">${ICO.user(11)} ${cli.nombre}</span> · `:''}
             ${a.creadoPorNombre||'Técnico'} · ${fmtF(a.creado)}
-            ${esResuelto?` · <span style="color:#4caf50;font-weight:700">Resuelto ${fmtF(a.resueltaEn)}</span>`:''}
+            ${esResuelto?` · <span style="color:var(--ok);font-weight:700">Resuelto ${fmtF(a.resueltaEn)}</span>`:''}
           </div>
-          <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
-            ${!esResuelto?`<button class="btn btn-ok btn-sm" onclick="resolverAvisoConOpcion('${a.id}')">✅ Marcar resuelto</button>`:''}
-            ${!esResuelto?`<button class="btn btn-s btn-sm" onclick="editarAviso('${a.id}')">✏️ Editar</button>`:''}
-            <button class="btn btn-del btn-sm" onclick="eliminarAviso('${a.id}')">🗑 Eliminar</button>
-          </div>
+          ${!esResuelto?`<div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
+            <button class="btn btn-s btn-sm" onclick="event.stopPropagation();editarAviso('${a.id}')">${ICO.edit(14)} Editar</button>
+          </div>`:''}
         </div>
+      </div>
+      </div>
       </div>
     </div>`;
   }).join('');
@@ -13210,8 +13496,10 @@ window.abrirNuevoAviso=(presetFecha,presetCliId)=>{
 
 // ── Editar aviso existente ──
 window.editarAviso=(id)=>{
-  const a=_avisosPend.find(x=>x.id===id);
-  if(!a)return;
+  const a=(_avisosPend||[]).find(x=>x.id===id)
+    ||(_avisosRes||[]).find(x=>x.id===id)
+    ||((window._fichaHistData&&window._fichaHistData.avisos)||[]).find(x=>x.id===id);
+  if(!a){toast('Aviso no encontrado','e');return;}
   const hoy=_hoyStr();
   abrirSB('✏️ Editar aviso',`
     <div class="fsec">
@@ -13333,6 +13621,33 @@ window.eliminarAviso=async(id)=>{
   try{
     await deleteDoc(doc(db,'grupos',CGID,'avisos',id));
     toast('Aviso eliminado','i');
+  }catch(e){toast('Error: '+e.message,'e');}
+};
+
+// Restaurar un aviso resuelto de vuelta a pendiente.
+window.restaurarAviso=async(id)=>{
+  try{
+    await updateDoc(doc(db,'grupos',CGID,'avisos',id),{estado:'pendiente',resueltaEn:null});
+    toast('↩️ Aviso restaurado a pendiente','o');
+  }catch(e){toast('Error: '+e.message,'e');}
+};
+
+// ── Acciones desde el gesto de deslizar+mantener pulsado (lista de avisos) ──
+// El propio gesto sostenido es la confirmación: no se interrumpe con un
+// diálogo, solo se avisa el resultado con un toast.
+window.swipeResolverAviso=async(id)=>{
+  if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
+  await resolverAviso(id);
+};
+window.swipeRestaurarAviso=async(id)=>{
+  if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
+  await restaurarAviso(id);
+};
+window.swipeEliminarAviso=async(id)=>{
+  if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
+  try{
+    await deleteDoc(doc(db,'grupos',CGID,'avisos',id));
+    toast('🗑️ Aviso eliminado','o');
   }catch(e){toast('Error: '+e.message,'e');}
 };
 
@@ -13476,6 +13791,7 @@ window.cambiarCarpetaBackup=async()=>{
 };
 
 window.toggleAutoBackup=async(active)=>{
+  if(!(CG && CU && CG.adminUid===CU.uid)){ toast('Solo el admin del grupo puede activar el backup automático','e'); return; }
   localStorage.setItem('alberto_autobackup',active?'1':'0');
   if(active){
     if('showDirectoryPicker' in window){
@@ -14335,27 +14651,10 @@ window._calgNavegar=(tipo,id,cliId)=>{
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ACCESIBILIDAD
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-window.toggleTextoGrande=activar=>{
-  localStorage.setItem('alberto_texto_grande',activar?'1':'0');
-  document.body.classList.toggle('texto-grande',activar);
-  toast(activar?'🔤 Texto grande activado':'🔤 Texto normal','o');
-};
-window.toggleAltoContraste=activar=>{
-  localStorage.setItem('alberto_alto_contraste',activar?'1':'0');
-  document.body.classList.toggle('alto-contraste',activar);
-  toast(activar?'🌗 Alto contraste activado':'🌗 Contraste normal','o');
-};
 window.toggleHaptic=activar=>{
   localStorage.setItem('alberto_haptic',activar?'1':'0');
   toast(activar?'📳 Vibración activada':'📳 Vibración desactivada','o');
 };
-
-// Aplicar accesibilidad al cargar
-const _aplicarAccesibilidad=()=>{
-  if(localStorage.getItem('alberto_texto_grande')==='1')document.body.classList.add('texto-grande');
-  if(localStorage.getItem('alberto_alto_contraste')==='1')document.body.classList.add('alto-contraste');
-};
-_aplicarAccesibilidad();
 
 // Haptic helper
 const haptic=(type='light')=>{
@@ -14378,7 +14677,7 @@ const _prevScreen=id=>{
 // PERSONALIZACIÓN: TEMA Y MODO CLARO
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const _TEMAS={
-  azul:        {r:'#0f766e',r2:'#0b5c56',r3:'#5eead4',r4:'#08403c',rgb:'15,118,110', shadow:'0 6px 28px rgba(15,118,110,.24)'},
+  azul:        {r:'#14b8a6',r2:'#0d9488',r3:'#5eead4',r4:'#0f766e',rgb:'20,184,166', shadow:'0 6px 28px rgba(20,184,166,.24)'},
   rojo:        {r:'#c2452f',r2:'#9a3620',r3:'#f4a38a',r4:'#6b2415',rgb:'194,69,47',  shadow:'0 6px 28px rgba(194,69,47,.24)'},
   lila:        {r:'#6d5a8a',r2:'#4f3f68',r3:'#c4b5d6',r4:'#382c4a',rgb:'109,90,138', shadow:'0 6px 28px rgba(109,90,138,.24)'},
   verde:       {r:'#2f6b4f',r2:'#204a38',r3:'#86c9a0',r4:'#163826',rgb:'47,107,79',  shadow:'0 6px 28px rgba(47,107,79,.24)'},
