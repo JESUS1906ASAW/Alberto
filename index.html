@@ -529,23 +529,23 @@ body.modo-claro .sbox:focus{box-shadow:inset 0 1px 2px rgba(0,0,0,.03),0 0 0 3px
 .grupo-header{
   /* 14px arriba + alto real del calendario + 10px de hueco + bloque del nombre */
   --mcal-filas:6;
-  --mcal-alto:calc(32.5px + 14.5px * var(--mcal-filas));
-  height:calc(14px + var(--mcal-alto) + 10px + 59px);border-radius:20px;overflow:hidden;position:relative;cursor:pointer;margin-bottom:16px;flex-shrink:0;box-shadow:0 10px 24px -12px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.06)}
+  --mcal-alto:calc(28.5px + 14.5px * var(--mcal-filas));
+  height:calc(12px + var(--mcal-alto) + 8px + 53px);border-radius:20px;overflow:hidden;position:relative;cursor:pointer;margin-bottom:16px;flex-shrink:0;box-shadow:0 10px 24px -12px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.06)}
 .grupo-header-img{position:absolute;inset:0;background-size:cover;background-position:center;filter:saturate(1.25) brightness(.98);transform:scale(1.02);transition:transform .5s cubic-bezier(.16,1,.3,1)}
 .grupo-header:active .grupo-header-img{transform:scale(1.06)}
 .grupo-header-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.86) 0%,rgba(0,0,0,.32) 46%,rgba(0,0,0,.08) 100%)}
 /* Fila superior del banner: agrupa el botón Inicio y el widget del
    calendario en un mismo contenedor flex para poder centrar el calendario
    en el hueco libre entre el botón y el borde derecho del banner. */
-.grupo-header-top{position:absolute;top:14px;left:14px;right:14px;z-index:3;display:flex;align-items:flex-start;gap:14px}
+.grupo-header-top{position:absolute;top:12px;left:12px;right:12px;z-index:3;display:flex;align-items:flex-start;gap:14px}
 .grupo-header-cal-wrap{flex:1;min-width:0;display:flex}
 .grupo-header-inicio{flex-shrink:0;display:flex;align-items:center;gap:7px;padding:8px 15px;border-radius:22px;background:rgba(8,12,11,.32);backdrop-filter:blur(16px) saturate(1.7);-webkit-backdrop-filter:blur(16px) saturate(1.7);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.92);font-size:13.5px;font-weight:800;letter-spacing:.1px;cursor:pointer;transition:.2s var(--ease-out);box-shadow:0 8px 20px -6px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.2)}
 .grupo-header-inicio:hover,.grupo-header-inicio:active{background:rgba(8,12,11,.6);border-color:rgba(255,255,255,.38);color:#fff;transform:translateY(-1px)}
-.grupo-header-content{position:absolute;bottom:0;left:0;right:0;padding:11px 16px;display:flex;align-items:center;gap:12px}
+.grupo-header-content{position:absolute;bottom:0;left:0;right:0;padding:9px 14px;display:flex;align-items:center;gap:12px}
 
 
-.grupo-title{font-size:18px;line-height:21px;font-weight:900;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.55);letter-spacing:-.2px;word-wrap:break-word;overflow-wrap:break-word}
-.grupo-sub{font-size:12px;line-height:14px;color:rgba(255,255,255,.7);margin-top:2px;font-weight:600}
+.grupo-title{font-size:17.5px;line-height:20px;font-weight:900;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.55);letter-spacing:-.2px;word-wrap:break-word;overflow-wrap:break-word}
+.grupo-sub{font-size:11.5px;line-height:13px;color:rgba(255,255,255,.7);margin-top:2px;font-weight:600}
 
 /* ── Widget mini-calendario dentro del banner de grupo ── */
 /* La caja de texto ya no tiene flex-shrink:0 (evitaba que se ajustara al
@@ -555,13 +555,13 @@ body.modo-claro .sbox:focus{box-shadow:inset 0 1px 2px rgba(0,0,0,.03),0 0 0 3px
 .grupo-header-text{flex:1;min-width:0}
 /* El widget se ancla arriba del banner (no centrado) para dejar SIEMPRE
    libre la franja inferior donde vive el nombre del grupo, aunque sea largo. */
-.mcal-widget{width:100%;box-sizing:border-box;padding:8px 12px 7px;background:rgba(12,16,15,.5);backdrop-filter:blur(14px) saturate(1.6);-webkit-backdrop-filter:blur(14px) saturate(1.6);border:1px solid rgba(255,255,255,.22);border-radius:14px;cursor:pointer;transition:.2s var(--ease-out);box-shadow:0 8px 20px -6px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.14)}
+.mcal-widget{width:100%;box-sizing:border-box;padding:6px 12px 5px;background:rgba(12,16,15,.5);backdrop-filter:blur(14px) saturate(1.6);-webkit-backdrop-filter:blur(14px) saturate(1.6);border:1px solid rgba(255,255,255,.22);border-radius:14px;cursor:pointer;transition:.2s var(--ease-out);box-shadow:0 8px 20px -6px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.14)}
 .mcal-widget:hover,.mcal-widget:active{background:rgba(12,16,15,.65);border-color:rgba(255,255,255,.38)}
 .mcal-month{font-size:10.5px;line-height:13px;font-weight:800;color:#fff;text-align:center;margin-bottom:4px;letter-spacing:1.1px;text-transform:uppercase;text-shadow:0 1px 3px rgba(0,0,0,.5)}
 .mcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1.5px 4px}
 .mcal-grid span{font-size:10.5px;font-weight:600;color:rgba(255,255,255,.75);text-align:center;line-height:13px;height:13px;border-radius:50%;transition:background .15s ease}
 .mcal-today{background:linear-gradient(155deg,var(--r3),var(--r))!important;color:#04211d!important;font-weight:900!important;box-shadow:0 0 0 1px rgba(255,255,255,.55),0 2px 6px rgba(0,0,0,.3)}
-@media(max-width:359px){.grupo-header{--mcal-alto:calc(30px + 13.5px * var(--mcal-filas))}.mcal-widget{padding:7px 9px 6px}.mcal-month{font-size:9.5px;line-height:12px}.mcal-grid span{font-size:9.5px;line-height:12px;height:12px}}
+@media(max-width:359px){.grupo-header{--mcal-alto:calc(26px + 13.5px * var(--mcal-filas))}.mcal-widget{padding:7px 9px 6px}.mcal-month{font-size:9.5px;line-height:12px}.mcal-grid span{font-size:9.5px;line-height:12px;height:12px}}
 
 /* ── GTABS ── */
 /* ══ MENÚ PRINCIPAL DEL GRUPO — 3 secciones simétricas ══ */
@@ -2309,6 +2309,17 @@ window._buildCliSelect = (hiddenId, preCliId, onchangeCb, preNombrePersonalizado
   const btnGuardarDirecto = document.getElementById(hiddenId+'-guardarsinficha');
   if(btnGuardarDirecto) btnGuardarDirecto.addEventListener('click', e => { e.stopPropagation(); pickOpt('__personalizado_directo__','',''); });
 
+  // El nombre escrito se adopta en cuanto se teclea, sin esperar a cerrar el
+  // desplegable ni a pulsar "Guardar sin ficha". Antes, si el usuario escribia
+  // el nombre y le daba directamente a Guardar, el texto se quedaba solo en la
+  // caja de busqueda y el aviso/recordatorio se guardaba sin cliente.
+  const searchEl = document.getElementById(hiddenId+'-search');
+  if(searchEl) searchEl.addEventListener('input', () => {
+    if(hidden.value) return;                    // hay ficha elegida
+    const txt = (searchEl.value||'').trim();
+    hidden.dataset.nombrePersonalizado = txt;
+  });
+
   // Cerrar al clic fuera
   const outsideClose = e => { if(!wrap.contains(e.target)) close(); };
   document.addEventListener('click', outsideClose);
@@ -3065,6 +3076,7 @@ window._selDeleteClientes=async(ids)=>{
   for(const id of ids){
     try{
       const c=allClientes.find(x=>x.id===id);
+      await _archivarDocsDeCliente(id);   // se archiva con todo lo suyo
       if(c) await addDoc(collection(db,'grupos',CGID,'archivos'),{...c,id:c.id,tipo:'cliente',eliminadoEn:serverTimestamp()});
       await deleteDoc(doc(db,'grupos',CGID,'clientes',id));
     }catch(e){ console.warn('_selDeleteClientes',id,e); }
@@ -7844,29 +7856,46 @@ const _ARCH_COLS = [
 // Mueve a 'archivos' todo lo asociado al cliente. Devuelve cuantos documentos movio.
 const _archivarDocsDeCliente = async (cliId) => {
   if(!CGID || !cliId) return 0;
-  let n = 0;
+  // Fuente 1: lo que la app ya tiene cargado en memoria por sus listeners.
+  // Antes solo se consultaba al servidor y, si la consulta fallaba, el fallo se
+  // tragaba en silencio: el cliente se archivaba y sus documentos se quedaban
+  // sueltos en las secciones normales. Ahora la memoria manda y la consulta
+  // solo suma lo que falte (por ejemplo las imagenes, que no estan en memoria).
+  const enMemoria = {
+    avisos:        [...(_avisosPend||[]),...(_avisosRes||[])],
+    cobros:        [...(_simplePend?.cobro||[]),...(_simpleComp?.cobro||[])],
+    presupuestos:  [...(_presusPend||[]),...(_presusComp||[])],
+    recordatorios: [...(allRecordatorios||[])],
+    imagenes:      []
+  };
+  let movidos = 0, fallos = 0;
   for(const {col,tipo} of _ARCH_COLS){
-    let snap;
-    try { snap = await getDocs(query(collection(db,'grupos',CGID,col), where('clienteId','==',cliId))); }
-    catch(e){ continue; }
-    for(const d of snap.docs){
-      const data = d.data();
+    const pendientes = new Map();
+    (enMemoria[col]||[]).forEach(x=>{ if(x && x.id && x.clienteId===cliId) pendientes.set(x.id,x); });
+    try{
+      const snap = await getDocs(query(collection(db,'grupos',CGID,col), where('clienteId','==',cliId)));
+      snap.docs.forEach(d=>pendientes.set(d.id,{id:d.id,...d.data()}));
+    }catch(e){ console.warn('archivar: no se pudo consultar',col,e); }
+    for(const [docId,data] of pendientes){
+      const limpio = {...data};
+      delete limpio.id;
       try{
         await addDoc(collection(db,'grupos',CGID,'archivos'), {
-          ...data, id:d.id, tipo, clienteId:cliId, _colOrigen:col, eliminadoEn:serverTimestamp()
+          ...limpio, id:docId, tipo, clienteId:cliId, _colOrigen:col, eliminadoEn:serverTimestamp()
         });
-        await deleteDoc(doc(db,'grupos',CGID,col,d.id));
-        n++;
-      }catch(e){ /* si falla uno, seguimos con el resto */ }
+        await deleteDoc(doc(db,'grupos',CGID,col,docId));
+        movidos++;
+      }catch(e){ fallos++; console.error('archivar',col,docId,e); }
     }
   }
-  // Los recordatorios viven tambien en memoria y en cache local: si no los
-  // quitamos aqui, la salvaguarda anti-perdida volveria a subirlos.
+  // Los recordatorios viven tambien en memoria y en cache local: si no se
+  // quitan aqui, la salvaguarda anti-perdida volveria a subirlos.
   if(Array.isArray(allRecordatorios) && allRecordatorios.some(r=>r.clienteId===cliId)){
     allRecordatorios = allRecordatorios.filter(r=>r.clienteId!==cliId);
-    if(typeof _lcSave==='function' && CGID) _lcSave('recordatorios', CGID, allRecordatorios);
+    if(CGID) _lcSave('recordatorios', CGID, allRecordatorios);
   }
-  return n;
+  if(fallos) toast(`${fallos} documento${fallos!==1?'s':''} no se pudo archivar`,'e');
+  return movidos;
 };
 
 // Devuelve a sus colecciones todo lo que se archivo en cascada con el cliente.
