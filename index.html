@@ -1770,26 +1770,9 @@ body.is-scrolling .presu-card{
     </div>
   </div>
 
-  <!-- ─── PANTALLA: AVISOS RESUELTOS ─── -->
-  <div class="screen" id="screenAvisosRes">
-    <div class="scroll-pad">
-      <button class="inicio-btn" onclick="goScreen('grupo')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Inicio</button>
-      <div style="font-size:20px;font-weight:900;color:var(--tx);margin-bottom:4px;display:flex;align-items:center;gap:8px">✅ Avisos resueltos</div>
-      <div style="font-size:12px;color:var(--tx2);margin-bottom:18px;line-height:1.5">Historial de avisos ya resueltos. Desliza uno hacia la izquierda para devolverlo a pendientes.</div>
-      <input class="sbox" id="avisResSearchInput" style="margin-bottom:12px" placeholder="🔍 Buscar por cliente o descripción..." oninput="window._filtrarAvisosRes(this.value)">
-      <div id="avisResBody"></div>
-    </div>
-  </div>
-
-  <!-- ─── PANTALLA: PRESUPUESTOS COMPLETADOS ─── -->
-  <div class="screen" id="screenPresusComp">
-    <div class="scroll-pad">
-      <button class="inicio-btn" onclick="goScreen('grupo')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Inicio</button>
-      <div style="font-size:20px;font-weight:900;color:var(--tx);margin-bottom:4px;display:flex;align-items:center;gap:8px">✅ Presupuestos completados</div>
-      <div style="font-size:12px;color:var(--tx2);margin-bottom:18px;line-height:1.5">Presupuestos ya aceptados. Se guardan aquí para consultarlos cuando haga falta.</div>
-      <input class="sbox" id="presuCompSearchInput" style="margin-bottom:12px" placeholder="🔍 Buscar por cliente, título, notas..." oninput="window._filtrarPresusComp(this.value)">
-      <div id="presuCompBody"></div>
-    </div>
+  <!-- ─── PANTALLA: COMPLETADOS / RESUELTOS ─── -->
+  <div class="screen" id="screenCompletados">
+    <div class="scroll-pad" id="completadosContent"></div>
   </div>
 
   <!-- ─── PANTALLA: IMÁGENES ─── -->
@@ -2661,7 +2644,7 @@ const notifLocal=(titulo,cuerpo)=>{
 };
 
 // NAVEGACIÓN — History API (botón atrás nativo del navegador/móvil)
-const screens={inicio:'screenInicio',grupo:'screenGrupo',mantenimiento:'screenMantenimiento',administracion:'screenAdministracion',calendario:'screenCalendario',archivos:'screenArchivos',imagenes:'screenImagenes',presupuestos:'screenPresupuestos',notificaciones:'screenNotificaciones',perfil:'screenPerfil',log:'screenLog',historialGlobal:'screenHistorialGlobal',recordatorios:'screenRecordatorios',avisosRes:'screenAvisosRes',presusComp:'screenPresusComp'};
+const screens={inicio:'screenInicio',grupo:'screenGrupo',mantenimiento:'screenMantenimiento',administracion:'screenAdministracion',calendario:'screenCalendario',archivos:'screenArchivos',imagenes:'screenImagenes',presupuestos:'screenPresupuestos',notificaciones:'screenNotificaciones',perfil:'screenPerfil',log:'screenLog',historialGlobal:'screenHistorialGlobal',recordatorios:'screenRecordatorios',completados:'screenCompletados'};
 
 // Flag para evitar bucles al manejar popstate
 let _navFromPop=false;
@@ -2681,8 +2664,7 @@ const _renderScreen=id=>{
   else if(id==='grupo')renderGrupo();
   else if(id==='mantenimiento')renderMantenimiento();
   else if(id==='recordatorios')renderRecordatorios();
-  else if(id==='avisosRes')renderAvisosResueltos();
-  else if(id==='presusComp')renderPresusCompletados();
+  else if(id==='completados')renderCompletados();
   else if(id==='administracion')renderAdministracion();
   else if(id==='calendario')renderCalendarioGlobal();
   else if(id==='archivos')renderArchivos();
@@ -3191,7 +3173,7 @@ window.addEventListener('popstate',e=>{
 // - Si estás EN el menú del grupo (screenGrupo) → va al inicio real de la app
 // - En cualquier otro sitio → va al inicio de la app
 window.drawerIrInicio=()=>{
-  const screensDelGrupo=['mantenimiento','administracion','calendario','archivos','imagenes','perfil','notificaciones','log','recordatorios','avisosRes','presusComp'];
+  const screensDelGrupo=['mantenimiento','administracion','calendario','archivos','imagenes','perfil','notificaciones','log','recordatorios','completados'];
   const cur=_currentScreenId();
   if(screensDelGrupo.includes(cur)&&CGID){
     goScreen('grupo');
@@ -3265,11 +3247,10 @@ window._buildDrawerBody=(tieneGrupo)=>{
     <div class="d-grupo-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:5px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>${grupoNombre}</div>
     <div class="d-item${act('grupo','cobros')}" onclick="abrirTabExclusiva('cobros');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v2m0 8v2M9.5 9a2.5 2.5 0 0 1 2.5-1.5h.5a2 2 0 0 1 0 4h-1a2 2 0 0 0 0 4h.5A2.5 2.5 0 0 0 14.5 15"/></svg></span>Cobros</div>
     <div class="d-item${act('recordatorios')}" onclick="goScreen('recordatorios');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>Recordatorios preventivos${(typeof allRecordatorios!=='undefined'&&allRecordatorios.filter(r=>r.estado!=='completado'&&r.fecha&&r.fecha<=new Date().toISOString().split('T')[0]).length)?`<span style="margin-left:auto;background:#ef4444;color:#fff;border-radius:20px;padding:1px 7px;font-size:10.5px;font-weight:900">${allRecordatorios.filter(r=>r.estado!=='completado'&&r.fecha&&r.fecha<=new Date().toISOString().split('T')[0]).length}</span>`:''}</div>
-    <div class="d-item${act('avisosRes')}" onclick="goScreen('avisosRes');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Avisos resueltos</div>
-    <div class="d-item${act('presusComp')}" onclick="goScreen('presusComp');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 7a6 6 0 1 0 0 10"/><line x1="3" y1="10" x2="13" y2="10"/><line x1="3" y1="14" x2="13" y2="14"/></svg></span>Presupuestos completados</div>
     <div class="d-item${act('imagenes')}" onclick="goScreen('imagenes');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>Galería de instalaciones</div>
     ${sep}
     <div class="d-section" style="padding-top:6px">Opciones de grupo</div>
+    <div class="d-item${act('completados')}" onclick="goScreen('completados');cerrarDrawer()" style="color:#f59e0b"><span class="d-icon" style="color:#f59e0b"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>Completados / Resueltos</div>
     <div class="d-item${act('archivos')}" onclick="goScreen('archivos');cerrarDrawer()" style="color:#e53935"><span class="d-icon" style="color:#e53935"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg></span>Clientes archivados</div>
 
     <div class="d-item${act('administracion')}" onclick="goScreen('administracion');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></span>Administrar grupo</div>
@@ -3771,7 +3752,7 @@ const iniciarApp=async()=>{
   let targetGrupoId  = sessionStorage.getItem('alberto_cgid');
   let targetGrupoRaw = sessionStorage.getItem('alberto_cg');
   const hashScreen  = location.hash.replace('#','');
-  const screensNeedGroup = ['grupo','mantenimiento','administracion','calendario','archivos','imagenes','recordatorios','avisosRes','presusComp'];
+  const screensNeedGroup = ['grupo','mantenimiento','administracion','calendario','archivos','imagenes','recordatorios','completados'];
 
   // ── 0. Sin grupo activo en esta sesión: entrar directamente al grupo del usuario ──
   // (no hace falta elegir grupo manualmente: si solo tiene uno, se abre ese; si tiene
@@ -4342,6 +4323,7 @@ const _syncAplicarSnap = (tipo, gid, snap) => {
 
   if(document.querySelector('#screenRecordatorios.active') && tipo==='recordatorios' && typeof renderRecordatorios==='function') renderRecordatorios();
   if(typeof _recRefrescarClientesTab==='function') _recRefrescarClientesTab();
+  if(typeof _renderCompLista==='function') _renderCompLista();
 };
 
 // Arranca (o reinicia) los dos listeners para un grupo.
@@ -4879,12 +4861,11 @@ window._filtrarAverInline=(q)=>{
 //  fecha opcionales, crear parte a partir de, editar, restaurar)
 // ═══════════════════════════════════════════════════════════════
 const _SIMPLE_CONF = {
-  cobro:   { col:'cobros',   labelSing:'Cobro',   labelPl:'Cobros',   tituloPh:'Ej: Cobro factura de marzo', colorRgb:'255,202,40', art:'Nuevo', artEste:'este' },
-  entrega: { col:'entregas', labelSing:'Entrega', labelPl:'Entregas', tituloPh:'Ej: Entrega de material al cliente', colorRgb:'66,165,245', art:'Nueva', artEste:'esta' }
+  cobro: { col:'cobros', labelSing:'Cobro', labelPl:'Cobros', tituloPh:'Ej: Cobro factura de marzo', colorRgb:'255,202,40', art:'Nuevo', artEste:'este' }
 };
-let _simplePend={cobro:[],entrega:[]}, _simpleComp={cobro:[],entrega:[]};
-let _unsubSimple={cobro:{pend:null,comp:null},entrega:{pend:null,comp:null}};
-let _simpleTabActiva={cobro:'pend',entrega:'pend'};
+let _simplePend={cobro:[]}, _simpleComp={cobro:[]};
+let _unsubSimple={cobro:{pend:null,comp:null}};
+let _simpleTabActiva={cobro:'pend'};
 const _capSimple=s=>s.charAt(0).toUpperCase()+s.slice(1);
 
 const _fmtFechaSimple=(f)=>{
@@ -4928,21 +4909,19 @@ const _simpleCardHtml=(tipo,item,completado)=>{
 };
 
 const _renderSimpleBody=(tipo)=>{
-  const wrap=document.getElementById('tab'+_capSimple(tipo)+'sContent');
-  if(!wrap) return;
+  // Pestaña del grupo: solo pendientes
   const bP=document.getElementById('simple'+tipo+'BadgePend');
-  const bC=document.getElementById('simple'+tipo+'BadgeComp');
   if(bP) bP.textContent=_simplePend[tipo].length||'';
-  if(bC) bC.textContent=_simpleComp[tipo].length||'';
-  const searchBox=document.getElementById('simple'+tipo+'Search');
-  if(searchBox&&searchBox.value.trim()){ window._filtrarSimple(tipo,searchBox.value); return; }
   const body=document.getElementById('simple'+tipo+'Body');
-  if(!body) return;
-  if(_simpleTabActiva[tipo]==='pend'){
-    body.innerHTML=!_simplePend[tipo].length?`<div class="empty"><div class="empty-ico">✅</div><p>Sin ${_SIMPLE_CONF[tipo].labelPl.toLowerCase()} pendientes</p></div>`:_simplePend[tipo].map(x=>_simpleCardHtml(tipo,x,false)).join('');
-  } else {
-    body.innerHTML=!_simpleComp[tipo].length?`<div class="empty"><div class="empty-ico">📋</div><p>Sin ${_SIMPLE_CONF[tipo].labelPl.toLowerCase()} completados</p></div>`:_simpleComp[tipo].map(x=>_simpleCardHtml(tipo,x,true)).join('');
+  if(body){
+    const searchBox=document.getElementById('simple'+tipo+'Search');
+    if(searchBox&&searchBox.value.trim()){ window._filtrarSimple(tipo,searchBox.value); }
+    else body.innerHTML=!_simplePend[tipo].length
+      ?`<div class="empty"><div class="empty-ico">✅</div><p>Sin ${_SIMPLE_CONF[tipo].labelPl.toLowerCase()} pendientes</p></div>`
+      :_simplePend[tipo].map(x=>_simpleCardHtml(tipo,x,false)).join('');
   }
+  // Y la subseccion de completados, si esta abierta
+  if(typeof _renderCompLista==='function') _renderCompLista();
 };
 
 window._filtrarSimple=(tipo,q)=>{
@@ -4955,33 +4934,36 @@ window._filtrarSimple=(tipo,q)=>{
   const words=trimmed.toLowerCase().split(/\s+/);
   const match=(x)=>{ const c=allClientes.find(y=>y.id===x.clienteId); const hay=[x.titulo,x.clienteNombre,c?.nombre].filter(Boolean).join(' ').toLowerCase(); return words.every(w=>hay.includes(w)); };
   const rP=(_simplePend[tipo]||[]).filter(match);
-  const rC=(_simpleComp[tipo]||[]).filter(match);
-  if(!rP.length&&!rC.length){ sr.innerHTML=`<div class="empty"><p>Sin resultados para "<strong>${trimmed}</strong>"</p></div>`; return; }
-  sr.innerHTML=[...rP.map(x=>_simpleCardHtml(tipo,x,false)),...rC.map(x=>_simpleCardHtml(tipo,x,true))].join('');
+  if(!rP.length){ sr.innerHTML=`<div class="empty"><p>Sin resultados para "<strong>${trimmed}</strong>"</p><div style="font-size:11.5px;color:var(--tx2);margin-top:6px">Los completados están en Completados / Resueltos</div></div>`; return; }
+  sr.innerHTML=rP.map(x=>_simpleCardHtml(tipo,x,false)).join('');
 };
 
-window.switchSimpleTab=(tipo,tab)=>{
-  _simpleTabActiva[tipo]=tab;
-  ['Pend','Comp'].forEach(t=>{ const e=document.getElementById('simple'+tipo+'Tab'+t); if(e) e.classList.toggle('active',tab===t.toLowerCase()); });
-  _renderSimpleBody(tipo);
-};
 
 window._renderGTabSimple=(tipo)=>{
   const conf=_SIMPLE_CONF[tipo];
   const el=document.getElementById('tab'+_capSimple(tipo)+'sContent');
   if(!el) return;
   if(!CGID){ el.innerHTML=`<div class="empty"><p>Selecciona un grupo primero</p></div>`; return; }
+  // Solo pendientes: los completados viven en Completados / Resueltos
+  _simpleTabActiva[tipo]='pend';
   el.innerHTML=`
-    <button class="btn btn-p" style="margin-bottom:12px;width:100%" onclick="abrirNuevoSimple('${tipo}')">+ ${conf.art} ${conf.labelSing.toLowerCase()}</button>
-    <input class="sbox" id="simple${tipo}Search" style="margin-bottom:10px" placeholder="🔍 Buscar por cliente, título..." oninput="_filtrarSimple('${tipo}',this.value)">
+    <div style="margin-bottom:14px">
+      <button class="btn btn-p" style="width:100%" onclick="abrirNuevoSimple('${tipo}')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:6px;vertical-align:-2px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        ${conf.art} ${conf.labelSing.toLowerCase()}
+      </button>
+    </div>
+    <input class="sbox" id="simple${tipo}Search" style="margin-bottom:12px" placeholder="🔍 Buscar por cliente, título..." oninput="_filtrarSimple('${tipo}',this.value)">
     <div id="simple${tipo}SearchResults" style="display:none"></div>
-    <div id="simple${tipo}TabsWrap">
-      <div class="stabs" style="margin-bottom:12px">
-        <button class="stab active" id="simple${tipo}TabPend" onclick="switchSimpleTab('${tipo}','pend')">⏳ Pendientes <span id="simple${tipo}BadgePend" style="margin-left:4px;background:rgba(255,152,0,.2);color:#ff9800;border-radius:20px;padding:1px 7px;font-size:11px;font-weight:800"></span></button>
-        <button class="stab" id="simple${tipo}TabComp" onclick="switchSimpleTab('${tipo}','comp')">✅ Completados <span id="simple${tipo}BadgeComp" style="margin-left:4px;background:rgba(76,175,80,.15);color:#4caf50;border-radius:20px;padding:1px 7px;font-size:11px;font-weight:800"></span></button>
-      </div>
-      <div id="simple${tipo}Body"></div>
-    </div>`;
+    <div id="simple${tipo}TabsWrap"><div id="simple${tipo}Body"></div></div>`;
+  _suscribirSimple(tipo);
+};
+
+// Listeners de cobros. Los usan la pestaña del grupo (pendientes) y la
+// subseccion de Completados / Resueltos.
+const _suscribirSimple=(tipo)=>{
+  if(!CGID) return;
+  const conf=_SIMPLE_CONF[tipo];
   if(!_unsubSimple[tipo].pend){
     _unsubSimple[tipo].pend=onSnapshot(query(collection(db,'grupos',CGID,conf.col),where('estado','==','pendiente')),snap=>{
       _simplePend[tipo]=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>{
@@ -5088,7 +5070,7 @@ window.verSimple=(tipo,itemId)=>{
     // Puede que la pestaña Cobros/Entregas aún no se haya cargado (p.ej. al
     // abrir el elemento desde el registro completo de un cliente). Usamos
     // los datos ya cargados en la ficha del cliente como respaldo.
-    const fhKey=tipo==='cobro'?'cobros':'entregas';
+    const fhKey='cobros';
     item=((window._fichaHistData&&window._fichaHistData[fhKey])||[]).find(x=>x.id===itemId);
   }
   if(!item){ toast('No encontrado','e'); return; }
@@ -5153,35 +5135,10 @@ const _renderPresuInline = () => {
     if(sb&&sb.value.trim()){ _filtrarPresuInline(sb.value); }
     else body.innerHTML=!_presusPend.length?`<div class="empty"><div class="empty-ico">💶</div><p>Sin presupuestos pendientes</p></div>`:_presusPend.map(p=>_presuCard(p,false)).join('');
   }
-  const bodyComp=document.getElementById('presuCompBody');
-  if(bodyComp){
-    const q=(window._presuCompQuery||'').trim().toLowerCase();
-    let lista=_presusComp||[];
-    if(q){
-      const words=q.split(/\s+/);
-      lista=lista.filter(p=>{
-        const cli=allClientes.find(x=>x.id===p.clienteId);
-        const hay=[p.titulo,p.notas,p.clienteNombre,cli?.nombre].filter(Boolean).join(' ').toLowerCase();
-        return words.every(w=>hay.includes(w));
-      });
-    }
-    bodyComp.innerHTML=!lista.length
-      ?`<div class="empty"><div class="empty-ico">✅</div><p>${q?`Sin resultados para "${q}"`:'Sin presupuestos completados'}</p></div>`
-      :lista.map(p=>_presuCard(p,true)).join('');
-  }
+  if(typeof _renderCompLista==='function') _renderCompLista();
 };
 
-window._filtrarPresusComp=(q)=>{
-  window._presuCompQuery=q;
-  _renderPresuInline();
-};
 
-// Pantalla propia de Presupuestos completados (menu lateral)
-const renderPresusCompletados=()=>{
-  _presuTabActiva='comp';   // la barra de seleccion ofrece "Restaurar" aqui
-  _suscribirPresupuestos();
-  _renderPresuInline();
-};
 
 window._filtrarPresuInline=(q)=>{
   const sr=document.getElementById('presuInlineSearchResults');
@@ -6022,14 +5979,10 @@ const _recRefrescarClientesTab=()=>{
 };
 
 // ─── Pantalla: listado de Recordatorios Preventivos ───
-const renderRecordatorios=()=>{
-  const cont=document.getElementById('recordatoriosContent');
-  if(!cont) return;
-  const hoy=_recHoyStr();
-  const activos=(allRecordatorios||[]).filter(r=>r.estado!=='completado').sort((a,b)=>(a.fecha||'')<(b.fecha||'')?-1:1);
-  const completados=(allRecordatorios||[]).filter(r=>r.estado==='completado').sort((a,b)=>(b.fecha||'')<(a.fecha||'')?-1:1);
-
-  const mkCard=(r)=>{
+// Tarjeta de recordatorio. La usan la seccion de pendientes y la de
+// Completados / Resueltos, para que se vean identicas en los dos sitios.
+const _recCardHtml=(r)=>{
+    const hoy=_recHoyStr();
     const vencido=r.estado!=='completado'&&r.fecha&&r.fecha<=hoy;
     const fechaFmt=typeof fmtFISO==='function'?fmtFISO(r.fecha):r.fecha;
     return `<div class="card" style="margin-bottom:10px;${vencido?'border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.06)':''}">
@@ -6049,21 +6002,142 @@ const renderRecordatorios=()=>{
         </div>
       </div>
     </div>`;
-  };
+};
 
+const renderRecordatorios=()=>{
+  const cont=document.getElementById('recordatoriosContent');
+  if(!cont) return;
+  _asegurarLocalesCargados();
+  const q=(window._recQuery||'').trim().toLowerCase();
+  const words=q?q.split(/\s+/):[];
+  const activos=(allRecordatorios||[])
+    .filter(r=>r.estado!=='completado')
+    .filter(r=>!words.length||words.every(w=>[r.titulo,r.notas,r.clienteNombre,r.equipoNombre].filter(Boolean).join(' ').toLowerCase().includes(w)))
+    .sort((a,b)=>(a.fecha||'')<(b.fecha||'')?-1:1);
+
+
+  // Solo pendientes: los completados viven en Completados / Resueltos
   cont.innerHTML=`
-    <button class="btn btn-p" style="width:100%;margin-bottom:16px" onclick="abrirFormRecordatorio()">+ Nuevo recordatorio</button>
+    <div style="margin-bottom:14px">
+      <button class="btn btn-p" style="width:100%" onclick="abrirFormRecordatorio()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:6px;vertical-align:-2px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo recordatorio
+      </button>
+    </div>
+    <input class="sbox" id="recSearchInput" style="margin-bottom:12px" placeholder="🔍 Buscar por cliente, título o notas..." value="${q.replace(/"/g,'&quot;')}" oninput="window._filtrarRecordatorios(this.value)">
     <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:10px">${activos.length} pendiente${activos.length!==1?'s':''}</div>
-    ${activos.length?activos.map(mkCard).join(''):`<div class="empty"><p>Sin recordatorios pendientes</p></div>`}
-    ${completados.length?`
-      <div style="margin-top:22px">
-        <div class="d-sep" style="margin:0 0 14px"></div>
-        <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:10px">Completados (${completados.length})</div>
-        ${completados.map(mkCard).join('')}
-      </div>`:''}
+    ${activos.length?activos.map(_recCardHtml).join(''):`<div class="empty"><p>${q?`Sin resultados para "${q}"`:'Sin recordatorios pendientes'}</p></div>`}
   `;
+  const _sb=document.getElementById('recSearchInput');
+  if(_sb&&q){ _sb.focus(); _sb.setSelectionRange(_sb.value.length,_sb.value.length); }
 };
 window.renderRecordatorios=renderRecordatorios;
+window._filtrarRecordatorios=(q)=>{ window._recQuery=q; renderRecordatorios(); };
+
+// ══════════════════════════════════════════════════════════════
+// COMPLETADOS / RESUELTOS
+// Una sola pantalla con cuatro secciones independientes. Cada una tiene su
+// propio buscador y sus propios filtros; no hay busqueda global que mezcle.
+// Los datos salen de los listeners que ya alimentan las secciones normales.
+// ══════════════════════════════════════════════════════════════
+const _COMP_SUBS = {
+  avisos:        {ico:'💬', label:'Avisos resueltos',                        color:'#ef4444', ph:'🔍 Buscar por cliente o descripción...'},
+  presupuestos:  {ico:'💶', label:'Presupuestos completados',                color:'#3b82f6', ph:'🔍 Buscar por cliente, título, notas...'},
+  cobros:        {ico:'💰', label:'Cobros completados',                      color:'#22c55e', ph:'🔍 Buscar por cliente, título...'},
+  recordatorios: {ico:'🔔', label:'Recordatorios preventivos completados',   color:'#eab308', ph:'🔍 Buscar por cliente, título o notas...'}
+};
+let _compSub = null;                  // null = portada de la seccion
+window._compQuery = {avisos:'',presupuestos:'',cobros:'',recordatorios:''};
+
+const _compCuenta = (sub) => {
+  if(sub==='avisos')        return (_avisosRes||[]).length;
+  if(sub==='presupuestos')  return (_presusComp||[]).length;
+  if(sub==='cobros')        return (_simpleComp?.cobro||[]).length;
+  if(sub==='recordatorios') return (allRecordatorios||[]).filter(r=>r.estado==='completado').length;
+  return 0;
+};
+
+window._compAbrir = (sub) => { _compSub = sub || null; renderCompletados(); };
+
+const _COMP_BTN_INICIO = `<button class="inicio-btn" style="margin-bottom:0" onclick="goScreen('grupo')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Inicio</button>`;
+
+const renderCompletados = () => {
+  const cont = document.getElementById('completadosContent');
+  if(!cont) return;
+  // Aseguramos los cuatro origenes aunque no se haya entrado antes en sus
+  // secciones normales durante esta sesion.
+  if(typeof _suscribirAvisos==='function') _suscribirAvisos();
+  if(typeof _suscribirPresupuestos==='function') _suscribirPresupuestos();
+  if(typeof _suscribirSimple==='function') _suscribirSimple('cobro');
+  if(typeof _asegurarLocalesCargados==='function') _asegurarLocalesCargados();
+
+  if(!_compSub){
+    cont.innerHTML = `
+      <div style="margin-bottom:16px">${_COMP_BTN_INICIO}</div>
+      <div style="font-size:20px;font-weight:900;color:var(--tx);margin-bottom:4px">✅ Completados / Resueltos</div>
+      <div style="font-size:12px;color:var(--tx2);margin-bottom:18px;line-height:1.5">Todo lo que ya está cerrado, ordenado por tipo. Sigue apareciendo en el calendario.</div>
+      ${Object.entries(_COMP_SUBS).map(([k,c])=>{
+        const n=_compCuenta(k);
+        return `<div class="card" style="margin-bottom:10px;cursor:pointer;display:flex;align-items:center;gap:13px" onclick="_compAbrir('${k}')">
+          <div style="flex-shrink:0;width:40px;height:40px;border-radius:14px;background:${c.color}1f;display:flex;align-items:center;justify-content:center;font-size:19px">${c.ico}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14.5px;font-weight:900;color:var(--tx)">${c.label}</div>
+            <div style="font-size:12px;color:var(--tx2);margin-top:2px">${n} ${n===1?'elemento':'elementos'}</div>
+          </div>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--tx2)" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>`;
+      }).join('')}`;
+    return;
+  }
+
+  const c = _COMP_SUBS[_compSub];
+  cont.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+      <button class="inicio-btn" style="margin-bottom:0" onclick="_compAbrir(null)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Atrás</button>
+      ${_COMP_BTN_INICIO}
+    </div>
+    <div style="font-size:18px;font-weight:900;color:var(--tx);margin-bottom:14px">${c.ico} ${c.label}</div>
+    <input class="sbox" id="compSearch" style="margin-bottom:12px" placeholder="${c.ph}" value="${(window._compQuery[_compSub]||'').replace(/"/g,'&quot;')}" oninput="_filtrarCompletados('${_compSub}',this.value)">
+    <div id="compBody"></div>`;
+  _renderCompLista();
+};
+window.renderCompletados = renderCompletados;
+
+// Pinta la lista de la subseccion abierta. La llaman tambien los listeners, asi
+// que si algo se completa mientras estas aqui, aparece solo.
+const _renderCompLista = () => {
+  const body = document.getElementById('compBody');
+  if(!body || !_compSub) return;
+  const q = (window._compQuery[_compSub]||'').trim().toLowerCase();
+  const words = q?q.split(/\s+/):[];
+  const filtra = (campos) => !words.length || words.every(w=>campos.filter(Boolean).join(' ').toLowerCase().includes(w));
+  const vacio = (txt) => `<div class="empty"><div class="empty-ico">${_COMP_SUBS[_compSub].ico}</div><p>${q?`Sin resultados para "${q}"`:txt}</p></div>`;
+
+  if(_compSub==='avisos'){
+    _avisTab='res';                 // la barra de seleccion ofrece "Restaurar"
+    body.innerHTML = _htmlListaAvisos(_avisosRes, q, true);
+  } else if(_compSub==='presupuestos'){
+    _presuTabActiva='comp';
+    const lista=(_presusComp||[]).filter(p=>{
+      const cli=allClientes.find(x=>x.id===p.clienteId);
+      return filtra([p.titulo,p.notas,p.clienteNombre,cli?.nombre]);
+    });
+    body.innerHTML = lista.length?lista.map(p=>_presuCard(p,true)).join(''):vacio('Sin presupuestos completados');
+  } else if(_compSub==='cobros'){
+    _simpleTabActiva.cobro='comp';
+    const lista=(_simpleComp?.cobro||[]).filter(x=>{
+      const cli=allClientes.find(y=>y.id===x.clienteId);
+      return filtra([x.titulo,x.clienteNombre,cli?.nombre]);
+    });
+    body.innerHTML = lista.length?lista.map(x=>_simpleCardHtml('cobro',x,true)).join(''):vacio('Sin cobros completados');
+  } else if(_compSub==='recordatorios'){
+    const lista=(allRecordatorios||[])
+      .filter(r=>r.estado==='completado')
+      .filter(r=>filtra([r.titulo,r.notas,r.clienteNombre,r.equipoNombre]))
+      .sort((a,b)=>(b.fecha||'')<(a.fecha||'')?-1:1);
+    body.innerHTML = lista.length?lista.map(r=>_recCardHtml(r)).join(''):vacio('Sin recordatorios completados');
+  }
+};
 
 // ─── Formulario: nuevo / editar recordatorio ───
 window.abrirFormRecordatorio=(id)=>{
@@ -6447,18 +6521,17 @@ window.verCliente=async id=>{
       presusCli=[...(_presusPend||[]),...(_presusComp||[])].filter(p=>p.clienteId===id);
       window._fichaHistData={
         partes:allPartes.filter(p=>p.clienteId===id&&!p.archivado).map(p=>({...p,_archivado:false})),
-        avisos:[],entregas:[],cobros:[],
+        avisos:[],cobros:[],
         presupuestos:presusCli,
         recordatorios:_recDeCliente(id)
       };
     }
-    const [hmSnap,presuSnap,imgSnap,archParteSnap,avisSnap,entrSnap,cobrSnap]=await Promise.all([
+    const [hmSnap,presuSnap,imgSnap,archParteSnap,avisSnap,cobrSnap]=await Promise.all([
       offline?Promise.resolve(null):getDocs(query(collection(db,'grupos',CGID,'historial_mantenimientos'),where('clienteId','==',id))),
       offline?Promise.resolve(null):getDocs(query(collection(db,'grupos',CGID,'presupuestos'),where('clienteId','==',id))),
       offline?Promise.resolve(null):getDocs(query(collection(db,'grupos',CGID,'imagenes'),where('clienteId','==',id))),
       offline?Promise.resolve(null):getDocs(query(collection(db,'grupos',CGID,'archivos'),where('clienteId','==',id))),
       offline?Promise.resolve(null):getDocs(query(collection(db,'grupos',CGID,'avisos'),where('clienteId','==',id))),
-      offline?Promise.resolve(null):getDocs(query(collection(db,'grupos',CGID,'entregas'),where('clienteId','==',id))),
       offline?Promise.resolve(null):getDocs(query(collection(db,'grupos',CGID,'cobros'),where('clienteId','==',id)))
     ]);
     if(hmSnap) histMants=hmSnap.docs.map(d=>({id:d.id,...d.data()}));
@@ -6472,7 +6545,6 @@ window.verCliente=async id=>{
     window._fichaHistData={
       partes:[...partesCli.map(p=>({...p,_archivado:false})),...archivadosCliente.map(p=>({...p,_archivado:true}))],
       avisos:(avisSnap?.docs||[]).map(d=>({id:d.id,...d.data()})),
-      entregas:(entrSnap?.docs||[]).map(d=>({id:d.id,...d.data()})),
       cobros:(cobrSnap?.docs||[]).map(d=>({id:d.id,...d.data()})),
       presupuestos:presusCli,
       recordatorios:_recDeCliente(id)
@@ -6773,10 +6845,9 @@ window._htmlFichaHistLista=(tipo)=>{
   // avisos / entregas / cobros — se abren igual que desde su sección nativa
   // (mismo visor/editor que en Avisos, Entregas o Cobros), permitiendo hacer
   // con ellos todo lo que se podría hacer desde ahí.
-  const icoMap={avisos:'💬',entregas:'📦',cobros:'💰'};
+  const icoMap={avisos:'💬',cobros:'💰'};
   const nativeOpen=(tipo,id)=>{
     if(tipo==='avisos') return `editarAviso('${id}')`;
-    if(tipo==='entregas') return `verSimple('entrega','${id}')`;
     return `verSimple('cobro','${id}')`;
   };
   return items.map(it=>{
@@ -14159,16 +14230,9 @@ const _suscribirAvisos=()=>{
   }
 };
 
-window._filtrarAvisosRes=(q)=>{
-  window._avisResQuery=q;
-  _renderAvisBody();
-};
-
-// Pantalla propia de Avisos resueltos (menu lateral)
-const renderAvisosResueltos=()=>{
-  _avisTab='res';   // la barra de seleccion ofrece "Restaurar" en esta pantalla
-  _suscribirAvisos();
-  _renderAvisBody();
+window._filtrarCompletados=(sub,q)=>{
+  window._compQuery[sub]=q;
+  _renderCompLista();
 };
 
 window._filtrarAvisos=(q)=>{
@@ -14184,11 +14248,10 @@ const _alarmIco=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" str
 // pintan ambas y cada una se salta sola si no esta en pantalla.
 const _renderAvisBody=()=>{
   const body=document.getElementById('avisBody');
-  const bodyRes=document.getElementById('avisResBody');
   const bP=document.getElementById('avisBadgePend');
   if(bP)bP.textContent=_avisosPend.length||'';
   if(body) body.innerHTML=_htmlListaAvisos(_avisosPend,(window._avisQuery||'').toLowerCase().trim(),false);
-  if(bodyRes) bodyRes.innerHTML=_htmlListaAvisos(_avisosRes,(window._avisResQuery||'').toLowerCase().trim(),true);
+  if(typeof _renderCompLista==='function') _renderCompLista();
 };
 
 const _htmlListaAvisos=(listaBase,qL,esResueltos)=>{
@@ -15115,7 +15178,8 @@ window._hgNavegar=(tipo,id,cliId)=>{
 const CALG_TIPOS={
   presu:{ico:'💶',color:'#3b82f6',label:'Presupuesto'},
   aviso:{ico:'💬',color:'#ef4444',label:'Aviso'},
-  cobro:{ico:'💰',color:'#22c55e',label:'Cobro'}
+  cobro:{ico:'💰',color:'#22c55e',label:'Cobro'},
+  recordatorio:{ico:'🔔',color:'#eab308',label:'Recordatorio'}
 };
 const _calgEstadoBadge={
   'completado':'<span style="font-size:10px;background:rgba(76,175,80,.12);color:#4caf50;border-radius:10px;padding:2px 7px;font-weight:800">Completado</span>',
@@ -15264,6 +15328,30 @@ const _calgCargarDatos=async()=>{
         eventos.push({tipo:subTipo,fecha:ts,fechaStr:_calgFechaStr(ts),titulo:tit,sub:it.clienteNombre||'',estado:'pendiente',atrasado:false,id:it.id,cliId:it.clienteId||'',sinFicha:!it.clienteId,gestionable:true,colOrigen:subTipo});
       }
     });
+  });
+
+  // ── Recordatorios preventivos (solo locales + Firestore, array allRecordatorios) ──
+  // Completarlos NO los saca del calendario: solo cambia su estado. Solo
+  // desaparecen si se elimina el recordatorio.
+  if(typeof _asegurarLocalesCargados==='function') _asegurarLocalesCargados();
+  (allRecordatorios||[]).forEach(r=>{
+    if(!r || !r.id) return;
+    const completado = r.estado==='completado';
+    const base = {tipo:'recordatorio',titulo:r.titulo||'Recordatorio',sub:r.clienteNombre||'',id:r.id,cliId:r.clienteId||'',sinFicha:!allClientes.some(c=>c.id===r.clienteId)};
+    if(completado){
+      const fd = r.fecha?new Date(r.fecha+'T00:00:00'):(r.completadoEn?new Date(r.completadoEn):hoyD);
+      eventos.push({...base,fecha:fd,fechaStr:r.fecha||_calgFechaStr(fd),estado:'completado'});
+      return;
+    }
+    if(r.fecha){
+      const origD=new Date(r.fecha+'T00:00:00');
+      const diffDias=Math.round((hoyD-origD)/86400000);
+      if(diffDias>0) eventos.push({...base,fecha:hoyD,fechaStr:hoyStr,estado:'pendiente',atrasado:true,diasAtraso:diffDias});
+      else           eventos.push({...base,fecha:origD,fechaStr:r.fecha,estado:'pendiente',atrasado:false});
+    }else{
+      const ts=r.creadoEn?new Date(r.creadoEn):hoyD;
+      eventos.push({...base,fecha:ts,fechaStr:_calgFechaStr(ts),estado:'pendiente',atrasado:false});
+    }
   });
 
   window._calgEventos=eventos;
@@ -15423,6 +15511,7 @@ window._calgNavegar=(tipo,id,cliId)=>{
   if(tipo==='presu'){ if(typeof verPresupuesto==='function') verPresupuesto(id); }
   else if(tipo==='aviso'){ if(typeof editarAviso==='function') editarAviso(id); }
   else if(tipo==='cobro'){ if(typeof verSimple==='function') verSimple(tipo,id); }
+  else if(tipo==='recordatorio'){ if(typeof abrirFormRecordatorio==='function') abrirFormRecordatorio(id); }
 };
 
 
