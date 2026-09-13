@@ -100,7 +100,7 @@ body.modo-claro #topbar{background:rgba(255,255,255,.88);backdrop-filter:blur(20
 body.modo-claro #drawer{background:var(--card);border-left:1px solid rgba(0,0,0,.09)}
 body.modo-claro #authWrap{background:#fafaf9}
 body.modo-claro .login-card{background:var(--card);border-color:rgba(22,27,25,.08);box-shadow:0 1px 3px rgba(16,24,22,.05),0 12px 32px rgba(16,24,22,.06)}
-body.modo-claro .auth-logo{background:linear-gradient(135deg,var(--r2) 15%,var(--r) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:none}
+
 body.modo-claro .login-sub{color:rgba(22,27,25,.5)}
 body.modo-claro .fgrp label{color:rgba(22,27,25,.45)}
 body.modo-claro .fgrp input,body.modo-claro .fgrp select,body.modo-claro .fgrp textarea{background:#f7f7f7;border-color:rgba(0,0,0,.14);color:var(--tx)}
@@ -126,7 +126,7 @@ body.modo-claro .btn-s{background:rgba(0,0,0,.05);color:var(--tx);border-color:r
 body.modo-claro .btn-s:hover{border-color:var(--r);color:var(--r)}
 body.modo-claro .gtabs{background:var(--bg);border-color:var(--border)}
 body.modo-claro .gtab{background:transparent}
-body.modo-claro .gtab .gtab-txt{color:rgba(0,0,0,.4)}
+
 body.modo-claro .stab{background:#f7f7f7;border-color:rgba(0,0,0,.09);color:rgba(0,0,0,.5)}
 body.modo-claro .cal-task{background:rgba(0,0,0,.02);border-color:rgba(0,0,0,.08)}
 body.modo-claro .cal-sem-label{color:var(--tx)}
@@ -147,26 +147,26 @@ body.modo-claro .toggle-track{background:rgba(0,0,0,.15)}
 body.modo-claro #installBanner{background:linear-gradient(135deg,var(--card),#f7f7f7);border-top-color:rgba(var(--theme-rgb),.2)}
 
 
-body.modo-claro .func-step-txt{color:rgba(0,0,0,.7)}
-body.modo-claro .func-step-txt strong{color:var(--tx)}
+
+
 
 body.modo-claro .cli-name{color:var(--tx)}
 body.modo-claro .parte-title{color:var(--tx)}
 body.modo-claro .arch-name{color:var(--tx)}
 body.modo-claro .notif-title{color:var(--tx)}
 
-body.modo-claro .stat-num{color:var(--tx)}
+
 body.modo-claro .grupo-title{color:var(--card)}
 body.modo-claro #topbar .logo{color:var(--r)}
 
 body.modo-claro .tl-card{background:var(--card);border-color:rgba(0,0,0,.09)}
-body.modo-claro .dash-item{background:var(--card)}
-body.modo-claro .chart-wrap{background:var(--card)}
-body.modo-claro .ficha-row{background:var(--card)}
-body.modo-claro .log-item{border-color:rgba(0,0,0,.08)}
-body.modo-claro .log-msg{color:var(--tx)}
-body.modo-claro .stat2-card{background:var(--card)}
-body.modo-claro .stat2-num{color:var(--tx)}
+
+
+
+
+
+
+
 
 /* ── MODO CLARO: FIXES DESKTOP ── */
 @media(min-width:600px){
@@ -238,9 +238,9 @@ body.modo-claro{background-color:#f2f3f1 !important}
 /* ── TRANSICIONES SUAVES ENTRE PANTALLAS ── */
 .screen{will-change:opacity,transform}
 .screen.active{display:flex}
-.screen.slide-out{animation:slideOutLeft .32s cubic-bezier(.4,0,.2,1) forwards;pointer-events:none}
+
 .screen.slide-in{animation:slideInRight .36s cubic-bezier(.16,1,.3,1) forwards}
-.screen.exit-left{animation:exitLeft .32s cubic-bezier(.4,0,.2,1) forwards;pointer-events:none}
+
 @keyframes slideOutLeft{
   0%{opacity:1;transform:translateX(0) scale(1);filter:blur(0px)}
   100%{opacity:0;transform:translateX(-12%) scale(.97);filter:blur(2px)}
@@ -278,9 +278,9 @@ body.modo-claro .skel{background:linear-gradient(90deg,rgba(0,0,0,.06) 25%,rgba(
 @keyframes skelAnim{0%{background-position:200% 0}100%{background-position:-200% 0}}
 .skel-card{height:72px;border-radius:16px;margin-bottom:8px}
 .skel-hero{height:120px;border-radius:18px;margin-bottom:16px}
-.skel-row{height:18px;border-radius:6px;margin-bottom:8px}
-.skel-row.w60{width:60%}
-.skel-row.w80{width:80%}
+
+
+
 
 /* ── TOPBAR ── */
 #topbar{background:rgba(11,18,32,.9);backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);padding:14px 20px;display:flex;align-items:center;border-bottom:1px solid var(--border);z-index:90;flex-shrink:0;gap:10px;box-shadow:0 1px 0 rgba(255,255,255,.04),0 2px 16px rgba(0,0,0,.3)}
@@ -294,8 +294,8 @@ body.modo-claro .skel{background:linear-gradient(90deg,rgba(0,0,0,.06) 25%,rgba(
 .tb-btn:active::after{opacity:1}
 .tb-btn:hover{background:rgba(var(--theme-rgb),.15)}
 
-.notif-dot{position:absolute;top:2px;right:2px;min-width:16px;height:16px;background:var(--r);border-radius:10px;display:none;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#fff;padding:0 4px;font-family:var(--font);border:2px solid var(--bg);line-height:1}
-.notif-dot.show{display:flex;animation:notifPop .4s cubic-bezier(.16,1,.3,1)}
+
+
 @keyframes notifPop{0%{transform:scale(0)}60%{transform:scale(1.3)}100%{transform:scale(1)}}
 
 /* ── DRAWER ── */
@@ -321,7 +321,7 @@ body.modo-claro .skel{background:linear-gradient(90deg,rgba(0,0,0,.06) 25%,rgba(
 .d-sep{height:1px;background:rgba(255,255,255,.08);margin:8px 16px}
 
 /* ── AUTH ── */
-.auth-logo{font-family:var(--font-head);font-size:68px;background:linear-gradient(135deg,#fff 30%,var(--r3) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 30px rgba(var(--theme-rgb),.5));margin-bottom:6px;text-align:center;animation:authLogoIn .6s cubic-bezier(.16,1,.3,1)}
+
 @keyframes authLogoIn{0%{opacity:0;transform:scale(.85) translateY(-10px)}100%{opacity:1;transform:scale(1) translateY(0)}}
 
 #loginWrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px}
@@ -382,8 +382,8 @@ body.modo-claro .cli-sel-dropdown{background:var(--card)}
 .btn-ok:active{background:var(--ok);color:#0b2016}
 .btn-del{background:var(--danger-bg);color:var(--danger2);border:1px solid var(--danger-bd)}
 .btn-del:active{background:var(--danger);color:#2a0d0d}
-.btn-ghost{background:transparent;color:var(--r);border:none;box-shadow:none;font-weight:700}
-.btn-ghost:hover{filter:none;background:rgba(var(--theme-rgb),.08)}
+
+
 .btn-sm{padding:8px 14px;width:auto;font-size:13px;border-radius:var(--rd-sm)}
 .btn-nuevo{background:linear-gradient(135deg,var(--r) 0%,var(--r2) 100%);color:#fff;border:none;padding:9px 18px;border-radius:var(--rd-sm);font-size:13px;font-weight:800;font-family:var(--font);cursor:pointer;margin-left:auto;transition:transform .16s var(--ease-spring),box-shadow .18s ease,filter .15s;white-space:nowrap;box-shadow:0 3px 10px -2px rgba(var(--theme-rgb),.4)}
 .btn-nuevo:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 5px 14px -2px rgba(var(--theme-rgb),.5)}
@@ -415,7 +415,7 @@ body.modo-claro .sbox:focus{box-shadow:inset 0 1px 2px rgba(0,0,0,.03),0 0 0 3px
 .bd{background:rgba(76,175,80,.15);color:#81c784;border:1px solid rgba(76,175,80,.3)}
 
 /* ── FILTERS ── */
-.filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+
 .fbtn{background:transparent;border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:7px 14px;font-size:12px;font-weight:700;color:var(--tx2);cursor:pointer;font-family:var(--font);transition:border-color .18s ease,color .18s ease,background .18s ease,transform .15s cubic-bezier(.16,1,.3,1),box-shadow .18s ease;white-space:nowrap}
 .fbtn:hover{border-color:rgba(255,255,255,.3);color:var(--tx);transform:scale(1.02)}
 .fbtn:active{transform:scale(.97)}
@@ -434,8 +434,8 @@ body.modo-claro .sbox:focus{box-shadow:inset 0 1px 2px rgba(0,0,0,.03),0 0 0 3px
 .tl-dot{position:absolute;left:-23px;top:10px;width:16px;height:16px;border-radius:50%;border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;z-index:1}
 .tl-dot.parte{background:#1e88e5}
 .tl-dot.mant{background:#ff9800}
-.tl-dot.averia{background:#e53935}
-.tl-dot.averia-ok{background:#4caf50}
+
+
 .tl-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;cursor:pointer;transition:transform .2s cubic-bezier(.16,1,.3,1),border-color .2s ease,box-shadow .2s ease}
 .tl-card:hover{transform:translateX(3px);border-color:rgba(var(--theme-rgb),.4);box-shadow:0 2px 12px rgba(0,0,0,.2)}
 .tl-card-head{display:flex;align-items:center;gap:8px;margin-bottom:3px}
@@ -445,64 +445,64 @@ body.modo-claro .sbox:focus{box-shadow:inset 0 1px 2px rgba(0,0,0,.03),0 0 0 3px
 .tl-card-total{font-size:13px;font-weight:800;color:var(--r);margin-top:2px}
 
 /* ── DASHBOARD WIDGETS ── */
-.dash-section{margin-bottom:18px}
-.dash-section-title{font-size:10px;font-weight:800;color:var(--r);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
-.dash-item{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:13px 16px;display:flex;align-items:center;gap:13px;margin-bottom:8px;cursor:pointer;transition:transform .2s cubic-bezier(.16,1,.3,1),box-shadow .2s ease,border-color .2s ease}
-.dash-item:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:rgba(255,255,255,.11)}
-.dash-item-ico{width:42px;height:42px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
-.dash-item-info{flex:1;min-width:0}
-.dash-item-title{font-size:14px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dash-item-sub{font-size:11px;color:var(--tx2);margin-top:2px}
-.dash-item-right{font-size:11px;font-weight:700;color:var(--tx3);flex-shrink:0}
-.dash-alert{background:rgba(var(--theme-rgb),.08);border:1px solid rgba(var(--theme-rgb),.2);border-radius:16px;padding:12px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px;cursor:pointer;transition:.15s}
-.dash-alert:hover{background:rgba(var(--theme-rgb),.13)}
-.dash-alert-ico{width:32px;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;opacity:.8}
-.dash-alert-txt{flex:1}
-.dash-alert-title{font-size:13px;font-weight:800;color:#ff7043}
-.dash-alert-sub{font-size:12px;color:var(--tx2);margin-top:2px}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* ── CHARTS ── */
-.chart-wrap{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:14px}
-.chart-title{font-size:12px;font-weight:800;color:var(--tx2);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
-.chart-bars{display:flex;align-items:flex-end;gap:5px;height:80px}
-.chart-bar-col{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
-.chart-bar{width:100%;border-radius:5px 5px 0 0;background:var(--r);opacity:.7;transition:opacity .15s,height .6s cubic-bezier(.4,0,.2,1);min-height:2px}
-.chart-bar:hover{opacity:1}
-.chart-bar-lbl{font-size:9px;color:var(--tx2);font-weight:700}
-.chart-bar-val{font-size:9px;color:var(--r);font-weight:800}
-.stat2-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
-.stat2-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px}
-.stat2-num{font-size:26px;font-weight:900;color:var(--tx);line-height:1}
-.stat2-label{font-size:11px;font-weight:700;color:var(--tx2);margin-top:4px}
-.stat2-sub{font-size:10px;color:var(--tx3);margin-top:2px}
-.conv-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.conv-bar-bg{flex:1;height:8px;background:rgba(255,255,255,.07);border-radius:4px;overflow:hidden}
-.conv-bar-fill{height:100%;border-radius:4px;background:var(--r);transition:width .6s cubic-bezier(.4,0,.2,1)}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* ── QR CLIENTE ── */
-.qr-wrap{text-align:center;padding:12px 0}
-.qr-img{width:200px;height:200px;margin:0 auto 10px;display:block;border-radius:14px;background:#fff;padding:8px}
+
+
 
 /* ── LOG DE ACTIVIDAD ── */
-.log-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
-.log-ico{width:32px;height:32px;border-radius:50%;background:rgba(var(--theme-rgb),.15);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.log-info{flex:1}
-.log-msg{font-size:13px;font-weight:700;color:var(--tx)}
-.log-meta{font-size:11px;color:var(--tx2);margin-top:2px}
+
+
+
+
+
 
 /* ── HORAS ── */
-.ficha-row{display:flex;align-items:center;gap:12px;padding:12px 16px;background:var(--card);border:1px solid var(--border);border-radius:16px;margin-bottom:8px}
-.ficha-badge{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;white-space:nowrap}
-.ficha-badge.activa{background:rgba(76,175,80,.15);color:#4caf50;border:1px solid rgba(76,175,80,.3)}
-.ficha-badge.cerrada{background:rgba(255,255,255,.06);color:var(--tx2);border:1px solid var(--border)}
+
+
+
+
 
 /* ── INICIO ── */
-.hero-card{background:linear-gradient(135deg,rgba(var(--theme-rgb),.08),rgba(var(--theme-rgb),.15));border:1px solid rgba(var(--theme-rgb),.2);border-radius:20px;padding:22px;margin-bottom:20px;cursor:pointer;position:relative;overflow:hidden;display:flex;align-items:center;gap:16px}
-.hero-card::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(var(--theme-rgb),.2),transparent 70%);pointer-events:none}
-.hero-ava{width:58px;height:58px;border-radius:0;background:transparent;display:flex;align-items:center;justify-content:center;font-size:28px;border:none;flex-shrink:0;overflow:visible}
-.hero-ava img{width:100%;height:100%;object-fit:cover}
-.hero-name{font-size:20px;font-weight:900;color:var(--tx)}
-.hero-sub{font-size:13px;color:var(--tx2);margin-top:3px}
+
+
+
+
+
+
 
 .sec-header{display:flex;align-items:center;margin-bottom:12px}
 .sec-label{font-size:11px;font-weight:800;color:var(--r);letter-spacing:2px;text-transform:uppercase}
@@ -525,7 +525,7 @@ body.modo-claro .sbox:focus{box-shadow:inset 0 1px 2px rgba(0,0,0,.03),0 0 0 3px
 .gtile:hover .gtile-img{transform:scale(1.07);filter:saturate(1.5) brightness(1.1)}
 .gtile-img{position:absolute;inset:0;background-size:cover;background-position:center;filter:saturate(1.3) brightness(1.05);transition:transform .4s cubic-bezier(.16,1,.3,1),filter .3s ease}
 .gtile-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.75) 0%,transparent 60%)}
-.gtile-ico svg{width:44px;height:44px;display:block}
+
 .gtile-name{position:absolute;bottom:12px;left:12px;right:12px;font-size:15px;font-weight:900;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
 
 /* ── GRUPO HEADER ── */
@@ -541,8 +541,8 @@ body.modo-claro .sbox:focus{box-shadow:inset 0 1px 2px rgba(0,0,0,.03),0 0 0 3px
 .grupo-header-inicio{flex-shrink:0;display:flex;align-items:center;gap:7px;padding:8px 15px;border-radius:22px;background:rgba(8,12,11,.6);backdrop-filter:blur(16px) saturate(1.7);-webkit-backdrop-filter:blur(16px) saturate(1.7);border:1px solid rgba(255,255,255,.32);color:#fff;font-size:13.5px;font-weight:800;letter-spacing:.1px;cursor:pointer;transition:.2s var(--ease-out);box-shadow:0 8px 20px -6px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.2)}
 .grupo-header-inicio:hover,.grupo-header-inicio:active{background:rgba(8,12,11,.78);border-color:rgba(255,255,255,.5);transform:translateY(-1px)}
 .grupo-header-content{position:absolute;bottom:0;left:0;right:0;padding:14px 16px;display:flex;align-items:center;gap:12px}
-.grupo-ava{width:60px;height:60px;border-radius:0;background:transparent;display:flex;align-items:center;justify-content:center;font-size:28px;border:none;flex-shrink:0;cursor:pointer;overflow:visible;padding:0;filter:drop-shadow(0 3px 8px rgba(0,0,0,.4))}
-.grupo-ava svg{width:60px;height:60px;display:block}
+
+
 .grupo-title{font-size:18px;font-weight:900;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.55);letter-spacing:-.2px;word-wrap:break-word;overflow-wrap:break-word}
 .grupo-sub{font-size:12px;color:rgba(255,255,255,.7);margin-top:2px;font-weight:600}
 
@@ -603,8 +603,8 @@ body.modo-claro .gtab-item.gt-presu{border-color:rgba(64,124,182,.28)}
 
 /* ── CLIENTE CARDS ── */
 .cli-card{position:relative;background:var(--glass-bg);backdrop-filter:blur(var(--glass-blur)) saturate(140%);-webkit-backdrop-filter:blur(var(--glass-blur)) saturate(140%);border:1px solid var(--glass-border);box-shadow:inset 0 1px 0 var(--glass-hi);border-radius:var(--rd);padding:14px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:transform .18s var(--ease-spring),box-shadow .18s ease,background .15s ease,border-color .2s ease;margin-bottom:8px}
-.cli-card-banner{display:flex!important;flex-direction:column!important;align-items:stretch!important;padding:0!important;overflow:hidden}
-.cli-card-banner:hover{transform:translateY(-2px);background:var(--glass-bg2)}
+
+
 .cli-card:hover{transform:translateY(-1px);background:var(--glass-bg2)}
 .cli-card:active{transform:scale(.985)}
 .cli-ava{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.25)}
@@ -683,11 +683,11 @@ body.sel-mode .scroll-pad{padding-bottom:140px}
 .det-val{font-size:14px;color:var(--tx);font-weight:600}
 
 /* ── ACCION BTNS ── */
-.accion-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:14px 0}
-.accion-btn{background:var(--card2);border:1px solid var(--border);border-radius:14px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;font-family:var(--font);color:var(--tx2);font-size:11px;font-weight:700;transition:transform .18s cubic-bezier(.16,1,.3,1),border-color .15s ease,color .15s ease,background .15s ease;text-decoration:none;text-align:center}
-.accion-btn:hover{transform:translateY(-2px) scale(1.03);border-color:rgba(var(--theme-rgb),.5);color:var(--r)}
-.accion-btn:active{transform:scale(.96)}
-.accion-btn .a-ico{font-size:22px}
+
+
+
+
+
 
 /* ── SLIDE-OVER (SB) ── */
 #sbOverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1180;display:none;backdrop-filter:blur(3px)}
@@ -740,13 +740,13 @@ body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
 .fondo-opt.sel{border-color:var(--r)}
 
 /* ── STATS ── */
-.stat-card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;margin-bottom:12px;transition:box-shadow .2s ease,border-color .2s ease}
-.stat-card:hover{border-color:rgba(255,255,255,.11);box-shadow:0 4px 20px rgba(0,0,0,.2)}
-.stat-num{font-size:38px;font-weight:900;color:var(--tx);line-height:1}
-.stat-label{font-size:12px;font-weight:700;color:var(--tx2);margin-top:4px;text-transform:uppercase;letter-spacing:1px}
-.stat-sub{font-size:13px;color:var(--tx2);margin-top:8px}
-.prog-bar{height:10px;background:rgba(255,255,255,.08);border-radius:12px;overflow:hidden;margin-top:10px}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--r2),var(--r));border-radius:12px;transition:width .6s ease}
+
+
+
+
+
+
+
 
 /* ── CARRUSEL FUNCIONALIDADES ── */
 /* ── INICIO LIMPIO ── */
@@ -815,17 +815,17 @@ body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
 /* ── CALENDARIO MEJORADO ── */
 .cal-task{padding:14px 16px;border-radius:13px;font-size:13px;margin-bottom:8px;background:rgba(255,255,255,.04);border:1px solid var(--border);transition:.15s;position:relative;overflow:hidden}
 .cal-task::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--task-color,var(--r));border-radius:0}
-.cal-task.tipo-mant::before{background:#ff9800}
-.cal-task.tipo-parte::before{background:#42a5f5}
-.cal-task.tipo-averia::before{background:#ef5350}
+
+
+
 .cal-task.done::before{background:#4caf50}
-.cal-task-tipo-badge{display:inline-flex;align-items:center;gap:5px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;padding:3px 9px;border-radius:20px;margin-bottom:7px}
-.cal-task-tipo-badge.mant{background:rgba(255,152,0,.12);color:#ff9800}
-.cal-task-tipo-badge.parte{background:rgba(66,165,245,.12);color:#42a5f5}
-.cal-task-tipo-badge.averia{background:rgba(239,83,80,.12);color:#ef5350}
-.cal-task-tipo-badge.presu{background:rgba(171,71,188,.12);color:#ab47bc}
-.cal-task-cliente{font-size:12px;font-weight:700;color:var(--tx);margin-bottom:2px;display:flex;align-items:center;gap:6px}
-.cal-task-desc{font-size:12px;color:var(--tx2);margin-bottom:9px;line-height:1.5}
+
+
+
+
+
+
+
 
 /* ── HISTORIAL GLOBAL ── */
 .hg-event{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px 14px;margin-bottom:7px;display:flex;align-items:flex-start;gap:12px;transition:.15s;cursor:pointer}
@@ -833,7 +833,7 @@ body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
 .hg-event-dot{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
 .hg-event-dot.mant{background:rgba(255,152,0,.12)}
 .hg-event-dot.parte{background:rgba(66,165,245,.12)}
-.hg-event-dot.averia{background:rgba(239,83,80,.12)}
+
 .hg-event-dot.presu{background:rgba(171,71,188,.12)}
 .hg-day-sep{font-size:10px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:1.5px;padding:6px 2px 4px;display:flex;align-items:center;gap:8px}
 .hg-day-sep::after{content:'';flex:1;height:1px;background:var(--border)}
@@ -852,7 +852,7 @@ body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
 .calg-toolbar{display:flex;justify-content:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
 .calg-hoy-btn{font-size:11px;font-weight:800;color:var(--r);background:rgba(var(--theme-rgb),.1);border:1px solid rgba(var(--theme-rgb),.25);border-radius:20px;padding:6px 12px;cursor:pointer;white-space:nowrap;font-family:var(--font);transition:transform .16s var(--ease-spring),background .15s ease}
 .calg-hoy-btn:active{transform:scale(.94)}
-.calg-cad-btn{font-size:11px;font-weight:800;color:var(--tx2);background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:20px;padding:6px 12px;cursor:pointer;white-space:nowrap;font-family:var(--font)}
+
 .calg-daynames{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
 .calg-dayname{text-align:center;font-size:10px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px}
 .calg-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
@@ -879,15 +879,15 @@ body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
 
 
 /* ── DASHBOARD SUMMARY CARDS ── */
-.dash-summary{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
-.dash-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;cursor:pointer;transition:.15s;position:relative;overflow:hidden}
-.dash-card:hover{border-color:rgba(var(--theme-rgb),.5);transform:translateY(-1px)}
-.dash-card-num{font-size:26px;font-weight:900;color:var(--tx);line-height:1}
-.dash-card-lbl{font-size:11px;color:var(--tx2);font-weight:700;margin-top:4px}
-.dash-card-ico{position:absolute;right:12px;top:12px;opacity:.15;font-size:28px}
-.dash-card.warn .dash-card-num{color:#ff9800}
-.dash-card.danger .dash-card-num{color:#ef5350}
-.dash-card.ok .dash-card-num{color:#4caf50}
+
+
+
+
+
+
+
+
+
 .dash-semana-banner{background:linear-gradient(135deg,rgba(var(--theme-rgb),.14),rgba(var(--theme-rgb),.06));border:1px solid rgba(var(--theme-rgb),.25);border-radius:16px;padding:14px 16px;margin-bottom:18px}
 .dash-semana-title{font-size:11px;font-weight:900;color:var(--r);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
 .dash-semana-item{font-size:13px;color:var(--tx);padding:4px 0;display:flex;align-items:center;gap:8px;border-bottom:1px solid rgba(255,255,255,.05)}
@@ -947,9 +947,9 @@ body.offline .dash-offline-bar{display:flex}
 body.modo-claro .stab.active{box-shadow:0 2px 6px rgba(16,24,22,.1),0 0 0 1px rgba(0,0,0,.05)}
 
 /* ── GALERÍA IMÁGENES ── */
-.img-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-bottom:16px}
-.img-thumb{aspect-ratio:1;border-radius:12px;overflow:hidden;cursor:pointer;position:relative;background:rgba(255,255,255,.06)}
-.img-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+
+
+
 .img-group{margin-bottom:16px}
 .mant-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
 
@@ -1114,18 +1114,13 @@ body.is-scrolling .presu-card{
 .partida-del:active{transform:scale(.9)}
 
   /* ── Avatar & Icon containers: fondo siempre negro ── */
-  .grupo-ava,.hero-ava{background:transparent !important;background-color:transparent !important}
-  .grupo-ava svg svg svg{
-    width:100% !important;height:100% !important;display:block !important;
-    min-width:100%;min-height:100%;
-  }
-  .grupo-ava img img img,.hero-ava img{
-    width:100% !important;height:100% !important;display:block !important;object-fit:cover !important;
-  }
-  .grupo-ava,.hero-ava{overflow:visible !important;background:transparent !important}
+  
+  
+  
+  
   /* Hover keeps dark bg */
       /* Light mode: still keep black for avatars */
-  body.modo-claro .grupo-ava,body.modo-claro .hero-ava{background:transparent !important}
+  
 
 @keyframes fadeInDrop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 /* ── Historial Mantenimientos Sheet ── */
@@ -1135,11 +1130,11 @@ body.is-scrolling .presu-card{
 #hmSheetPanel{position:relative;z-index:1;background:var(--card);border-radius:24px 24px 0 0;width:100%;max-width:520px;max-height:92dvh;display:flex;flex-direction:column;animation:slideUp .3s cubic-bezier(.16,1,.3,1)}
 #hmSheetFicha{position:absolute;inset:0;background:var(--card);border-radius:24px 24px 0 0;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s cubic-bezier(.16,1,.3,1);z-index:2}
 #hmSheetFicha.open{transform:translateX(0)}
-.hm-head{padding:16px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
-.hm-head h2{font-size:17px;font-weight:800;color:var(--tx);flex:1;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.hm-close{width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,.08);color:var(--tx2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.hm-back{height:34px;padding:0 12px 0 8px;border-radius:50px;border:none;background:rgba(255,255,255,.08);color:var(--r);font-size:20px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.hm-body{overflow-y:auto;padding:18px 20px 32px;flex:1}
+
+
+
+
+
 .hm-card{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:16px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .15s,transform .15s}
 .hm-card:active{transform:scale(.98)}
 .hm-card.realizado{border-color:rgba(76,175,80,.25)}
@@ -1932,7 +1927,6 @@ let CU=null, CUD=null, CGID=null, CG=null;
 let allGrupos=[], allClientes=[], allPartes=[], allMantenimientos=[], allRecordatorios=[], allEquipos=[];
 let _mantHistCache=[];
 let unsubP=null, unsubC=null, unsubG=null, unsubN=null, unsubM=null;
-const tipoU='trabajador';
 let screenHistory=[];
 let _swReg=null;
 let plantillas=[], mantPlantillas=[], _partePlantillasFull=[], _mantFullPlantillas=[];
@@ -2349,7 +2343,6 @@ const _ajustarFechaLaborable = (fechaStr) => {
   else if(dow === 0) d.setDate(d.getDate() + 1); // Domingo → Lunes
   return d.toISOString().split('T')[0];
 };
-const weekDates=wk=>{const[y,w]=wk.split('-W').map(Number);const jan4=new Date(y,0,4);const mon=new Date(jan4);mon.setDate(jan4.getDate()-(jan4.getDay()||7)+1+(w-1)*7);const sun=new Date(mon);sun.setDate(mon.getDate()+6);const fmt=d=>d.toLocaleDateString('es-ES',{day:'2-digit',month:'2-digit'});return`${fmt(mon)} – ${fmt(sun)}`};
 const freqDays={semanal:7,quincenal:14,mensual:30,bimestral:60,trimestral:90,cuatrimestral:120,semestral:180};
 const audioCtx=()=>{try{return new(window.AudioContext||window.webkitAudioContext)()}catch{return null}};
 
@@ -2505,7 +2498,6 @@ window.addEventListener('beforeinstallprompt',e=>{
 });
 
 // Mostrar banner auth cuando se muestre el authWrap
-const _origShowAuth=window.showAuth;
 const _patchAuthBanner=()=>{
   const authWrap=$('authWrap');
   if(!authWrap)return;
@@ -3676,8 +3668,10 @@ window.doLogout=async()=>{
   if(window._unsubNotifScreen){try{window._unsubNotifScreen();}catch(_){}window._unsubNotifScreen=null;}
   _limpiarAvisosSubs();
   if(unsubM){unsubM();unsubM=null}
+  _syncArrancarListeners(null);
   CU=null;CUD=null;CGID=null;CG=null;
   allGrupos=[];allClientes=[];allPartes=[];allMantenimientos=[];allRecordatorios=[];allEquipos=[];
+  _localesCargadosDe=null;
   _mantHistCache=[];
   screenHistory=[];
   sessionStorage.removeItem('alberto_cgid');
@@ -3796,6 +3790,10 @@ const iniciarApp=async()=>{
       mantPlantillas     = mpSnap.docs.map(d=>d.data().nombre);
       _partePlantillasFull = ppfSnap.docs.map(d=>({id:d.id,...d.data()}));
       _reconciliarFirmasPendientes();
+      // Equipos y recordatorios preventivos: no viajan por Firestore, hay que
+      // leerlos de la cache local. Si se omite, quedan en [] y el primer
+      // guardado los borra del almacenamiento.
+      _cargarLocalesDeGrupo(CGID);
 
       // Arrancar listeners en tiempo real del grupo
       if(unsubP){unsubP();unsubP=null}
@@ -3825,6 +3823,7 @@ const iniciarApp=async()=>{
         mantPlantillas     = _lcLoad('mantPlant',     CGID) || [];
         _partePlantillasFull=_lcLoad('partePlantFull',CGID) || [];
         _reconciliarFirmasPendientes();
+        _cargarLocalesDeGrupo(CGID);
         // Arrancar listeners (servirán datos de caché Firestore cuando vuelva la red)
         if(unsubP){unsubP();unsubP=null}
         if(unsubC){unsubC();unsubC=null}
@@ -4195,6 +4194,138 @@ const _idbLeer = async (key) => {
   });
 };
 
+// Marca de que grupo se han cargado ya los datos locales (equipos/recordatorios).
+// Sin esto, una ruta de arranque que no los cargue deja los arrays vacios y el
+// primer guardado pisa el localStorage con [] — que es justo lo que borraba los
+// equipos y los recordatorios al reabrir la app.
+let _localesCargadosDe = null;
+
+const _cargarLocalesDeGrupo = (gid) => {
+  if(!gid) return;
+  allRecordatorios = _lcLoad('recordatorios', gid) || [];
+  allEquipos       = _lcLoad('equipos',       gid) || [];
+  _localesCargadosDe = gid;
+  _restaurarLocalesDesdeIDB(gid);
+  _syncArrancarListeners(gid);
+};
+
+// Red de seguridad: cualquier funcion que lea o escriba equipos/recordatorios
+// llama a esto primero. Si el grupo activo aun no los ha cargado, los carga.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SINCRONIZACION FIRESTORE DE EQUIPOS Y RECORDATORIOS
+// Antes vivian solo en este movil. Ahora van a grupos/{gid}/equipos y
+// grupos/{gid}/recordatorios, igual que los clientes: se comparten entre
+// dispositivos y sobreviven a un cambio de telefono. localStorage e IndexedDB
+// siguen ahi como cache offline y red de seguridad.
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const _SYNC_COLS = { equipos:'equipos', recordatorios:'recordatorios' };
+const _syncMapas = { equipos:new Map(), recordatorios:new Map() };
+// Limite duro de Firestore: 1 MiB por documento. Dejamos margen.
+const _SYNC_MAX_DOC = 900000;
+
+// JSON con las claves ordenadas, para que comparar local contra remoto no
+// dependa del orden en que Firestore devuelva los campos.
+const _jsonEstable = (obj) => {
+  try { return JSON.stringify(obj, Object.keys(obj).sort()); } catch(e) { return String(Math.random()); }
+};
+
+// Prepara el documento que se sube. Si las fotos hacen que no quepa, se suben
+// los datos sin ellas y se marca para que el movil que las tiene no las pierda.
+const _syncPayload = (item) => {
+  const limpio = {};
+  Object.keys(item).forEach(k=>{ if(item[k]!==undefined) limpio[k]=item[k]; });
+  delete limpio.id;
+  if(_jsonEstable(limpio).length > _SYNC_MAX_DOC && Array.isArray(limpio.fotos)){
+    delete limpio.fotos;
+    limpio._fotosLocales = true;
+  }
+  return limpio;
+};
+
+// Sube lo que haya cambiado y borra en remoto lo que ya no existe en local.
+const _syncSubir = (tipo) => {
+  if(!CGID) return;
+  const gid = CGID, col = _SYNC_COLS[tipo], mapa = _syncMapas[tipo];
+  const arr = (tipo==='equipos' ? allEquipos : allRecordatorios) || [];
+  const vivos = new Set();
+  arr.forEach(item=>{
+    if(!item || !item.id) return;
+    vivos.add(item.id);
+    const payload = _syncPayload(item);
+    const firma = _jsonEstable(payload);
+    if(mapa.get(item.id) === firma) return;     // sin cambios: no gastamos escritura
+    mapa.set(item.id, firma);
+    setDoc(doc(db,'grupos',gid,col,item.id), payload).catch(()=>{});
+  });
+  [...mapa.keys()].forEach(id=>{
+    if(vivos.has(id)) return;
+    mapa.delete(id);
+    deleteDoc(doc(db,'grupos',gid,col,id)).catch(()=>{});
+  });
+};
+
+// Aplica lo que llega de Firestore, conservando las fotos que solo estan en
+// este movil y subiendo, una unica vez por grupo, lo que se creo antes de que
+// existiera la sincronizacion.
+const _syncAplicarSnap = (tipo, gid, snap) => {
+  if(CGID !== gid) return;
+  const previos = ((tipo==='equipos' ? allEquipos : allRecordatorios) || []).slice();
+  const remotos = snap.docs.map(d=>({id:d.id,...d.data()}));
+  const mapa = _syncMapas[tipo];
+  mapa.clear();
+  remotos.forEach(r=>{ const {id,...resto}=r; mapa.set(id, _jsonEstable(resto)); });
+
+  let lista = remotos.map(r=>{
+    if(r._fotosLocales){
+      const p = previos.find(x=>x.id===r.id);
+      if(p && Array.isArray(p.fotos) && p.fotos.length) return {...r, fotos:p.fotos};
+    }
+    return r;
+  });
+
+  const flag = 'alberto_mig_'+tipo+'_'+gid;
+  let pendienteSubir = false;
+  let migrado = false;
+  try { migrado = localStorage.getItem(flag)==='1'; } catch(e){}
+  // Ademas de la migracion inicial: si el servidor viene vacio pero este movil
+  // tiene datos, nunca los tiramos — se vuelven a subir. Preferimos un borrado
+  // que no se propaga a perder fichas de equipos.
+  if(!migrado || (remotos.length===0 && previos.length>0)){
+    const soloLocales = previos.filter(p=>p.id && !remotos.some(r=>r.id===p.id));
+    if(soloLocales.length){ lista = [...lista, ...soloLocales]; pendienteSubir = true; }
+    try { localStorage.setItem(flag,'1'); } catch(e){}
+  }
+
+  if(tipo==='equipos') allEquipos = lista; else allRecordatorios = lista;
+  _localesCargadosDe = gid;
+  _lcSave(tipo, gid, lista);
+  if(pendienteSubir) _syncSubir(tipo);
+
+  if(document.querySelector('#screenRecordatorios.active') && tipo==='recordatorios' && typeof renderRecordatorios==='function') renderRecordatorios();
+  if(typeof _recRefrescarClientesTab==='function') _recRefrescarClientesTab();
+};
+
+// Arranca (o reinicia) los dos listeners para un grupo.
+let unsubEq=null, unsubRec=null;
+const _syncArrancarListeners = (gid) => {
+  if(unsubEq){ try{unsubEq()}catch(e){} unsubEq=null; }
+  if(unsubRec){ try{unsubRec()}catch(e){} unsubRec=null; }
+  if(!gid) return;
+  _syncMapas.equipos.clear(); _syncMapas.recordatorios.clear();
+  try{
+    unsubEq = onSnapshot(collection(db,'grupos',gid,'equipos'),
+      snap=>_syncAplicarSnap('equipos', gid, snap),
+      ()=>{ /* sin permisos o sin red: seguimos con la cache local */ });
+    unsubRec = onSnapshot(collection(db,'grupos',gid,'recordatorios'),
+      snap=>_syncAplicarSnap('recordatorios', gid, snap),
+      ()=>{ /* idem */ });
+  }catch(e){}
+};
+
+const _asegurarLocalesCargados = () => {
+  if(CGID && _localesCargadosDe !== CGID) _cargarLocalesDeGrupo(CGID);
+};
+
 // Recupera equipos/recordatorios desde IndexedDB si localStorage los perdió.
 const _restaurarLocalesDesdeIDB = async (gid) => {
   if(!gid) return;
@@ -4422,13 +4553,8 @@ window.abrirGrupo=async id=>{
   sessionStorage.setItem('alberto_cgid', id);
   sessionStorage.setItem('alberto_cg', JSON.stringify(grupoData));
   try{ if(CU) localStorage.setItem('alberto_ultimo_grupo_'+CU.uid, id); }catch(e){}
-  // Recordatorios preventivos: solo locales (no se sincronizan por Firestore)
-  allRecordatorios = _lcLoad('recordatorios', id) || [];
-  // Equipos asociados a clientes: solo locales (no se sincronizan por Firestore)
-  allEquipos = _lcLoad('equipos', id) || [];
-  // Red de seguridad: si localStorage se llenó y perdió estos datos, se
-  // recuperan del espejo en IndexedDB (no bloquea la apertura del grupo).
-  _restaurarLocalesDesdeIDB(id);
+  // Recordatorios preventivos y equipos: viven en local (no van por Firestore)
+  _cargarLocalesDeGrupo(id);
 
   // ── 2. Listeners en tiempo real ──
   if(unsubP){unsubP();unsubP=null}
@@ -4642,38 +4768,6 @@ const _renderVentanaExclusiva = (tab) => {
 };
 
 // Versiones que renderizan en #ventExclContent
-const _renderGTabAverias_Excl = () => {
-  const el=$('ventExclContent');if(!el)return;
-  el.innerHTML=`
-    <button class="btn btn-p" style="margin-bottom:14px;width:100%" onclick="abrirNuevaAveria()">+ Nueva avería</button>
-    <div class="stabs" style="margin-bottom:12px">
-      <button class="stab active" id="averExclTabPend" onclick="switchAverExclTab('pend')">⚠️ Pendientes <span id="averExclBadgePend" style="margin-left:4px;background:rgba(255,152,0,.2);color:#ff9800;border-radius:20px;padding:1px 7px;font-size:11px;font-weight:800"></span></button>
-      <button class="stab" id="averExclTabRes" onclick="switchAverExclTab('res')">✅ Resueltas <span id="averExclBadgeRes" style="margin-left:4px;background:rgba(76,175,80,.15);color:#4caf50;border-radius:20px;padding:1px 7px;font-size:11px;font-weight:800"></span></button>
-    </div>
-    <div id="averExclBody"></div>`;
-  if(!_unsubAverPend){
-    _unsubAverPend=onSnapshot(query(collection(db,'grupos',CGID,'averias'),where('estado','==','pendiente')),snap=>{_averiasPend=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>_tsN(b.creado)-_tsN(a.creado));_lcSave('averias_pend',CGID,_averiasPend);_renderAverExcl();},()=>{const c=_lcLoad('averias_pend',CGID);if(c){_averiasPend=c;_renderAverExcl();}});
-  } else { _renderAverExcl(); }
-  if(!_unsubAverRes){
-    _unsubAverRes=onSnapshot(query(collection(db,'grupos',CGID,'averias_historial'),orderBy('resueltaEn','desc')),snap=>{_averiasRes=snap.docs.map(d=>({id:d.id,...d.data()}));_lcSave('averias_res',CGID,_averiasRes);_renderAverExcl();},()=>{const c=_lcLoad('averias_res',CGID);if(c){_averiasRes=c;_renderAverExcl();}});
-  } else { _renderAverExcl(); }
-};
-let _averExclTab='pend';
-window.switchAverExclTab=(tab)=>{
-  _averExclTab=tab;
-  ['Pend','Res'].forEach(t=>{const e=document.getElementById('averExclTab'+t);if(e)e.classList.toggle('active',tab===t.toLowerCase());});
-  _renderAverExcl();
-};
-const _renderAverExcl=()=>{
-  const body=document.getElementById('averExclBody');if(!body)return;
-  const bP=document.getElementById('averExclBadgePend');const bR=document.getElementById('averExclBadgeRes');
-  if(bP)bP.textContent=_averiasPend.length||'';if(bR)bR.textContent=_averiasRes.length||'';
-  if(_averExclTab==='pend'){
-    body.innerHTML=!_averiasPend.length?`<div class="empty"><p>Sin averías pendientes ✅</p></div>`:_averiasPend.map(a=>{const c=allClientes.find(x=>x.id===a.clienteId);return`<div class="averia-card" onclick="verAveria('${a.id}')" data-sync-id="${a.id}"><div class="averia-header">${syncBadgeAv}<div class="averia-ico">${_averIco('#ff9800')}</div><div style="flex:1"><div class="averia-title">${a.tipo||'Avería'}</div><div class="averia-sub">${c?.nombre||'Cliente'} · ${fmtF(a.creado)}</div></div><span class="averia-badge pend">Pendiente</span></div></div>`;}).join('');
-  } else {
-    body.innerHTML=!_averiasRes.length?`<div class="empty"><p>Sin averías resueltas</p></div>`:_averiasRes.map(a=>{const c=allClientes.find(x=>x.id===a.clienteId);return`<div class="averia-card resuelta" onclick="verAveriaHistorial('${a.id}','${a.clienteId}')"><div class="averia-header">${syncBadgeAv}<div class="averia-ico">${_averIco('#4caf50')}</div><div style="flex:1"><div class="averia-title">${a.tipo||'Avería'}</div><div class="averia-sub">${c?.nombre||'Cliente'} · ${fmtF(a.resueltaEn||a.creado)}</div></div><span class="averia-badge resuelta">Resuelta</span></div></div>`;}).join('');
-  }
-};
 const _renderGTabPresupuestos_Excl = () => {
   const el=$('ventExclContent');if(!el)return;
   el.innerHTML=`
@@ -4717,36 +4811,8 @@ const _renderGTabMantenimientos_Excl = () => {
 };
 
 // ── Render inline tab: Averías (con 2 sub-pestañas en tiempo real) ──
-let _unsubAverInlinePend = null;
-let _unsubAverInlineRes = null;
-let _averInlineTab = 'pend';
 
-window.switchAverInlineTab = (tab) => {
-  _averInlineTab = tab;
-  ['Pend','Res'].forEach(t=>{
-    const el=document.getElementById('averInlineTab'+t);
-    if(el) el.classList.toggle('active', tab===t.toLowerCase());
-  });
-  _renderAverInline();
-};
 
-const _renderAverInline = () => {
-  const el=$('tabAverContent');if(!el)return;
-  const bP=document.getElementById('averInlineBadgePend');
-  const bR=document.getElementById('averInlineBadgeRes');
-  if(bP) bP.textContent=_averiasPend.length||'';
-  if(bR) bR.textContent=_averiasRes.length||'';
-  // Si hay búsqueda activa, actualizar resultados en tiempo real
-  const searchBox=document.getElementById('averInlineSearch');
-  if(searchBox&&searchBox.value.trim()){ _filtrarAverInline(searchBox.value); return; }
-  if(_averInlineTab==='pend'){
-    if(!_averiasPend.length){el.querySelector('#averInlineBody').innerHTML=`<div class="empty"><div class="empty-ico">✅</div><p>Sin averías pendientes</p></div>`;return;}
-    el.querySelector('#averInlineBody').innerHTML=_averiasPend.map(a=>_averCardHtml(a,false)).join('');
-  } else {
-    if(!_averiasRes.length){el.querySelector('#averInlineBody').innerHTML=`<div class="empty"><div class="empty-ico">📋</div><p>Sin averías resueltas</p></div>`;return;}
-    el.querySelector('#averInlineBody').innerHTML=_averiasRes.map(a=>_averCardHtml(a,true)).join('');
-  }
-};
 
 window._filtrarAverInline=(q)=>{
   const sr=document.getElementById('averInlineSearchResults');
@@ -4763,36 +4829,6 @@ window._filtrarAverInline=(q)=>{
   sr.innerHTML=[...rP.map(a=>_averCardHtml(a,false)),...rR.map(a=>_averCardHtml(a,true))].join('');
 };
 
-const _renderGTabAverias=()=>{
-  const el=$('tabAverContent');if(!el)return;
-  if(!CGID){el.innerHTML=`<div class="empty"><p>Selecciona un grupo primero</p></div>`;return;}
-  el.innerHTML=`
-    <button class="btn btn-p" style="margin-bottom:12px;width:100%" onclick="abrirNuevaAveria()">+ Nueva avería</button>
-    <input class="sbox" id="averInlineSearch" style="margin-bottom:10px" placeholder="🔍 Buscar por cliente, tipo, descripción..." oninput="_filtrarAverInline(this.value)">
-    <div id="averInlineSearchResults" style="display:none"></div>
-    <div id="averInlineTabsWrap">
-      <div class="stabs" style="margin-bottom:12px">
-        <button class="stab active" id="averInlineTabPend" onclick="switchAverInlineTab('pend')">⚠️ Pendientes <span id="averInlineBadgePend" style="margin-left:4px;background:rgba(255,152,0,.2);color:#ff9800;border-radius:20px;padding:1px 7px;font-size:11px;font-weight:800"></span></button>
-        <button class="stab" id="averInlineTabRes" onclick="switchAverInlineTab('res')">✅ Resueltas <span id="averInlineBadgeRes" style="margin-left:4px;background:rgba(76,175,80,.15);color:#4caf50;border-radius:20px;padding:1px 7px;font-size:11px;font-weight:800"></span></button>
-      </div>
-      <div id="averInlineBody"></div>
-    </div>`;
-  // Activar listeners (reusar los globales de renderAverias si ya están activos)
-  if(!_unsubAverPend){
-    _unsubAverPend = onSnapshot(
-      query(collection(db,'grupos',CGID,'averias'), where('estado','==','pendiente')),
-      snap => { _averiasPend=snap.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>_tsN(b.creado)-_tsN(a.creado)); _lcSave('averias_pend',CGID,_averiasPend); _renderAverInline(); _renderAveriasTab(); },
-      ()=>{ const c=_lcLoad('averias_pend',CGID); if(c){_averiasPend=c; _renderAverInline(); _renderAveriasTab();} }
-    );
-  } else { _renderAverInline(); }
-  if(!_unsubAverRes){
-    _unsubAverRes = onSnapshot(
-      query(collection(db,'grupos',CGID,'averias_historial'), orderBy('resueltaEn','desc')),
-      snap => { _averiasRes=snap.docs.map(d=>({id:d.id,...d.data()})); _lcSave('averias_res',CGID,_averiasRes); _renderAverInline(); _renderAveriasTab(); },
-      ()=>{ const c=_lcLoad('averias_res',CGID); if(c){_averiasRes=c; _renderAverInline(); _renderAveriasTab();} }
-    );
-  } else { _renderAverInline(); }
-};
 
 // ═══════════════════════════════════════════════════════════════
 // MÓDULO GENÉRICO — COBROS Y ENTREGAS
@@ -5060,35 +5096,6 @@ window.borrarSimple=async(tipo,itemId)=>{
 };
 
 // Crear un parte de trabajo a partir de un cobro o entrega, volcando sus datos
-window.crearParteDesdeSimple=(tipo,itemId)=>{
-  const conf=_SIMPLE_CONF[tipo];
-  const item=(_simplePend[tipo]||[]).find(x=>x.id===itemId)||(_simpleComp[tipo]||[]).find(x=>x.id===itemId);
-  if(!item){ toast(conf.labelSing+' no encontrado','e'); return; }
-  const cli=allClientes.find(c=>c.id===item.clienteId);
-  const importeTxt=(tipo==='cobro'&&item.importe)?` ${fmtM(item.importe).replace(/\s/g,'')}`:'';
-  const preData={
-    titulo:(item.titulo||conf.labelSing)+importeTxt,
-    descripcion:`${conf.labelSing}: ${item.titulo||''}`,
-    operario:CUD?.nombre||'',
-    clienteNombre:!item.clienteId&&item.clienteNombre?item.clienteNombre:''
-  };
-  const preDataJson=JSON.stringify(preData).replace(/'/g,"&#39;");
-  abrirSB(`📋 Crear parte desde ${conf.labelSing.toLowerCase()}`,`
-    <div style="background:rgba(66,165,245,.1);border:1px solid rgba(66,165,245,.3);border-radius:14px;padding:12px 14px;margin-bottom:14px">
-      <div style="font-size:12px;font-weight:900;color:#42a5f5;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Datos volcados desde ${conf.labelSing.toLowerCase()}</div>
-      <div style="font-size:13px;font-weight:800;color:var(--tx)">${item.titulo||conf.labelSing}</div>
-      <div style="font-size:12px;color:var(--tx2);margin-top:2px">${cli?.nombre||item.clienteNombre||'—'}</div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <button onclick="cerrarSBTotal();completarSimple('${tipo}','${itemId}',true);abrirParteExpress('${item.clienteId||''}',{...JSON.parse(decodeURIComponent('${encodeURIComponent(preDataJson)}')),_ocultarVolver:true})" style="display:flex;align-items:center;gap:12px;background:rgba(var(--theme-rgb),.1);border:1px solid rgba(var(--theme-rgb),.3);border-radius:16px;padding:14px 16px;cursor:pointer;font-family:var(--font)">
-        <span style="font-size:22px">⚡</span>
-        <div style="text-align:left"><div style="font-size:14px;font-weight:900;color:var(--tx)">Crear parte express</div><div style="font-size:11px;color:var(--tx2)">Datos prellenados — puedes editarlos. Se marca como completado</div></div>
-        <span style="margin-left:auto;color:var(--tx2)">›</span>
-      </button>
-      <button onclick="cerrarSBTotal()" style="padding:11px;background:transparent;border:1px solid var(--border);border-radius:14px;color:var(--tx2);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">Cancelar</button>
-    </div>
-  `);
-};
 
 // ── Render inline tab: Presupuestos (con 2 sub-pestañas en tiempo real) ──
 let _presuInlineTab = 'pend';
@@ -5168,7 +5175,7 @@ const _renderGTabPresupuestos=()=>{
 // ── Render inline tab: Calendario (calendario completo sincronizado con mantenimientos) ──
 // ─── Estado del toggle dentro del tab Mantenimientos ───
 let _gMantMode='gestionar'; // 'gestionar' | 'calendario'
-let _gCalPeriodo='mes';     // usado solo por los botones de Imprimir PDF
+// usado solo por los botones de Imprimir PDF
 let _gCalMesOffset=0;       // meses de diferencia respecto al mes actual (navegación del calendario)
 window._switchGMantMode=(mode)=>{
   _gMantMode=mode;
@@ -5805,8 +5812,6 @@ const renderTabClientes=()=>{
   <div id="clisList">${htmlListaClis(ultimos,false)}</div>`;
 };
 
-let activeCTab='clis';
-window.switchCTab=tab=>{ activeCTab=tab; };
 
 const htmlListaClis=(clis,preview=false)=>{
   if(!clis.length)return`<div class="empty"><div class="empty-ico"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><p>Sin clientes</p></div>`;
@@ -5884,7 +5889,13 @@ window.filtrarClis=v=>{
 // grupo (CGID) — no se sincronizan entre dispositivos.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const _recHoyStr=()=>new Date().toISOString().split('T')[0];
-const _recSaveAll=()=>{ if(CGID) _lcSave('recordatorios',CGID,allRecordatorios); };
+const _recSaveAll=()=>{
+  if(!CGID) return false;
+  if(_localesCargadosDe!==CGID) return false;   // sin cargar: nunca sobrescribir
+  const ok=_lcSave('recordatorios',CGID,allRecordatorios);
+  _syncSubir('recordatorios');
+  return ok;
+};
 
 // Recordatorios pendientes cuya fecha ya llegó (hoy) o ya pasó
 const _recordatoriosVencidos=()=>{
@@ -5921,6 +5932,18 @@ const _recordatoriosAlertHTML=()=>{
       </div>`;
     }).join('')}
   </div>`;
+};
+
+// Recordatorios preventivos de un cliente concreto (pendientes primero, por fecha).
+const _recDeCliente=cliId=>{
+  _asegurarLocalesCargados();
+  return (allRecordatorios||[])
+    .filter(r=>r.clienteId===cliId)
+    .sort((a,b)=>{
+      const pa=a.estado==='completado'?1:0, pb=b.estado==='completado'?1:0;
+      if(pa!==pb) return pa-pb;
+      return (a.fecha||'')<(b.fecha||'')?-1:1;
+    });
 };
 
 // Refresca la pestaña Clientes (si está visible) para reflejar cambios en los recordatorios
@@ -6014,6 +6037,7 @@ window._recRefrescarSelectEquipo=(cliId,preEquipoId)=>{
 };
 
 window.guardarRecordatorio=(id)=>{
+  _asegurarLocalesCargados();
   const cliInput=document.getElementById('_recCli');
   const clienteId=cliInput?cliInput.value:'';
   const cliente=clienteId?allClientes.find(c=>c.id===clienteId):null;
@@ -6053,6 +6077,7 @@ window.guardarRecordatorio=(id)=>{
 };
 
 window.completarRecordatorio=(id)=>{
+  _asegurarLocalesCargados();
   const i=(allRecordatorios||[]).findIndex(x=>x.id===id);
   if(i<0) return;
   allRecordatorios[i].estado='completado';
@@ -6064,6 +6089,7 @@ window.completarRecordatorio=(id)=>{
 };
 
 window.eliminarRecordatorio=(id)=>{
+  _asegurarLocalesCargados();
   if(!confirm('¿Eliminar este recordatorio?')) return;
   allRecordatorios=(allRecordatorios||[]).filter(x=>x.id!==id);
   _recSaveAll();
@@ -6081,8 +6107,14 @@ window.eliminarRecordatorio=(id)=>{
 // independiente). Se guarda en localStorage por grupo (CGID), igual que
 // Recordatorios preventivos: no se sincroniza por Firestore.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const _eqSaveAll=()=>{ if(!CGID) return false; return _lcSave('equipos',CGID,allEquipos); };
-const _eqDeCliente=cliId=>(allEquipos||[]).filter(e=>e.clienteId===cliId).sort((a,b)=>(b.creadoEn||0)-(a.creadoEn||0));
+const _eqSaveAll=()=>{
+  if(!CGID) return false;
+  if(_localesCargadosDe!==CGID) return false;   // sin cargar: nunca sobrescribir
+  const ok=_lcSave('equipos',CGID,allEquipos);  // cache local (offline)
+  _syncSubir('equipos');                        // y a Firestore
+  return ok;
+};
+const _eqDeCliente=cliId=>{ _asegurarLocalesCargados(); return (allEquipos||[]).filter(e=>e.clienteId===cliId).sort((a,b)=>(b.creadoEn||0)-(a.creadoEn||0)); };
 const _eqEstadoConf={
   ok:{label:'OK',color:'#4caf50',bg:'rgba(76,175,80,.13)'},
   revisar:{label:'Revisar',color:'#ff9800',bg:'rgba(255,152,0,.13)'},
@@ -6107,6 +6139,7 @@ const _comprimirImgEquipo=(file)=>new Promise((res,rej)=>{
 
 // ─── Lista de equipos de un cliente (abierta desde el botón "Equipos" en su ficha) ───
 window.abrirEquiposClienteSB=(cliId)=>{
+  _asegurarLocalesCargados();
   const c=allClientes.find(x=>x.id===cliId);if(!c)return;
   _sbReturnCli=cliId;
   const equipos=_eqDeCliente(cliId);
@@ -6150,6 +6183,7 @@ window.abrirFormEquipo=(cliId,id)=>{
 };
 
 window.guardarEquipo=(cliId,id)=>{
+  _asegurarLocalesCargados();
   const tipo=(document.getElementById('_eqTipo')?.value||'').trim();
   const marca=(document.getElementById('_eqMarca')?.value||'').trim();
   const modelo=(document.getElementById('_eqModelo')?.value||'').trim();
@@ -6177,6 +6211,7 @@ window.guardarEquipo=(cliId,id)=>{
 };
 
 window.eliminarEquipo=(id)=>{
+  _asegurarLocalesCargados();
   if(!confirm('¿Eliminar este equipo? Los recordatorios ya creados no se borran, pero dejarán de estar vinculados a él.')) return;
   const e=(allEquipos||[]).find(x=>x.id===id);
   allEquipos=(allEquipos||[]).filter(x=>x.id!==id);
@@ -6189,6 +6224,7 @@ window.eliminarEquipo=(id)=>{
 };
 
 window.subirFotoEquipo=async(id,files)=>{
+  _asegurarLocalesCargados();
   if(!files||!files.length) return;
   const e=(allEquipos||[]).find(x=>x.id===id);if(!e)return;
   toast('Procesando foto...','o');
@@ -6203,6 +6239,7 @@ window.subirFotoEquipo=async(id,files)=>{
 };
 
 window._eqEliminarFoto=(id,idx)=>{
+  _asegurarLocalesCargados();
   const e=(allEquipos||[]).find(x=>x.id===id);if(!e)return;
   e.fotos=(e.fotos||[]).filter((_,i)=>i!==idx);
   _eqSaveAll();
@@ -6212,6 +6249,7 @@ window._eqEliminarFoto=(id,idx)=>{
 // Guardado inline de la ficha técnica (garantía / estado / vida útil) — sin botón,
 // se guarda solo al cambiar cada campo para que sea rápido de rellenar.
 window._eqGuardarFichaTecnica=(id)=>{
+  _asegurarLocalesCargados();
   const e=(allEquipos||[]).find(x=>x.id===id);if(!e)return;
   e.garantiaHasta=document.getElementById('_eqGarantia')?.value||'';
   e.estado=document.getElementById('_eqEstado')?.value||'ok';
@@ -6223,6 +6261,7 @@ window._eqGuardarFichaTecnica=(id)=>{
 
 // ─── Ficha de un equipo: datos + ficha técnica + historial de recordatorios vinculados ───
 window.verEquipo=(id)=>{
+  _asegurarLocalesCargados();
   const e=(allEquipos||[]).find(x=>x.id===id);if(!e)return;
   const c=allClientes.find(x=>x.id===e.clienteId);
   const est=_eqEstadoConf[e.estado||'ok'];
@@ -6342,7 +6381,8 @@ window.verCliente=async id=>{
       window._fichaHistData={
         partes:allPartes.filter(p=>p.clienteId===id&&!p.archivado).map(p=>({...p,_archivado:false})),
         avisos:[],entregas:[],cobros:[],
-        presupuestos:presusCli
+        presupuestos:presusCli,
+        recordatorios:_recDeCliente(id)
       };
     }
     const [hmSnap,presuSnap,imgSnap,archParteSnap,avisSnap,entrSnap,cobrSnap]=await Promise.all([
@@ -6367,7 +6407,8 @@ window.verCliente=async id=>{
       avisos:(avisSnap?.docs||[]).map(d=>({id:d.id,...d.data()})),
       entregas:(entrSnap?.docs||[]).map(d=>({id:d.id,...d.data()})),
       cobros:(cobrSnap?.docs||[]).map(d=>({id:d.id,...d.data()})),
-      presupuestos:presusCli
+      presupuestos:presusCli,
+      recordatorios:_recDeCliente(id)
     };
     // Asegurar que _verParteArchivado pueda resolver estos partes aunque la pestaña Archivos no se haya abierto
     window._archivosCache=window._archivosCache||{};
@@ -6593,10 +6634,11 @@ window.verCliente=async id=>{
     </div>
     <div style="margin-top:18px">
       <div style="font-size:10px;font-weight:800;color:var(--tx2);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Registro completo del cliente</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px" id="fichaHistFiltros">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px" id="fichaHistFiltros">
         <button class="fbtn ficha-hist-fbtn active" data-t="avisos" onclick="window._fichaHistFiltro('${id}','avisos')">💬 Avisos</button>
         <button class="fbtn ficha-hist-fbtn" data-t="presupuestos" onclick="window._fichaHistFiltro('${id}','presupuestos')">💶 Presupuestos</button>
         <button class="fbtn ficha-hist-fbtn" data-t="cobros" onclick="window._fichaHistFiltro('${id}','cobros')">💰 Cobros</button>
+        <button class="fbtn ficha-hist-fbtn" data-t="recordatorios" onclick="window._fichaHistFiltro('${id}','recordatorios')">🔔 Recordatorios${_recDeCliente(id).length?` <span style="opacity:.7">(${_recDeCliente(id).length})</span>`:''}</button>
       </div>
       <div id="fichaHistBody">${window._htmlFichaHistLista('avisos')}</div>
     </div>
@@ -6639,6 +6681,28 @@ window._htmlFichaHistLista=(tipo)=>{
       </div>`;
     }).join('');
   }
+  if(tipo==='recordatorios'){
+    const hoy=(typeof _recHoyStr==='function')?_recHoyStr():new Date().toISOString().split('T')[0];
+    // Sin reordenar: _recDeCliente ya los entrega con los pendientes delante
+    return data.map(r=>{
+      const hecho=r.estado==='completado';
+      const vencido=!hecho&&r.fecha&&r.fecha<=hoy;
+      const fechaFmt=(typeof fmtFISO==='function')?fmtFISO(r.fecha):(r.fecha||'');
+      const estadoTxt=hecho?'Completado':(vencido?'Vencido':'Pendiente');
+      const color=hecho?'#4caf50':(vencido?'#ef4444':'var(--tx2)');
+      return`<div class="averia-card ${hecho?'resuelta':''}" style="cursor:pointer" onclick="abrirFormRecordatorio('${r.id}')">
+        <div class="averia-header">
+          <div class="averia-ico">🔔</div>
+          <div style="flex:1;min-width:0">
+            <div class="averia-title">${r.titulo||'Recordatorio'}</div>
+            <div class="averia-sub"><span style="color:${color};font-weight:800">${estadoTxt}</span> · ${fechaFmt}${r.equipoNombre?' · 🔧 '+r.equipoNombre:''}</div>
+          </div>
+        </div>
+        ${r.notas?`<div style="font-size:11.5px;color:var(--tx2);margin-top:6px;line-height:1.4">${r.notas}</div>`:''}
+      </div>`;
+    }).join('');
+  }
+
   // avisos / entregas / cobros — se abren igual que desde su sección nativa
   // (mismo visor/editor que en Avisos, Entregas o Cobros), permitiendo hacer
   // con ellos todo lo que se podría hacer desde ahí.
@@ -6672,39 +6736,11 @@ window._fichaHistFiltro=(cliId,tipo)=>{
 // Vista de solo lectura para un aviso/entrega/cobro mostrado en el registro completo del cliente.
 // No depende de las cachés en vivo de la pestaña (_simplePend/_simpleComp), así que funciona
 // aunque el elemento no se haya cargado todavía en la pestaña correspondiente del grupo.
-window._verFichaHistItem=(tipo,itemId)=>{
-  const data=(window._fichaHistData&&window._fichaHistData[tipo])||[];
-  const it=data.find(x=>x.id===itemId);
-  if(!it){toast('No encontrado','e');return;}
-  const completado=it.estado==='completado'||it.estado==='resuelto';
-  const icoMap={avisos:'💬',entregas:'📦',cobros:'💰'};
-  const labelMap={avisos:'Aviso',entregas:'Entrega',cobros:'Cobro'};
-  const prio=it.prioridad;
-  const pc=(tipo!=='avisos'&&prio&&prio!=='normal')?(_averPrioConf[prio]||null):null;
-  const avisoAlta=tipo==='avisos'&&it.prioridad==='alta';
-  abrirSB(`${icoMap[tipo]} ${it.titulo||it.descripcion||labelMap[tipo]}`,`
-    <div style="margin-bottom:14px">
-      <div style="font-size:13px;color:var(--tx2);margin-bottom:8px">${it.clienteNombre||'Sin cliente'}</div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-        ${pc?`<span style="font-size:11px;font-weight:900;color:${pc.color};background:${pc.bg};border:1px solid ${pc.border};padding:3px 10px;border-radius:20px">${pc.label}</span>`:''}
-        ${avisoAlta?`<span style="font-size:11px;font-weight:900;color:#ef5350;background:rgba(239,83,80,.12);border:1px solid rgba(239,83,80,.3);padding:3px 10px;border-radius:20px">⚠️ Alta</span>`:''}
-        <span class="averia-badge ${completado?'resuelta':'pend'}">${completado?(tipo==='avisos'?'Resuelto':'Completado'):'Pendiente'}</span>
-      </div>
-      ${(it.descripcion&&it.titulo)?`<div style="font-size:13px;color:var(--tx2);margin-bottom:8px">${it.descripcion}</div>`:''}
-      ${(tipo==='cobros'&&it.importe)?`<div style="font-size:16px;font-weight:900;color:var(--r);margin-bottom:6px">${fmtM(it.importe)}</div>`:''}
-      <div style="font-size:12px;color:var(--tx2)">📅 ${fmtF(it.creado)}${it.resueltaEn?` · Resuelto: ${fmtF(it.resueltaEn)}`:''}</div>
-    </div>
-    <div style="background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:12px;padding:10px 12px;font-size:11.5px;color:var(--tx2);line-height:1.5">
-      Para editarlo, marcarlo o crear un parte a partir de ${tipo==='avisos'?'este aviso':(tipo==='entregas'?'esta entrega':'este cobro')}, ve a la pestaña <strong style="color:var(--tx)">${labelMap[tipo]}</strong> del grupo.
-    </div>
-  `);
-};
 
 
 // ── Helpers "desde ficha cliente"
 // verCliente ya pasa cliId=null (ficha base), los demás activan retorno
 window.abrirFCliDesdeCli=id=>{ _sbReturnCli=id; abrirFCli(id); };
-window.abrirFParteDesdeCli=id=>{ const c=id; cerrarSB(); setTimeout(()=>{ _sbReturnCli=c; abrirSelectorParte(id); },120); };
 window.verParteDesdeCliente=(partId,cliId)=>{ _sbReturnCli=cliId; verParte(partId); };
 window.abrirImagenesClienteDesdeCli=id=>{ _sbReturnCli=id; abrirImagenesClienteSB(id); };
 window.verMantDesdeCliente=(mantId,cliId)=>{ _sbReturnCli=cliId; verMant(mantId); };
@@ -6741,118 +6777,16 @@ window._crearPresupuestoRapidoCli=(cliId)=>{
   },20);
 };
 
-window._crearMantRapidoCli=async(cliId)=>{
-  const cli=allClientes.find(c=>c.id===cliId);
-  if(!cli)return;
-  _sbReturnCli=cliId;
-  const cliNom=cli.nombre||'Cliente';
-  // Cargar plantillas completas desde Firestore (igual que nuevoMantDesdeCliente)
-  let plantsFull=[];
-  try{
-    const snap=await getDocs(collection(db,'grupos',CGID,'mantPlantillasFull'));
-    plantsFull=snap.docs.map(d=>({id:d.id,...d.data()}));
-    _mantFullPlantillas=plantsFull;
-  }catch(e){}
-  _abrirSelectorMantSB(cliId,cliNom,plantsFull);
-};
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // PUNTO 7 — TRANSICIONES DE ESTADO AUTOMÁTICAS
 // Al completar un parte: cierra averías vinculadas, propone siguiente paso
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-window._transicionesAutoCompletarParte=async(parteId)=>{
-  const p=allPartes.find(x=>x.id===parteId);
-  if(!p||!CGID)return;
-  const cliId=p.clienteId;
-  // 1. Si hay averías abiertas de este cliente, ofrecer cerrarlas
-  try{
-    const avSnap=await getDocs(query(collection(db,'grupos',CGID,'averias'),where('clienteId','==',cliId)));
-    const avAbiertas=avSnap.docs.map(d=>({id:d.id,...d.data()})).filter(a=>a.estado==='pendiente');
-    if(avAbiertas.length){
-      // Cerrar automáticamente la primera (la más probable de estar relacionada)
-      const av=avAbiertas[0];
-      await addDoc(collection(db,'grupos',CGID,'averias_historial'),{...av,avId:av.id,estado:'resuelta',resueltaEn:serverTimestamp(),cierreAutoPorParte:parteId});
-      await updateDoc(doc(db,'grupos',CGID,'averias',av.id),{estado:'resuelta',resueltaEn:serverTimestamp()});
-      toast(`✅ Avería "${av.tipo||'Sin tipo'}" cerrada automáticamente`,'o');
-    }
-  }catch(e){}
-  // 2. Micro-interacción de cierre satisfactorio
-  _microInteraccionCierre();
-  // 3. Proponer siguiente paso tras un breve delay
-  setTimeout(()=>{
-    const cli=allClientes.find(c=>c.id===cliId);
-    abrirSB('✅ Parte completado',`
-      <div style="text-align:center;padding:12px 0 20px">
-        <div id="_celebIcon" style="font-size:56px;line-height:1;margin-bottom:10px;transform:scale(0);transition:transform .4s cubic-bezier(.16,1,.3,1)">✅</div>
-        <div style="font-size:18px;font-weight:900;color:var(--tx);margin-bottom:4px">${p.titulo||'Parte completado'}</div>
-        <div style="font-size:13px;color:var(--tx2)">${cli?.nombre||''}</div>
-      </div>
-      <div style="font-size:11px;font-weight:800;color:var(--tx2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">¿Qué sigue?</div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <button onclick="cerrarSBTotal();crearPresupuestoDesdeParteId('${parteId}')" style="display:flex;align-items:center;gap:12px;background:rgba(66,133,244,.1);border:1px solid rgba(66,133,244,.25);border-radius:14px;padding:13px 14px;cursor:pointer;font-family:var(--font);transition:.15s" onmouseover="this.style.background='rgba(66,133,244,.18)'" onmouseout="this.style.background='rgba(66,133,244,.1)'">
-          <span style="font-size:20px">💶</span>
-          <div style="text-align:left"><div style="font-size:13px;font-weight:900;color:var(--tx)">Crear presupuesto</div><div style="font-size:11px;color:var(--tx2)">Partidas importadas del parte</div></div>
-          <span style="margin-left:auto;color:var(--tx2)">›</span>
-        </button>
-        <button onclick="cerrarSBTotal();window._crearMantRapidoCli('${cliId}')" style="display:flex;align-items:center;gap:12px;background:rgba(76,175,80,.08);border:1px solid rgba(76,175,80,.2);border-radius:14px;padding:13px 14px;cursor:pointer;font-family:var(--font);transition:.15s" onmouseover="this.style.background='rgba(76,175,80,.16)'" onmouseout="this.style.background='rgba(76,175,80,.08)'">
-          <span style="font-size:20px">🔧</span>
-          <div style="text-align:left"><div style="font-size:13px;font-weight:900;color:var(--tx)">Programar mantenimiento</div><div style="font-size:11px;color:var(--tx2)">Próxima revisión del equipo</div></div>
-          <span style="margin-left:auto;color:var(--tx2)">›</span>
-        </button>
-        <button onclick="cerrarSBTotal();verCliente('${cliId}')" style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:14px;padding:13px 14px;cursor:pointer;font-family:var(--font);transition:.15s" onmouseover="this.style.borderColor='var(--r)'" onmouseout="this.style.borderColor='var(--border)'">
-          <span style="font-size:20px">👤</span>
-          <div style="text-align:left"><div style="font-size:13px;font-weight:900;color:var(--tx)">Ver ficha del cliente</div><div style="font-size:11px;color:var(--tx2)">Volver al expediente completo</div></div>
-          <span style="margin-left:auto;color:var(--tx2)">›</span>
-        </button>
-        <button onclick="cerrarSBTotal()" style="padding:12px;background:transparent;border:none;color:var(--tx2);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">Cerrar</button>
-      </div>
-    `);
-    // Animar el icono de celebración
-    setTimeout(()=>{const el=document.getElementById('_celebIcon');if(el)el.style.transform='scale(1)';},80);
-  },900);
-};
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // PUNTO 12 — MICRO-INTERACCIONES
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-window._microInteraccionCierre=()=>{
-  // Partícula de confeti rápida sobre el SB
-  const wrap=document.createElement('div');
-  wrap.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:99999;overflow:hidden';
-  const colors=['#e53935','#4caf50','#ff9800','#1e88e5','#9c27b0'];
-  for(let i=0;i<22;i++){
-    const p=document.createElement('div');
-    const x=20+Math.random()*60;
-    const col=colors[Math.floor(Math.random()*colors.length)];
-    const size=5+Math.random()*7;
-    const rot=Math.random()*360;
-    p.style.cssText=`position:absolute;left:${x}%;top:50%;width:${size}px;height:${size}px;background:${col};border-radius:${Math.random()>.5?'50%':'2px'};transform:rotate(${rot}deg);animation:_confettiDrop${i%3} .9s cubic-bezier(.16,1,.3,1) ${i*28}ms forwards`;
-    wrap.appendChild(p);
-  }
-  // Keyframes dinámicos para las partículas
-  if(!document.getElementById('_confettiStyle')){
-    const st=document.createElement('style');
-    st.id='_confettiStyle';
-    st.textContent=`
-      @keyframes _confettiDrop0{0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}100%{opacity:0;transform:translateY(-180px) rotate(360deg) scale(.4)}}
-      @keyframes _confettiDrop1{0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}100%{opacity:0;transform:translateY(-220px) rotate(-180deg) scale(.3)}}
-      @keyframes _confettiDrop2{0%{opacity:1;transform:translateY(0) rotate(0deg) scale(1)}100%{opacity:0;transform:translateY(-150px) rotate(270deg) scale(.5)}}
-    `;
-    document.head.appendChild(st);
-  }
-  document.body.appendChild(wrap);
-  setTimeout(()=>wrap.remove(),1200);
-  // Haptic doble
-  if(navigator.vibrate)navigator.vibrate([40,60,40]);
-};
 
-// Inyectar micro-interacción en flujoCompletarFirmarPDF → _transicionesAutoCompletarParte
-const _origFlujoCompletar=window.flujoCompletarFirmarPDF;
-window.flujoCompletarFirmarPDF=async(id)=>{
-  if(_origFlujoCompletar) await _origFlujoCompletar(id);
-  // Encadenar transiciones automáticas tras el flujo original
-  setTimeout(()=>window._transicionesAutoCompletarParte(id),200);
-};
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // GEOLOCALIZACIÓN — única consulta al abrir la app
@@ -7719,8 +7653,6 @@ window.swipeArchivarCli=async(id)=>{
 const _dateStr=(d)=>{if(!d)return'';const dt=d.seconds?new Date(d.seconds*1000):new Date(d);return`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')}`;};
 const _hoyPartes=()=>{const d=new Date();return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
 const _ayerPartes=()=>{const d=new Date();d.setDate(d.getDate()-1);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
-const _semanaPartes=()=>{const d=new Date();d.setDate(d.getDate()-6);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
-const _mesPartes=()=>{const d=new Date();d.setDate(d.getDate()-29);return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;};
 const _labelFecha=(ds)=>{if(!ds)return'';const hoy=_hoyPartes();const ayer=_ayerPartes();if(ds===hoy)return'Hoy';if(ds===ayer)return'Ayer';const [y,m,d]=ds.split('-');const dt=new Date(+y,+m-1,+d);return dt.toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'});};
 
 // ── Agrupar partes por día ──
@@ -7819,105 +7751,8 @@ const htmlListaPartes=partes=>{
 };
 
 // ─── Selector de franja de fechas para imprimir partes ───
-window.abrirSelectorImprimirPartes=()=>{
-  abrirSB('🖨️ Imprimir partes',`
-    <div style="font-size:12px;color:var(--tx2);margin-bottom:14px">Elige la franja de fechas que quieres imprimir</div>
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <button class="btn btn-s" style="width:100%;text-align:left" onclick="cerrarSBTotal();imprimirPartes('todos')">📋 Todos los partes</button>
-      <button class="btn btn-s" style="width:100%;text-align:left" onclick="cerrarSBTotal();imprimirPartes('hoy')">📅 Hoy</button>
-      <button class="btn btn-s" style="width:100%;text-align:left" onclick="cerrarSBTotal();imprimirPartes('ayer')">↩️ Ayer</button>
-      <button class="btn btn-s" style="width:100%;text-align:left" onclick="cerrarSBTotal();imprimirPartes('semana')">🗓️ Últimos 7 días</button>
-      <button class="btn btn-s" style="width:100%;text-align:left" onclick="cerrarSBTotal();imprimirPartes('mes')">🗓️ Últimos 30 días</button>
-    </div>
-  `);
-};
 
 // ─── Imprimir partes (Ayer / Semanal / Mensual / Todos / Hoy) ───
-window.imprimirPartes=(modo)=>{
-  if(modo===undefined)modo='todos';
-  const hoy=_hoyPartes();const ayer=_ayerPartes();const semana=_semanaPartes();const mes=_mesPartes();
-  let lista=allPartes.filter(p=>!p.archivado&&!p.esPlantilla);
-  let tituloRango='Todos los partes';
-  if(modo==='hoy'){lista=lista.filter(p=>_dateStr(p.creado)===hoy);tituloRango='Partes de hoy';}
-  else if(modo==='ayer'){lista=lista.filter(p=>_dateStr(p.creado)===ayer);tituloRango='Partes de ayer';}
-  else if(modo==='semana'){lista=lista.filter(p=>_dateStr(p.creado)>=semana);tituloRango='Partes de los últimos 7 días';}
-  else if(modo==='mes'){lista=lista.filter(p=>_dateStr(p.creado)>=mes);tituloRango='Partes de los últimos 30 días';}
-  lista=lista.sort((a,b)=>_tsN(b.creado)-_tsN(a.creado));
-  if(!lista.length){toast('No hay partes en este período','i');return;}
-
-  const totalGeneral=lista.reduce((s,p)=>s+calcTotal(p),0);
-  const fechaHoyTxt=new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
-
-  const filas=lista.map((p,i)=>{
-    const cli=allClientes.find(c=>c.id===p.clienteId);
-    const cliNom=p.clienteNombre||cli?.nombre||'Sin cliente';
-    const fechaTxt=p.fechaParte?new Date(p.fechaParte+'T00:00:00').toLocaleDateString('es-ES',{day:'2-digit',month:'short',year:'numeric'}):fmtF(p.creado);
-    const estadoTxt=p.estado==='completado'?'✓ Completado':'Pendiente';
-    return`<tr class="${i%2===0?'row-even':'row-odd'}">
-      <td class="td-fecha">${fechaTxt}</td>
-      <td class="td-trabajo">${p.titulo||'—'}${p.descripcion?`<div class="sub-desc">${p.descripcion}</div>`:''}</td>
-      <td class="td-cliente">
-        <span class="cli-nombre">${cliNom}</span>
-        ${p.clienteDireccion?`<span class="cli-dir">${p.clienteDireccion}</span>`:''}
-      </td>
-      <td class="td-estado"><span class="${p.estado==='completado'?'estado-comp':'estado-pend'}">${estadoTxt}</span></td>
-      <td class="td-total">${fmtM(calcTotal(p))}</td>
-    </tr>`;
-  }).join('');
-
-  const accentColor='#0b5c56';
-  const printHTML=`<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Partes — ${CG?.nombre||'Alberto'}</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:#fff;color:#1a1a1a;font-size:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.hdr{padding:22px 24px;border-bottom:3px solid ${accentColor}}
-.hdr h1{font-size:20px;font-weight:900;color:${accentColor}}
-.hdr .sub{font-size:12px;color:#666;margin-top:4px}
-.resumen{display:flex;gap:18px;padding:14px 24px;background:#fafafa;border-bottom:1px solid #eee;font-size:11px;flex-wrap:wrap}
-.resumen b{color:${accentColor}}
-table{width:100%;border-collapse:collapse;margin:16px 24px;width:calc(100% - 48px)}
-th{text-align:left;font-size:10px;text-transform:uppercase;color:#888;padding:8px 10px;border-bottom:2px solid #ddd}
-td{padding:9px 10px;border-bottom:1px solid #eee;vertical-align:top}
-.row-even{background:#fcfcfc}
-.cli-nombre{font-weight:700;display:block}
-.cli-dir{font-size:10px;color:#888;display:block}
-.sub-desc{font-size:10.5px;color:#777;margin-top:2px}
-.estado-comp{color:#2e7d32;font-weight:700}
-.estado-pend{color:#e65100;font-weight:700}
-.td-total{font-weight:800;text-align:right;white-space:nowrap}
-.ftr{padding:14px 24px;text-align:right;font-size:13px;font-weight:900;border-top:2px solid #ddd;margin:0 24px}
-@media print{body{padding:0}}
-</style>
-</head>
-<body>
-  <div class="hdr">
-    <img src="${LOGO_B64}" style="width:34px;height:34px;border-radius:9px;display:block;margin-bottom:8px">
-    <h1>📋 ${tituloRango}</h1>
-    <div class="sub">${CG?.nombre||'Alberto'} · Generado el ${fechaHoyTxt}</div>
-  </div>
-  <div class="resumen">
-    <span>Total partes: <b>${lista.length}</b></span>
-    <span>Completados: <b>${lista.filter(p=>p.estado==='completado').length}</b></span>
-    <span>Pendientes: <b>${lista.filter(p=>p.estado!=='completado').length}</b></span>
-  </div>
-  <table>
-    <thead><tr><th>Fecha</th><th>Trabajo</th><th>Cliente</th><th>Estado</th><th style="text-align:right">Importe</th></tr></thead>
-    <tbody>${filas}</tbody>
-  </table>
-  <div class="ftr">TOTAL: ${fmtM(totalGeneral)}</div>
-</body>
-</html>`;
-
-  const w=window.open('','_blank');
-  if(!w){toast('Activa las ventanas emergentes para imprimir','e');return;}
-  w.document.write(printHTML);w.document.close();
-  setTimeout(()=>{w.focus();w.print();},400);
-};
 
 // ─── Ver parte ───
 window.verParte=id=>{
@@ -8049,18 +7884,6 @@ window.abrirFParte=async(id,preCliId,preData)=>{
 };
 
 // Autorellenar edificio y dirección al cambiar cliente
-window.autoEdificio=sel=>{
-  const opt=sel.options[sel.selectedIndex];
-  const edif=opt?.dataset?.edif||'';
-  const dir=opt?.dataset?.dir||'';
-  const tel=opt?.dataset?.tel||'';
-  const ef=document.getElementById('pEdif');
-  const df=document.getElementById('pDir');
-  const tf=document.getElementById('pTel');
-  if(ef&&edif)ef.value=edif;
-  if(df&&dir)df.value=dir;
-  if(tf&&tel)tf.value=tel;
-};
 
 // ── Mejora 4: Sugerencias de materiales del historial ──
 const _getHistorialMateriales=()=>{
@@ -9919,22 +9742,6 @@ window.eliminarMant=async(id)=>{
 };
 
 // ── Mejora 7: Crear parte copiando datos del mantenimiento ──
-window.crearParteDesdeMantenimiento=async(mantId)=>{
-  const m=allMantenimientos.find(x=>x.id===mantId);if(!m)return;
-  const cli=allClientes.find(c=>c.id===m.clienteId);
-  cerrarSB();
-  await abrirFParte(null, m.clienteId||'', {
-    titulo: m.nombreTrabajo||'',
-    edificio: m.clienteEdificio||cli?.edificio||'',
-    clienteDireccion: m.clienteDireccion||cli?.direccion||'',
-    clienteTelefono: m.clienteTelefono||cli?.telefono||'',
-    operario: CUD?.nombre||'',
-    descripcion: m.notas||'',
-    materiales: '',
-    estado: 'pendiente'
-  });
-  toast('Parte creado desde mantenimiento — completa los detalles','i');
-};
 
 // completarMant se mantiene para el botón ✅ del calendario (no cambia allí)
 window.completarMant=async(id)=>{
@@ -11595,14 +11402,6 @@ let _averTabActiva = 'pend'; // 'pend' | 'res'
 let _averiasPend = [];
 let _averiasRes = [];
 
-window.switchAverTab = (tab) => {
-  _averTabActiva = tab;
-  const tabPend = document.getElementById('averTabPend');
-  const tabRes = document.getElementById('averTabRes');
-  if(tabPend) tabPend.classList.toggle('active', tab==='pend');
-  if(tabRes) tabRes.classList.toggle('active', tab==='res');
-  _renderAveriasTab();
-};
 
 const _averIco = (color) => `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
 
@@ -11755,83 +11554,7 @@ const renderAverias = () => {
 };
 
 // ─── Crear parte directamente desde una avería ───
-window.crearParteDesdeAveria = async (averiaId) => {
-  let a = (_averiasPend||[]).find(x=>x.id===averiaId) || (_averiasRes||[]).find(x=>x.id===averiaId);
-  if(!a){
-    try{
-      const snap = await getDoc(doc(db,'grupos',CGID,'averias',averiaId));
-      if(snap.exists()) a = {id:snap.id,...snap.data()};
-    }catch(e){}
-  }
-  if(!a){ toast('Avería no encontrada','e'); return; }
-  const cli = allClientes.find(c=>c.id===a.clienteId);
-  const hoy = new Date().toISOString().split('T')[0];
-  // Volcado automático de datos de la avería al parte
-  const preData = {
-    titulo: `Reparación: ${a.tipo||'Avería'}`,
-    descripcion: [a.tipo, a.descripcion].filter(Boolean).join('\n'),
-    clienteDireccion: a.clienteDireccion||cli?.direccion||'',
-    edificio: a.clienteEdificio||cli?.edificio||'',
-    clienteTelefono: a.clienteTelefono||cli?.telefono||'',
-    operario: CUD?.nombre||''
-  };
-  // Marcar la avería como resuelta con fecha de hoy
-  const resueltaHoy = a.resueltaEn || null;
-  abrirSB('📋 Crear parte desde avería', `
-    <div style="background:rgba(66,165,245,.1);border:1px solid rgba(66,165,245,.3);border-radius:14px;padding:12px 14px;margin-bottom:14px">
-      <div style="font-size:12px;font-weight:900;color:#42a5f5;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Datos volcados desde avería</div>
-      <div style="font-size:13px;font-weight:800;color:var(--tx)">${a.tipo||'Avería'}</div>
-      <div style="font-size:12px;color:var(--tx2);margin-top:2px">${cli?.nombre||a.clienteNombre||'—'}${a.descripcion?' · '+a.descripcion.slice(0,60):''}</div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <button onclick="cerrarSBTotal();abrirFParte(null,'${a.clienteId||''}',${JSON.stringify(preData).replace(/'/g,"\'")})" style="display:flex;align-items:center;gap:12px;background:rgba(var(--theme-rgb),.1);border:1px solid rgba(var(--theme-rgb),.3);border-radius:16px;padding:14px 16px;cursor:pointer;font-family:var(--font)">
-        <span style="font-size:22px">📋</span>
-        <div style="text-align:left"><div style="font-size:14px;font-weight:900;color:var(--tx)">Crear parte completo</div><div style="font-size:11px;color:var(--tx2)">Datos prellenados — puedes editarlos</div></div>
-        <span style="margin-left:auto;color:var(--tx2)">›</span>
-      </button>
-      <button onclick="cerrarSBTotal();_crearParteExpressDesdeAveria('${averiaId}')" style="display:flex;align-items:center;gap:12px;background:rgba(255,152,0,.08);border:1px solid rgba(255,152,0,.25);border-radius:16px;padding:14px 16px;cursor:pointer;font-family:var(--font)">
-        <span style="font-size:22px">⚡</span>
-        <div style="text-align:left"><div style="font-size:14px;font-weight:900;color:var(--tx)">Parte express + cerrar avería</div><div style="font-size:11px;color:var(--tx2)">Guarda rápido y marca la avería como resuelta</div></div>
-        <span style="margin-left:auto;color:var(--tx2)">›</span>
-      </button>
-      <button onclick="cerrarSBTotal()" style="padding:11px;background:transparent;border:1px solid var(--border);border-radius:14px;color:var(--tx2);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">Cancelar</button>
-    </div>
-  `);
-};
 
-window._crearParteExpressDesdeAveria = async (averiaId) => {
-  let a = (_averiasPend||[]).find(x=>x.id===averiaId);
-  if(!a){ try{ const sn=await getDoc(doc(db,'grupos',CGID,'averias',averiaId)); if(sn.exists()) a={id:sn.id,...sn.data()}; }catch(e){} }
-  if(!a){ toast('Avería no encontrada','e'); return; }
-  const cli = allClientes.find(c=>c.id===a.clienteId);
-  const hoy = new Date().toISOString().split('T')[0];
-  const data = {
-    titulo: `Reparación: ${a.tipo||'Avería'}`,
-    clienteId: a.clienteId||'',
-    clienteNombre: cli?.nombre||a.clienteNombre||'',
-    edificio: a.clienteEdificio||cli?.edificio||'',
-    clienteDireccion: a.clienteDireccion||cli?.direccion||'',
-    clienteTelefono: a.clienteTelefono||cli?.telefono||'',
-    descripcion: [a.tipo, a.descripcion].filter(Boolean).join('\n'),
-    operario: CUD?.nombre||'',
-    creadoPor: CUD?.nombre||CU?.email||'',
-    materiales:'', duracion:'',
-    importeManoObra:0, importeMateriales:0, importeDesplazamiento:0,
-    aplicarIVAMateriales:false, estado:'completado', esPlantilla:false,
-    fechaParte:hoy, actualizado:serverTimestamp()
-  };
-  // Optimistic: fire-and-forget, no blocking
-  const newDataExpress={...data,creado:Timestamp.fromDate(new Date())};
-  const parteIdExpress=_offlineSaveWithId(collection(db,'grupos',CGID,'partes'),newDataExpress);
-  allPartes=[{id:parteIdExpress,...newDataExpress},...allPartes];
-  _lcSave('partes',CGID,allPartes);
-  if(_averiasPend){ const ai=_averiasPend.findIndex(x=>x.id===averiaId); if(ai>=0)_averiasPend.splice(ai,1); _lcSave('averias_pend',CGID,_averiasPend); }
-  addDoc(collection(db,'grupos',CGID,'averias_historial'),{...a,avId:a.id,estado:'resuelta',resueltaEn:serverTimestamp(),parteId:parteIdExpress}).catch(()=>{});
-  updateDoc(doc(db,'grupos',CGID,'averias',averiaId),{estado:'resuelta',resueltaEn:serverTimestamp(),parteId:parteIdExpress}).catch(()=>{});
-  toast('✅ Parte creado y avería cerrada','o');
-  haptic('medium');
-  setTimeout(()=>_ofrecerFirmaAlCrear(parteIdExpress), 600);
-};
 
 window.abrirNuevaAveriaPrerellenada=(cliId,tipo,desc,contacto)=>{
   const cliPresel2=allClientes.find(c=>c.id===cliId);
@@ -11859,9 +11582,6 @@ window.abrirNuevaAveriaPrerellenada=(cliId,tipo,desc,contacto)=>{
   },80);
 };
 
-window.abrirNuevaAveria=()=>{
-  abrirNuevaAveriaPrerellenada('','','');
-};
 
 // ── Crear avería desde un mantenimiento del calendario, volcando datos ──
 window.abrirAveriaDesdeMantenimiento=(mantId)=>{
@@ -12637,63 +12357,6 @@ window.guardarPresupuesto=async(editId)=>{
 // ─── Crear parte a partir de un presupuesto ───
 // Vuelca los datos del presupuesto (título, importes, IVA) en el título del parte,
 // ordenados con puntos (·) y signos (€), y también en los campos numéricos del parte.
-window.crearParteDesdePresupuesto = async (prId) => {
-  let p = (_presusPend||[]).find(x=>x.id===prId) || (_presusComp||[]).find(x=>x.id===prId);
-  if(!p){
-    try{
-      const snap = await getDoc(doc(db,'grupos',CGID,'presupuestos',prId));
-      if(snap.exists()) p = {id:snap.id,...snap.data()};
-    }catch(e){}
-  }
-  if(!p){ toast('Presupuesto no encontrado','e'); return; }
-  const cli = allClientes.find(c=>c.id===p.clienteId);
-  const mo = parseFloat(p.importeManoObra)||0;
-  const mat = parseFloat(p.importeMateriales)||0;
-  const desp = parseFloat(p.importeDesplazamiento)||0;
-  const partidasTotal = (p.partidas||[]).reduce((a,b)=>a+(parseFloat(b.importe)||0),0);
-  const iva = p.aplicarIVA ? (mo+mat+desp)*0.21 : 0;
-  const total = mo+mat+iva+desp+partidasTotal;
-  // Título ordenado con puntos (·) y signos (€)
-  const tituloBloques = [p.titulo||'Presupuesto'];
-  if(mo>0) tituloBloques.push(`M.O.: ${fmtM(mo)}`);
-  if((mat+partidasTotal)>0) tituloBloques.push(`Materiales: ${fmtM(mat+partidasTotal)}`);
-  if(desp>0) tituloBloques.push(`Desplazamiento: ${fmtM(desp)}`);
-  tituloBloques.push(`Total: ${fmtM(total)}${iva>0?` (IVA ${fmtM(iva)} incl.)`:''}`);
-  const tituloParte = tituloBloques.join(' · ');
-  const preData = {
-    titulo: tituloParte,
-    descripcion: p.notas||'',
-    clienteDireccion: p.clienteDireccion||cli?.direccion||'',
-    edificio: p.clienteEdificio||cli?.edificio||'',
-    clienteTelefono: p.clienteTelefono||cli?.telefono||'',
-    clienteNombre: (!p.clienteId && p.clienteNombre) ? p.clienteNombre : '',
-    operario: CUD?.nombre||'',
-    importeManoObra: mo,
-    importeMateriales: mat+partidasTotal,
-    importeDesplazamiento: desp,
-    aplicarIVAMateriales: !!p.aplicarIVA
-  };
-  abrirSB('🧾 Crear parte desde presupuesto', `
-    <div style="background:rgba(66,165,245,.1);border:1px solid rgba(66,165,245,.3);border-radius:14px;padding:12px 14px;margin-bottom:14px">
-      <div style="font-size:12px;font-weight:900;color:#42a5f5;text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Datos volcados desde presupuesto</div>
-      <div style="font-size:13px;font-weight:800;color:var(--tx)">${tituloParte}</div>
-      <div style="font-size:12px;color:var(--tx2);margin-top:2px">${cli?.nombre||p.clienteNombre||'—'}</div>
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <button onclick="cerrarSBTotal();abrirParteExpress('${p.clienteId||''}',${JSON.stringify(preData).replace(/'/g,"\\'")})" style="display:flex;align-items:center;gap:12px;background:rgba(var(--theme-rgb),.1);border:1px solid rgba(var(--theme-rgb),.3);border-radius:16px;padding:14px 16px;cursor:pointer;font-family:var(--font)">
-        <span style="font-size:22px">⚡</span>
-        <div style="text-align:left"><div style="font-size:14px;font-weight:900;color:var(--tx)">Crear parte express</div><div style="font-size:11px;color:var(--tx2)">Título ya ordenado con los importes — puedes editarlo</div></div>
-        <span style="margin-left:auto;color:var(--tx2)">›</span>
-      </button>
-      <button onclick="cerrarSBTotal();abrirFParte(null,'${p.clienteId||''}',${JSON.stringify(preData).replace(/'/g,"\\'")})" style="display:flex;align-items:center;gap:12px;background:rgba(255,152,0,.08);border:1px solid rgba(255,152,0,.25);border-radius:16px;padding:14px 16px;cursor:pointer;font-family:var(--font)">
-        <span style="font-size:22px">📋</span>
-        <div style="text-align:left"><div style="font-size:14px;font-weight:900;color:var(--tx)">Crear parte completo</div><div style="font-size:11px;color:var(--tx2)">Importes y datos del cliente prellenados — puedes editarlos</div></div>
-        <span style="margin-left:auto;color:var(--tx2)">›</span>
-      </button>
-      <button onclick="cerrarSBTotal()" style="padding:11px;background:transparent;border:1px solid var(--border);border-radius:14px;color:var(--tx2);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">Cancelar</button>
-    </div>
-  `);
-};
 
 window._verPresuBusy=null;
 window.verPresupuesto=async(prId)=>{
@@ -13159,14 +12822,6 @@ window._enviarPresuWA=async(prId,firmaDataURL)=>{
   }
 };
 
-window.enviarPresupuestoWADirecto=(prId,tel,nombre,totalStr,titulo)=>{
-  const msg=encodeURIComponent(
-    `Hola ${nombre},\n\nTe enviamos el presupuesto para "${titulo}":\n\n`+
-    `💶 Total: ${totalStr}\n\n`+
-    `Quedo a tu disposición para cualquier duda.\nSaludos, Alberto`
-  );
-  window.open(`https://wa.me/${window._waTel(tel)}?text=${msg}`,'_blank');
-};
 
 window.toggleEstadoPresupuesto=async(prId,nuevoEstado)=>{
   try{
@@ -14534,65 +14189,6 @@ const _renderAvisBody=()=>{
 };
 
 // ─── Imprimir avisos (según la pestaña activa: pendientes o resueltos) ───
-window.imprimirAvisos=()=>{
-  const lista=(_avisTab==='pend'?_avisosPend:_avisosRes).slice();
-  if(!lista.length){toast('No hay avisos para imprimir','i');return;}
-  const tituloRango=_avisTab==='pend'?'Avisos pendientes':'Avisos resueltos';
-  const fechaHoyTxt=new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
-
-  const filas=lista.map((a,i)=>{
-    const cli=allClientes.find(x=>x.id===a.clienteId);
-    const prio=_avisPrioridad[a.prioridad||'baja'];
-    const esResuelto=a.estado==='resuelto';
-    return`<tr class="${i%2===0?'row-even':'row-odd'}">
-      <td class="td-fecha">${fmtF(a.creado)}${esResuelto?`<div class="sub-desc">Resuelto ${fmtF(a.resueltaEn)}</div>`:''}</td>
-      <td class="td-cliente">${cli?.nombre||'—'}</td>
-      <td class="td-trabajo">${a.descripcion||'Sin descripción'}</td>
-      <td class="td-estado">${esResuelto?'<span class="estado-comp">✓ Resuelto</span>':`<span style="color:${prio.color};font-weight:700">${prio.ico} ${prio.label}</span>`}</td>
-      <td class="td-fecha">${fmtFISO(a.fechaAlerta)||'—'}</td>
-    </tr>`;
-  }).join('');
-
-  const accentColor='#ab47bc';
-  const printHTML=`<!DOCTYPE html>
-<html lang="es">
-<head>
-<meta charset="UTF-8">
-<title>Avisos — ${CG?.nombre||'Alberto'}</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:#fff;color:#1a1a1a;font-size:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.hdr{padding:22px 24px;border-bottom:3px solid ${accentColor}}
-.hdr h1{font-size:20px;font-weight:900;color:${accentColor}}
-.hdr .sub{font-size:12px;color:#666;margin-top:4px}
-table{width:calc(100% - 48px);border-collapse:collapse;margin:16px 24px}
-th{text-align:left;font-size:10px;text-transform:uppercase;color:#888;padding:8px 10px;border-bottom:2px solid #ddd}
-td{padding:9px 10px;border-bottom:1px solid #eee;vertical-align:top}
-.row-even{background:#fcfcfc}
-.sub-desc{font-size:10px;color:#888;margin-top:2px}
-.estado-comp{color:#2e7d32;font-weight:700}
-@media print{body{padding:0}}
-</style>
-</head>
-<body>
-  <div class="hdr">
-    <img src="${LOGO_B64}" style="width:34px;height:34px;border-radius:9px;display:block;margin-bottom:8px">
-    <h1>💬 ${tituloRango}</h1>
-    <div class="sub">${CG?.nombre||'Alberto'} · Generado el ${fechaHoyTxt} · ${lista.length} aviso${lista.length===1?'':'s'}</div>
-  </div>
-  <table>
-    <thead><tr><th>Creado</th><th>Cliente</th><th>Descripción</th><th>Estado</th><th>Alerta</th></tr></thead>
-    <tbody>${filas}</tbody>
-  </table>
-</body>
-</html>`;
-
-  const w=window.open('','_blank');
-  if(!w){toast('Activa las ventanas emergentes para imprimir','e');return;}
-  w.document.write(printHTML);w.document.close();
-  setTimeout(()=>{w.focus();w.print();},400);
-};
 
 // ── Abrir bottom-sheet para nuevo aviso ──
 window.abrirNuevoAviso=(presetFecha,presetCliId)=>{
@@ -14746,19 +14342,6 @@ window.resolverAviso=async(id)=>{
 // Marcar un aviso como resuelto directamente (ya no ofrece crear un parte: sección eliminada)
 window.resolverAvisoConOpcion=(id)=>{ resolverAviso(id); };
 
-window.crearParteDesdeAviso=(avisoId)=>{
-  const a=(_avisosPend||[]).find(x=>x.id===avisoId)||(_avisosRes||[]).find(x=>x.id===avisoId);
-  if(!a){ toast('Aviso no encontrado','e'); return; }
-  const preData={
-    titulo:(a.descripcion||'Aviso').slice(0,60),
-    descripcion:a.descripcion||'',
-    operario:CUD?.nombre||'',
-    clienteNombre:!a.clienteId&&a.clienteNombre?a.clienteNombre:'',
-    _ocultarVolver:true
-  };
-  resolverAviso(avisoId);
-  abrirParteExpress(a.clienteId||'', preData);
-};
 
 window.eliminarAviso=async(id)=>{
   if(!confirm('¿Eliminar este aviso? Esta acción no tiene vuelta atrás.'))return;
@@ -15182,31 +14765,6 @@ window._hmGrupoFiltrar = (q) => {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // QR POR CLIENTE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-window.mostrarQRCliente=async(cliId)=>{
-  const c=allClientes.find(x=>x.id===cliId);if(!c)return;
-  // Preservar referencia para volver a la ficha
-  _sbReturnCli=cliId;
-  const url=`${location.origin}${location.pathname}#cliente_${CGID}_${cliId}`;
-  abrirSB(`📱 QR — ${c.nombre}`,`
-    ${_btnVolverCli(cliId,c.nombre)}
-    <div class="qr-wrap">
-      <div id="qrContainer" style="background:#fff;padding:12px;border-radius:14px;display:inline-block;margin-bottom:12px"></div>
-      <div style="font-size:13px;color:var(--tx2);margin-bottom:14px">Escanea para abrir la ficha de <strong style="color:var(--tx)">${c.nombre}</strong></div>
-      <div style="font-size:11px;color:var(--tx3);word-break:break-all;margin-bottom:14px">${url}</div>
-      <button class="btn btn-s btn-sm" onclick="
-        const a=document.createElement('a');
-        const canvas=document.querySelector('#qrContainer canvas');
-        if(canvas){a.href=canvas.toDataURL('image/png');a.download='QR_${c.nombre.replace(/\s/g,'_')}.png';a.click();}
-        else toast('Genera primero el QR','e')
-      ">📥 Descargar QR</button>
-    </div>
-  `,cliId);
-  setTimeout(()=>{
-    const cont=document.getElementById('qrContainer');
-    if(!cont||typeof QRCode==='undefined')return;
-    new QRCode(cont,{text:url,width:180,height:180,colorDark:'#000000',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
-  },200);
-};
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // LOG DE ACTIVIDAD
@@ -15322,7 +14880,6 @@ const _checkMantProximos=async()=>{
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // BACKUP AUTOMÁTICO SEMANAL (email)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const _BACKUP_EMAIL='ch.contacto.19@gmail.com';
 const _checkBackupAutomatico=async()=>{
   if(!CGID||!CU)return;
   // Solo ejecutar los lunes
@@ -15772,11 +15329,6 @@ window._calgEliminarAviso=(id,colOrigen)=>{
   else borrarSimple(colOrigen,id).then(()=>renderCalendarioGlobal());
 };
 
-window._calgCrearParteDesdeAviso=(id,colOrigen)=>{
-  cerrarSB();
-  if(colOrigen==='aviso') crearParteDesdeAviso(id);
-  else crearParteDesdeSimple(colOrigen,id);
-};
 
 window._calgNavegar=(tipo,id,cliId)=>{
   if(!CGID)return;
@@ -15823,13 +15375,6 @@ const haptic=(type='light')=>{
 };
 
 // Animaciones esqueleto en carga de transiciones de pantalla
-const _prevScreen=id=>{
-  const cur=document.querySelector('.screen.active');
-  if(cur&&cur.id!==screens[id]){
-    cur.classList.add('exit-left');
-    setTimeout(()=>cur.classList.remove('exit-left'),300);
-  }
-};
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // PERSONALIZACIÓN: TEMA Y MODO CLARO
