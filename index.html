@@ -628,7 +628,10 @@ body.modo-claro .gtab-item.gt-presu{border-color:rgba(64,124,182,.28)}
   align-items:center;justify-content:center;z-index:5;transition:background .18s var(--ease-spring),border-color .18s ease,transform .22s var(--ease-spring);
 }
 /* Encabezados de bloque de la ficha del cliente */
-.ficha-sec-tit{font-size:10px;font-weight:800;color:var(--tx2);letter-spacing:2px;text-transform:uppercase;margin:0 0 10px 2px}
+.ficha-sec-tit{display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:900;color:var(--r);letter-spacing:1.6px;text-transform:uppercase;margin:20px 0 10px}
+.ficha-sec-tit::after{content:'';flex:1;height:1px;background:linear-gradient(to right,rgba(var(--theme-rgb),.35),transparent)}
+.ficha-sec-tit:first-child{margin-top:0}
+body.modo-claro .ficha-sec-tit{color:var(--r)}
 .card[data-sel-id],.averia-card[data-sel-id]{position:relative}
 /* En la galeria la miniatura recorta su contenido: el check se ve igual porque
    va dentro del propio recorte, pero necesita separarse del borde. */
@@ -5113,10 +5116,10 @@ window._setSimplePrio=(p)=>{
   });
 };
 
-window.abrirNuevoSimple=(tipo,editId,presetFecha)=>{
+window.abrirNuevoSimple=(tipo,editId,presetFecha,presetCliId)=>{
   const conf=_SIMPLE_CONF[tipo];
   const editing=editId?((_simplePend[tipo]||[]).find(x=>x.id===editId)||(_simpleComp[tipo]||[]).find(x=>x.id===editId)):null;
-  const cliId=editing?.clienteId||'';
+  const cliId=editing?.clienteId||presetCliId||'';
   abrirSB(editing?`✏️ Editar ${conf.labelSing.toLowerCase()}`:`+ ${conf.art} ${conf.labelSing.toLowerCase()}`,`
     <div class="fsec">
       <div class="fgrp"><label>Título</label><input id="smpTitulo" placeholder="${conf.tituloPh}" value="${(editing?.titulo||'').replace(/"/g,'&quot;')}"></div>
@@ -6263,7 +6266,7 @@ const _renderCompLista = () => {
 };
 
 // ─── Formulario: nuevo / editar recordatorio ───
-window.abrirFormRecordatorio=(id)=>{
+window.abrirFormRecordatorio=(id,presetCliId)=>{
   const r=id?(allRecordatorios||[]).find(x=>x.id===id):null;
   const html=`
     <div class="fsec">
@@ -6281,7 +6284,9 @@ window.abrirFormRecordatorio=(id)=>{
     </div>`;
   abrirSB(r?'Editar recordatorio':'Nuevo recordatorio preventivo', html, undefined);
   setTimeout(()=>{
-    _buildCliSelect('_recCli', r?.clienteId||'', cliId=>_recRefrescarSelectEquipo(cliId));
+    const _recPre = r?.clienteId || presetCliId || '';
+    _buildCliSelect('_recCli', _recPre, cliId=>_recRefrescarSelectEquipo(cliId));
+    if(_recPre) _recRefrescarSelectEquipo(_recPre);
     _recRefrescarSelectEquipo(r?.clienteId||'', r?.equipoId||'');
   }, 30);
 };
@@ -6731,6 +6736,7 @@ window.verCliente=async id=>{
     </div>`}
 
     <!-- ── CABECERA CLIENTE ── -->
+    <div class="ficha-sec-tit" style="margin-top:0">Cliente</div>
     <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:14px">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px">
         <div style="flex:1;min-width:0">
@@ -6754,6 +6760,7 @@ window.verCliente=async id=>{
       </div>`:''}
     </div>
 
+    ${c.notas?`<div class="ficha-sec-tit">Notas</div>`:''}
     ${c.notas?`<div style="background:rgba(255,255,255,.04);border-left:3px solid var(--r);border-radius:0 8px 8px 0;padding:7px 11px;font-size:12px;color:var(--tx2);margin-bottom:14px;white-space:pre-wrap">${c.notas}</div>`:''}
 
     <!-- ── ESTADO ACTUAL: resumen inteligente de pendientes ── -->
@@ -6780,6 +6787,14 @@ window.verCliente=async id=>{
       <button onclick="window._crearPresupuestoRapidoCli('${id}')" style="display:flex;align-items:center;gap:8px;background:rgba(66,133,244,.08);border:1px solid rgba(66,133,244,.2);border-radius:14px;padding:11px 12px;cursor:pointer;font-family:var(--font);transition:.15s" onmouseover="this.style.background='rgba(66,133,244,.14)'" onmouseout="this.style.background='rgba(66,133,244,.08)'">
         <span style="font-size:18px">💶</span>
         <div style="text-align:left"><div style="font-size:12px;font-weight:900;color:var(--tx)">Nuevo presupuesto</div><div style="font-size:10px;color:var(--tx2)">Cliente pre-rellenado</div></div>
+      </button>
+      <button onclick="window._crearCobroRapidoCli('${id}')" style="display:flex;align-items:center;gap:8px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.22);border-radius:14px;padding:11px 12px;cursor:pointer;font-family:var(--font);text-align:left">
+        <span style="font-size:18px">💰</span>
+        <div style="text-align:left"><div style="font-size:12px;font-weight:900;color:var(--tx)">Nuevo cobro</div><div style="font-size:10px;color:var(--tx2)">Cliente pre-rellenado</div></div>
+      </button>
+      <button onclick="window._crearRecordatorioRapidoCli('${id}')" style="display:flex;align-items:center;gap:8px;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.24);border-radius:14px;padding:11px 12px;cursor:pointer;font-family:var(--font);text-align:left">
+        <span style="font-size:18px">🔔</span>
+        <div style="text-align:left"><div style="font-size:12px;font-weight:900;color:var(--tx)">Recordatorio</div><div style="font-size:10px;color:var(--tx2)">${_recDeCliente(id).filter(r=>r.estado!=='completado').length?`${_recDeCliente(id).filter(r=>r.estado!=='completado').length} pendiente${_recDeCliente(id).filter(r=>r.estado!=='completado').length!==1?'s':''}`:'Preventivo'}</div></div>
       </button>
       <button onclick="abrirImagenesClienteDesdeCli('${id}')" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;padding:11px 12px;cursor:pointer;font-family:var(--font);transition:.15s" onmouseover="this.style.borderColor='rgba(var(--theme-rgb),.4)'" onmouseout="this.style.borderColor='var(--border)'">
         <span style="font-size:18px">📷</span>
@@ -6905,6 +6920,18 @@ window.verMantDesdeCliente=(mantId,cliId)=>{ _sbReturnCli=cliId; verMant(mantId)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ACCIONES EN CASCADA DESDE FICHA CLIENTE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+window._crearCobroRapidoCli=(cliId)=>{
+  if(!allClientes.some(c=>c.id===cliId))return;
+  _sbReturnCli=cliId;
+  abrirNuevoSimple('cobro','','',cliId);
+};
+
+window._crearRecordatorioRapidoCli=(cliId)=>{
+  if(!allClientes.some(c=>c.id===cliId))return;
+  _sbReturnCli=cliId;
+  abrirFormRecordatorio('',cliId);
+};
+
 window._crearAvisoRapidoCli=(cliId)=>{
   const cli=allClientes.find(c=>c.id===cliId);
   if(!cli)return;
@@ -12332,8 +12359,8 @@ const _presuCard = (p, comp=false) => {
             <div style="font-size:12px;color:var(--tx2)">${c?.nombre||p.clienteNombre||'—'} · ${fmtF(p.creado)}</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-            ${telCard?`${!comp?`<button class="icon-btn" style="color:#25d366;border-color:rgba(37,211,102,.35)" onclick="event.stopPropagation();_recordarPresupuesto('${p.id}','${telCard}')" title="Escribir al cliente por WhatsApp (sin PDF)">${ICO.message(14)}</button>`:''}
-            <button class="icon-btn wa" onclick="event.stopPropagation();enviarPresupuestoWhatsAppPDF('${p.id}')" title="Enviar el presupuesto en PDF por WhatsApp">
+            ${telCard?`${!comp?`<button class="icon-btn" style="color:#25d366;border-color:rgba(37,211,102,.35)" onclick="event.stopPropagation();_recordarPresupuesto('${p.id}','${telCard}')" title="Enviar SMS por WhatsApp (mensaje de texto, sin PDF)">${ICO.message(14)}</button>`:''}
+            <button class="icon-btn wa" onclick="event.stopPropagation();enviarPresupuestoWhatsAppPDF('${p.id}')" title="Enviar PDF del presupuesto por WhatsApp">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.8-.7-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 20.2 12 8.2 8.2 0 0 1 12 20.2z"/></svg>
             </button>`:''}
             <span class="presu-badge ${comp?'aceptado':'espera'}">${comp?'Completado':'Pendiente'}</span>
@@ -12783,8 +12810,8 @@ const _renderVerPresupuesto=(prId,p)=>{
       </button>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      ${prTel?`<button class="btn" style="flex:1 1 100%;min-width:0;background:#25d366;border:1px solid #25d366;color:#06331a;font-weight:900" onclick="enviarPresupuestoWhatsAppPDF('${prId}')" title="Genera el PDF del presupuesto y lo envía por WhatsApp">📄 Enviar presupuesto en PDF</button>
-      <button class="btn btn-s" style="flex:1 1 100%;min-width:0;border:1px solid rgba(37,211,102,.45);color:#25d366" onclick="_recordarPresupuesto('${prId}','${prTel.replace(/\s/g,'')}')" title="Abre WhatsApp con un mensaje escrito, sin adjuntar el PDF">💬 Escribir al cliente (sin PDF)</button>`:''}
+      ${prTel?`<button class="btn" style="flex:1;min-width:0;background:#25d366;border:1px solid #25d366;color:#06331a;font-weight:900" onclick="enviarPresupuestoWhatsAppPDF('${prId}')" title="Genera el PDF del presupuesto y lo envía por WhatsApp"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right:6px;vertical-align:-2px"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.8-.7-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/></svg>Enviar PDF</button>
+      <button class="btn btn-s" style="flex:1;min-width:0;border:1px solid rgba(37,211,102,.45);color:#25d366" onclick="_recordarPresupuesto('${prId}','${prTel.replace(/\s/g,'')}')" title="Abre WhatsApp con un mensaje de texto, sin adjuntar el PDF"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right:6px;vertical-align:-2px"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.8-.7-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/></svg>Enviar SMS</button>`:''}
       <button class="btn btn-s" style="flex:1;min-width:0" onclick="exportarPresupuestoPDF('${prId}')" title="Guardar presupuesto en PDF"><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' style='margin-right:4px'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>Guardar PDF</button>
     </div>
   `);
@@ -14450,7 +14477,7 @@ const _htmlListaAvisos=(listaBase,qL,esResueltos)=>{
   if(qL){
     lista=lista.filter(a=>{
       const cli=allClientes.find(x=>x.id===a.clienteId);
-      const hay=[a.descripcion,cli?.nombre].filter(Boolean).join(' ').toLowerCase();
+      const hay=[a.descripcion,cli?.nombre,a.clienteNombre].filter(Boolean).join(' ').toLowerCase();
       return hay.includes(qL);
     });
   }
@@ -14511,7 +14538,13 @@ const _htmlListaAvisos=(listaBase,qL,esResueltos)=>{
           </div>
           <div class="averia-title" style="white-space:normal;line-height:1.4">${a.descripcion||'Sin descripción'}</div>
           <div class="averia-sub" style="margin-top:4px">
-            ${cli?`<span style="color:var(--r);font-weight:700">${ICO.user(11)} ${cli.nombre}</span> · `:''}
+${(()=>{
+              // El cliente puede no tener ficha: en ese caso vale el nombre que
+              // se escribio al crear el aviso, que antes no se mostraba.
+              const nom = cli?.nombre || a.clienteNombre || '';
+              if(!nom) return '';
+              return `<span style="color:var(--r);font-weight:700">${ICO.user(11)} ${nom}${cli?'':' <span style="font-weight:600;opacity:.65">(sin ficha)</span>'}</span> · `;
+            })()}
             ${a.creadoPorNombre||'Técnico'} · ${fmtF(a.creado)}
             ${esResuelto?` · <span style="color:var(--ok);font-weight:700">Resuelto ${fmtF(a.resueltaEn)}</span>`:''}
           </div>
