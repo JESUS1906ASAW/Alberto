@@ -684,6 +684,14 @@ body.sel-mode [data-sel-id]:not(.sel-checked){transform:scale(.97)}
    inferior derecho) y bloquea los toques sobre "Eliminar". El !important
    es necesario porque _fabUpdateVisibility fija display por estilo en línea. */
 body.sel-mode #fabWrap{display:none!important}
+/* Con un formulario abierto, el gesto de "tirar para recargar" del navegador
+   estorbaba al rellenar: al llegar arriba del formulario recargaba la pagina
+   y se perdia lo escrito. Mientras haya hoja abierta, se desactiva. */
+body.hoja-abierta{overscroll-behavior-y:none;overflow:hidden}
+/* Mientras se archiva o se elimina un cliente, sus acciones quedan inertes:
+   una segunda pulsacion durante el proceso dejaba documentos a medio mover. */
+body.cliente-ocupado .cli-card,body.cliente-ocupado .arch-card{opacity:.55;pointer-events:none}
+body.cliente-ocupado .arch-card .btn{pointer-events:none}
 /* Deja hueco de sobra bajo la lista para que ninguna tarjeta quede
    permanentemente tapada por la barra de selección fija. */
 body.sel-mode .scroll-pad{padding-bottom:140px}
@@ -718,15 +726,15 @@ body.sel-mode .scroll-pad{padding-bottom:140px}
 /* ── SLIDE-OVER (SB) ── */
 #sbOverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1180;display:none;backdrop-filter:blur(3px)}
 /* ── PRESUPUESTO MODAL ── */
-#presuModal{position:fixed;inset:0;z-index:1195;display:none;align-items:center;justify-content:center;padding:16px}
+#presuModal{position:fixed;inset:0;z-index:1195;display:none;align-items:flex-end;justify-content:center;padding:0}
 #presuModal.open{display:flex}
-#presuModalOverlay{position:absolute;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(8px)}
-#presuModalBox{position:relative;z-index:1;background:var(--card);border-radius:22px;border:1px solid var(--border);width:100%;max-width:480px;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.04) inset;animation:presuModalIn .38s cubic-bezier(.16,1,.3,1)}
-@keyframes presuModalIn{from{opacity:0;transform:scale(.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
-#presuModalHead{display:flex;align-items:center;padding:16px 18px 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+#presuModalOverlay{position:absolute;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+#presuModalBox{position:relative;z-index:1;background:rgba(17,17,17,.98);border-radius:24px 24px 0 0;border:none;width:100%;max-width:100%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 -8px 48px rgba(0,0,0,.5);animation:presuModalIn .34s cubic-bezier(.16,1,.3,1)}
+@keyframes presuModalIn{from{transform:translateY(100%)}to{transform:translateY(0)}}
+#presuModalHead{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0;min-height:62px}
 #presuModalHead h2{flex:1;font-size:16px;font-weight:900;color:var(--tx);margin:0}
 #presuModalHead .pm-close{background:rgba(255,255,255,.08);border:none;border-radius:12px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tx2);font-size:18px;font-family:var(--font)}
-#presuModalBody{overflow-y:auto;padding:18px;flex:1}
+#presuModalBody{overflow-y:auto;overflow-x:hidden;padding:18px 20px 32px;flex:1;min-height:0;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
 body.modo-claro #presuModalBox{background:var(--card)}
 body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
 
@@ -3623,6 +3631,7 @@ window.abrirSB=(titulo,html,cliId,tipo)=>{
   $('sbTitle').textContent=titulo;
   $('sbBody').innerHTML=html;
   $('sbOverlay').style.display='block';
+  document.body.classList.add('hoja-abierta');
   _sbSetBack();
   setTimeout(()=>{
     $('sb').classList.add('open');
@@ -3636,6 +3645,7 @@ window.sbVolverCliente=()=>{
   _sbReturnCli=null;
   $('sb').classList.remove('open');
   $('sbOverlay').style.display='none';
+  if(!document.getElementById('presuModal')?.classList.contains('open')) document.body.classList.remove('hoja-abierta');
   $('sbBack').style.display='none';
   setTimeout(()=>verCliente(id),120);
 };
@@ -3645,6 +3655,7 @@ window.cerrarSBTotal=()=>{
   _sbReturnCli=null;
   $('sb').classList.remove('open');
   $('sbOverlay').style.display='none';
+  if(!document.getElementById('presuModal')?.classList.contains('open')) document.body.classList.remove('hoja-abierta');
   $('sbBack').style.display='none';
   if(typeof _currentScreenId==='function' && _currentScreenId()==='calendario' && typeof renderCalendarioGlobal==='function'){
     setTimeout(()=>renderCalendarioGlobal(),150);
@@ -3655,6 +3666,7 @@ window.cerrarSBTotal=()=>{
 window.cerrarSB=()=>{
   $('sb').classList.remove('open');
   $('sbOverlay').style.display='none';
+  if(!document.getElementById('presuModal')?.classList.contains('open')) document.body.classList.remove('hoja-abierta');
   if(_sbReturnCli){
     const id=_sbReturnCli;
     _sbReturnCli=null;
@@ -7407,6 +7419,7 @@ window.guardarMantDesdeSB=async()=>{
   _sbReturnCli=null;
   $('sb').classList.remove('open');
   $('sbOverlay').style.display='none';
+  if(!document.getElementById('presuModal')?.classList.contains('open')) document.body.classList.remove('hoja-abierta');
   if(cliRetorno)setTimeout(()=>verCliente(cliRetorno),150);
 };
 // ─── Formulario cliente ───
@@ -8031,6 +8044,31 @@ window.importarContactoAgenda=async()=>{
 // a 'archivos' (se conserva, se oculta) y vuelve entero al restaurarlo.
 // Cada documento movido guarda _colOrigen para saber a que coleccion regresa.
 // ══════════════════════════════════════════════════════════════
+// Clientes con un archivado o un borrado en marcha. Mover un cliente y sus
+// documentos son muchas operaciones seguidas: si se lanza dos veces a la vez,
+// la segunda encuentra a medias lo que la primera esta moviendo y se duplican
+// o se pierden documentos. Mientras dure, el cliente queda bloqueado.
+const _clientesEnProceso = new Set();
+
+window._clienteOcupado = (cliId) => _clientesEnProceso.has(cliId);
+
+// Envuelve una operacion larga sobre un cliente. Devuelve null si ya habia otra
+// en marcha, y libera el bloqueo pase lo que pase.
+const _conBloqueoCliente = async (cliId, etiqueta, fn) => {
+  if(!cliId) return null;
+  if(_clientesEnProceso.has(cliId)){
+    toast(`${etiqueta} en curso — espera a que termine`,'e');
+    return null;
+  }
+  _clientesEnProceso.add(cliId);
+  document.body.classList.add('cliente-ocupado');
+  try { return await fn(); }
+  finally {
+    _clientesEnProceso.delete(cliId);
+    if(!_clientesEnProceso.size) document.body.classList.remove('cliente-ocupado');
+  }
+};
+
 const _ARCH_COLS = [
   {col:'avisos',        tipo:'aviso'},
   {col:'cobros',        tipo:'cobro'},
@@ -8120,8 +8158,10 @@ const _eliminarDocsArchivadosDeCliente = async (cliId) => {
 };
 
 window.archivarCli=async(id)=>{
+  if(window._clienteOcupado(id)){toast('Archivado en curso — espera a que termine','e');return;}
   if(!confirm('¿Mover este cliente a archivos?'))return;
   const c=allClientes.find(x=>x.id===id);if(!c)return;
+  await _conBloqueoCliente(id,'Archivado',async()=>{
   try{
     const movidos=await _archivarDocsDeCliente(id);
     await addDoc(collection(db,'grupos',CGID,'archivos'),{...c,id:c.id,tipo:'cliente',eliminadoEn:serverTimestamp()});
@@ -8131,6 +8171,7 @@ window.archivarCli=async(id)=>{
     cerrarSB();
     toast(movidos?`Cliente archivado con ${movidos} documento${movidos!==1?'s':''}`:'Cliente archivado','i');
   }catch(e){toast('Error','e')}
+  });
 };
 
 // Archivar directamente desde el gesto de deslizar hacia la derecha en la
@@ -8138,7 +8179,9 @@ window.archivarCli=async(id)=>{
 // en Archivos), así que se ejecuta al soltar sin diálogo de confirmación.
 window.swipeArchivarCli=async(id)=>{
   if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
+  if(window._clienteOcupado(id)){toast('Archivado en curso — espera a que termine','e');return;}
   const c=allClientes.find(x=>x.id===id);if(!c)return;
+  await _conBloqueoCliente(id,'Archivado',async()=>{
   try{
     const movidos=await _archivarDocsDeCliente(id);
     await addDoc(collection(db,'grupos',CGID,'archivos'),{...c,id:c.id,tipo:'cliente',eliminadoEn:serverTimestamp()});
@@ -8150,6 +8193,7 @@ window.swipeArchivarCli=async(id)=>{
     console.error('swipeArchivarCli',e);
     toast('Sin conexión: se archivará al recuperar internet','i');
   }
+  });
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -11331,6 +11375,7 @@ const renderArchivos=async()=>{
 };
 
 window.restaurarArchivo=async(id,tipo)=>{
+  if(window._clienteOcupado(id)){toast('Operación en curso — espera a que termine','e');return;}
   const btn=document.querySelector(`.arch-card[data-archid="${id}"] .btn-ok`);
   if(btn){btn.disabled=true;btn.textContent='...';}
   try{
@@ -11427,6 +11472,9 @@ window.borrarArchivo=async(id)=>{
 
 // ── Núcleo del borrado definitivo — todas las rutas convergen aquí ──
 const _ejecutarBorradoDefinitivo=async(archId,cliId,itemData)=>{
+  const _clave=cliId||archId;
+  if(window._clienteOcupado(_clave)){toast('Eliminación en curso — espera a que termine','e');return;}
+  return _conBloqueoCliente(_clave,'Eliminación',async()=>{
   const archRef=doc(db,'grupos',CGID,'archivos',archId);
   const esCliente=(itemData?.tipo||'cliente')==='cliente';
   // Solo el identificador real del cliente. Antes se caia por defecto en archId,
@@ -11466,6 +11514,7 @@ const _ejecutarBorradoDefinitivo=async(archId,cliId,itemData)=>{
   if(window._archivosCache){delete window._archivosCache[archId];if(realCliId)delete window._archivosCache[realCliId];}
 
   toast('🗑️ Eliminado definitivamente','i');
+  });
 };
 
 // ── Acciones en bloque para la selección múltiple de Clientes archivados ──
@@ -12724,14 +12773,16 @@ window.cerrarPresuModal=()=>{
   const box=document.getElementById('presuModalBox');
   if(!m)return;
   if(box){box.style.animation='presuModalOut .2s cubic-bezier(.4,0,.2,1) forwards';}
-  setTimeout(()=>{m.classList.remove('open');if(box)box.style.animation='';},200);
+  setTimeout(()=>{m.classList.remove('open');if(box)box.style.animation='';
+    if(!document.getElementById('sb')?.classList.contains('open')) document.body.classList.remove('hoja-abierta');
+  },200);
 };
 
 // Add close animation keyframes dynamically once
 (()=>{
   if(!document.getElementById('presuModalOutKF')){
     const s=document.createElement('style');s.id='presuModalOutKF';
-    s.textContent='@keyframes presuModalOut{to{opacity:0;transform:scale(.94) translateY(12px)}}';
+    s.textContent='@keyframes presuModalOut{from{transform:translateY(0)}to{transform:translateY(100%)}}';
     document.head.appendChild(s);
   }
 })();
@@ -12743,6 +12794,7 @@ window.abrirNuevoPresupuesto=(presuId)=>{
     document.getElementById('presuModalTitle').textContent = presuId ? 'Editar presupuesto' : 'Nuevo presupuesto';
     document.getElementById('presuModalBody').innerHTML = html;
     document.getElementById('presuModal').classList.add('open');
+    document.body.classList.add('hoja-abierta');
     _prIVA=false;
     calcPresuTotal();
   };
