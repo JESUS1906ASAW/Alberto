@@ -740,10 +740,12 @@ body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
 .sb-head.con-acento{
   background:linear-gradient(180deg,rgba(var(--acento),.16),rgba(var(--acento),0));
   border-bottom-color:rgba(var(--acento),.3);
+  border-radius:24px 24px 0 0;          /* mismo redondeo que la hoja */
 }
 .sb-head.con-acento::before{
   content:'';position:absolute;left:0;right:0;top:0;height:3px;
   background:linear-gradient(to right,rgb(var(--acento)),rgba(var(--acento),.35));
+  border-radius:24px 24px 0 0;          /* la franja acompaña a la curva */
 }
 .sb-head.con-acento .sb-ico{
   width:30px;height:30px;border-radius:10px;flex-shrink:0;margin-right:11px;
@@ -751,8 +753,8 @@ body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
   background:rgba(var(--acento),.18);border:1px solid rgba(var(--acento),.3);
 }
 .sb-head .sb-ico{display:none}
-#presuModalHead{--acento:59,130,246;position:relative;background:linear-gradient(180deg,rgba(var(--acento),.16),rgba(var(--acento),0));border-bottom-color:rgba(var(--acento),.3)}
-#presuModalHead::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(to right,rgb(var(--acento)),rgba(var(--acento),.35))}
+#presuModalHead{--acento:59,130,246;position:relative;background:linear-gradient(180deg,rgba(var(--acento),.16),rgba(var(--acento),0));border-bottom-color:rgba(var(--acento),.3);border-radius:22px 22px 0 0}
+#presuModalHead::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(to right,rgb(var(--acento)),rgba(var(--acento),.35));border-radius:22px 22px 0 0}
 /* Etiquetas de campo algo mas legibles dentro de los formularios */
 .fsec .fgrp label{letter-spacing:1.2px;font-size:10.5px}
 .sb-head h2{font-size:17px;font-weight:800;color:var(--tx);flex:1}
