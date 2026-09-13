@@ -1091,6 +1091,8 @@ body.is-scrolling .presu-card{
 #fabWrap.open .fab-opt:nth-child(1){transition-delay:.02s}
 #fabWrap.open .fab-opt:nth-child(2){transition-delay:.06s}
 #fabWrap.open .fab-opt:nth-child(3){transition-delay:.1s}
+#fabWrap.open .fab-opt:nth-child(4){transition-delay:.14s}
+#fabWrap.open .fab-opt:nth-child(5){transition-delay:.18s}
 .fab-opt:active{transform:scale(.95)}
 .fab-opt-ico{font-size:17px;line-height:1}
 .fab-opt-txt{font-size:13px;font-weight:700;color:var(--tx);white-space:nowrap}
@@ -1767,6 +1769,28 @@ body.is-scrolling .presu-card{
     </div>
   </div>
 
+  <!-- ─── PANTALLA: AVISOS RESUELTOS ─── -->
+  <div class="screen" id="screenAvisosRes">
+    <div class="scroll-pad">
+      <div class="volver-btn" onclick="goScreen('grupo')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Volver</div>
+      <div style="font-size:20px;font-weight:900;color:var(--tx);margin-bottom:4px;display:flex;align-items:center;gap:8px">✅ Avisos resueltos</div>
+      <div style="font-size:12px;color:var(--tx2);margin-bottom:18px;line-height:1.5">Historial de avisos ya resueltos. Desliza uno hacia la izquierda para devolverlo a pendientes.</div>
+      <input class="sbox" id="avisResSearchInput" style="margin-bottom:12px" placeholder="🔍 Buscar por cliente o descripción..." oninput="window._filtrarAvisosRes(this.value)">
+      <div id="avisResBody"></div>
+    </div>
+  </div>
+
+  <!-- ─── PANTALLA: PRESUPUESTOS COMPLETADOS ─── -->
+  <div class="screen" id="screenPresusComp">
+    <div class="scroll-pad">
+      <div class="volver-btn" onclick="goScreen('grupo')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Volver</div>
+      <div style="font-size:20px;font-weight:900;color:var(--tx);margin-bottom:4px;display:flex;align-items:center;gap:8px">✅ Presupuestos completados</div>
+      <div style="font-size:12px;color:var(--tx2);margin-bottom:18px;line-height:1.5">Presupuestos ya aceptados. Se guardan aquí para consultarlos cuando haga falta.</div>
+      <input class="sbox" id="presuCompSearchInput" style="margin-bottom:12px" placeholder="🔍 Buscar por cliente, título, notas..." oninput="window._filtrarPresusComp(this.value)">
+      <div id="presuCompBody"></div>
+    </div>
+  </div>
+
   <!-- ─── PANTALLA: IMÁGENES ─── -->
   <div class="screen" id="screenImagenes">
     <div class="scroll-pad">
@@ -1840,6 +1864,12 @@ body.is-scrolling .presu-card{
       </button>
       <button class="fab-opt" id="fabOptCliente" onclick="fabAccion('cliente')">
         <span class="fab-opt-ico">👤</span><span class="fab-opt-txt">Nuevo cliente</span><span class="fab-opt-star">⭐</span>
+      </button>
+      <button class="fab-opt" id="fabOptCobro" onclick="fabAccion('cobro')">
+        <span class="fab-opt-ico">💰</span><span class="fab-opt-txt">Nuevo cobro</span><span class="fab-opt-star">⭐</span>
+      </button>
+      <button class="fab-opt" id="fabOptRecordatorio" onclick="fabAccion('recordatorio')">
+        <span class="fab-opt-ico">🔔</span><span class="fab-opt-txt">Nuevo recordatorio preventivo</span><span class="fab-opt-star">⭐</span>
       </button>
     </div>
     <button id="fabMain" aria-label="Acciones rápidas">
@@ -2630,7 +2660,7 @@ const notifLocal=(titulo,cuerpo)=>{
 };
 
 // NAVEGACIÓN — History API (botón atrás nativo del navegador/móvil)
-const screens={inicio:'screenInicio',grupo:'screenGrupo',mantenimiento:'screenMantenimiento',administracion:'screenAdministracion',calendario:'screenCalendario',archivos:'screenArchivos',imagenes:'screenImagenes',presupuestos:'screenPresupuestos',notificaciones:'screenNotificaciones',perfil:'screenPerfil',log:'screenLog',historialGlobal:'screenHistorialGlobal',recordatorios:'screenRecordatorios'};
+const screens={inicio:'screenInicio',grupo:'screenGrupo',mantenimiento:'screenMantenimiento',administracion:'screenAdministracion',calendario:'screenCalendario',archivos:'screenArchivos',imagenes:'screenImagenes',presupuestos:'screenPresupuestos',notificaciones:'screenNotificaciones',perfil:'screenPerfil',log:'screenLog',historialGlobal:'screenHistorialGlobal',recordatorios:'screenRecordatorios',avisosRes:'screenAvisosRes',presusComp:'screenPresusComp'};
 
 // Flag para evitar bucles al manejar popstate
 let _navFromPop=false;
@@ -2650,6 +2680,8 @@ const _renderScreen=id=>{
   else if(id==='grupo')renderGrupo();
   else if(id==='mantenimiento')renderMantenimiento();
   else if(id==='recordatorios')renderRecordatorios();
+  else if(id==='avisosRes')renderAvisosResueltos();
+  else if(id==='presusComp')renderPresusCompletados();
   else if(id==='administracion')renderAdministracion();
   else if(id==='calendario')renderCalendarioGlobal();
   else if(id==='archivos')renderArchivos();
@@ -2665,7 +2697,8 @@ const _renderScreen=id=>{
 // FAB — Acciones rápidas (Presupuesto / Avería / Cliente)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let _fabOpen=false;
-const _FAB_LABELS={presupuesto:'Presupuesto',aviso:'Aviso',cliente:'Cliente'};
+const _FAB_LABELS={presupuesto:'Presupuesto',aviso:'Aviso',cliente:'Cliente',cobro:'Cobro',recordatorio:'Recordatorio preventivo'};
+const _FAB_KEYS=['presupuesto','aviso','cliente','cobro','recordatorio'];
 window._fabDefaultKey=()=>localStorage.getItem('alberto_fab_default')||'presupuesto';
 
 // Muestra u oculta el FAB según la pantalla activa (solo tiene sentido dentro de un grupo)
@@ -2679,7 +2712,7 @@ window._fabUpdateVisibility=(screenId)=>{
 
 window._fabRefreshDefaultMarks=()=>{
   const key=_fabDefaultKey();
-  ['presupuesto','aviso','cliente'].forEach(k=>{
+  _FAB_KEYS.forEach(k=>{
     const el=document.getElementById('fabOpt'+k.charAt(0).toUpperCase()+k.slice(1));
     if(el) el.classList.toggle('fab-default', k===key);
   });
@@ -2702,13 +2735,15 @@ window.fabAccion=(tipo)=>{
     if(tipo==='presupuesto') abrirNuevoPresupuesto();
     else if(tipo==='aviso') abrirNuevoAviso();
     else if(tipo==='cliente') abrirCliExpress();
+    else if(tipo==='cobro') abrirNuevoSimple('cobro');
+    else if(tipo==='recordatorio') abrirFormRecordatorio();
   },180);
 };
 
 // Guarda la preferencia de pulsación larga (elegida en Perfil) para futuras aperturas
 window._fabSetDefault=(key)=>{
   localStorage.setItem('alberto_fab_default',key);
-  ['presupuesto','aviso','cliente'].forEach(k=>{
+  _FAB_KEYS.forEach(k=>{
     const el=document.getElementById('fabPref'+k.charAt(0).toUpperCase()+k.slice(1));
     if(el) el.classList.toggle('active', k===key);
   });
@@ -3155,7 +3190,7 @@ window.addEventListener('popstate',e=>{
 // - Si estás EN el menú del grupo (screenGrupo) → va al inicio real de la app
 // - En cualquier otro sitio → va al inicio de la app
 window.drawerIrInicio=()=>{
-  const screensDelGrupo=['mantenimiento','administracion','calendario','archivos','imagenes','perfil','notificaciones','log','recordatorios'];
+  const screensDelGrupo=['mantenimiento','administracion','calendario','archivos','imagenes','perfil','notificaciones','log','recordatorios','avisosRes','presusComp'];
   const cur=_currentScreenId();
   if(screensDelGrupo.includes(cur)&&CGID){
     goScreen('grupo');
@@ -3228,6 +3263,8 @@ window._buildDrawerBody=(tieneGrupo)=>{
     <div class="d-grupo-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:5px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>${grupoNombre}</div>
     <div class="d-item${act('grupo','cobros')}" onclick="abrirTabExclusiva('cobros');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v2m0 8v2M9.5 9a2.5 2.5 0 0 1 2.5-1.5h.5a2 2 0 0 1 0 4h-1a2 2 0 0 0 0 4h.5A2.5 2.5 0 0 0 14.5 15"/></svg></span>Cobros</div>
     <div class="d-item${act('recordatorios')}" onclick="goScreen('recordatorios');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>Recordatorios preventivos${(typeof allRecordatorios!=='undefined'&&allRecordatorios.filter(r=>r.estado!=='completado'&&r.fecha&&r.fecha<=new Date().toISOString().split('T')[0]).length)?`<span style="margin-left:auto;background:#ef4444;color:#fff;border-radius:20px;padding:1px 7px;font-size:10.5px;font-weight:900">${allRecordatorios.filter(r=>r.estado!=='completado'&&r.fecha&&r.fecha<=new Date().toISOString().split('T')[0]).length}</span>`:''}</div>
+    <div class="d-item${act('avisosRes')}" onclick="goScreen('avisosRes');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Avisos resueltos</div>
+    <div class="d-item${act('presusComp')}" onclick="goScreen('presusComp');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 7a6 6 0 1 0 0 10"/><line x1="3" y1="10" x2="13" y2="10"/><line x1="3" y1="14" x2="13" y2="14"/></svg></span>Presupuestos completados</div>
     <div class="d-item${act('calendario')}" onclick="goScreen('calendario');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>Calendario</div>
     <div class="d-item${act('imagenes')}" onclick="goScreen('imagenes');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>Galería de instalaciones</div>
     ${sep}
@@ -3732,7 +3769,7 @@ const iniciarApp=async()=>{
   let targetGrupoId  = sessionStorage.getItem('alberto_cgid');
   let targetGrupoRaw = sessionStorage.getItem('alberto_cg');
   const hashScreen  = location.hash.replace('#','');
-  const screensNeedGroup = ['grupo','mantenimiento','administracion','calendario','archivos','imagenes','recordatorios'];
+  const screensNeedGroup = ['grupo','mantenimiento','administracion','calendario','archivos','imagenes','recordatorios','avisosRes','presusComp'];
 
   // ── 0. Sin grupo activo en esta sesión: entrar directamente al grupo del usuario ──
   // (no hace falta elegir grupo manualmente: si solo tiene uno, se abre ese; si tiene
@@ -5097,32 +5134,47 @@ window.borrarSimple=async(tipo,itemId)=>{
 
 // Crear un parte de trabajo a partir de un cobro o entrega, volcando sus datos
 
-// ── Render inline tab: Presupuestos (con 2 sub-pestañas en tiempo real) ──
-let _presuInlineTab = 'pend';
+// ── Render inline tab: Presupuestos (solo pendientes; los completados van aparte) ──
+// Los completados ya no son una sub-pestaña: tienen pantalla propia en el menu
+// lateral. Un mismo listener alimenta las dos vistas.
+const _renderPresuInline = () => {
+  const el=$('tabPresuContent');
+  const body=el?el.querySelector('#presuInlineBody'):null;
+  if(body){
+    const bP=document.getElementById('presuInlineBadgePend');
+    if(bP) bP.textContent=_presusPend.length||'';
+    const sb=document.getElementById('presuInlineSearch');
+    if(sb&&sb.value.trim()){ _filtrarPresuInline(sb.value); }
+    else body.innerHTML=!_presusPend.length?`<div class="empty"><div class="empty-ico">💶</div><p>Sin presupuestos pendientes</p></div>`:_presusPend.map(p=>_presuCard(p,false)).join('');
+  }
+  const bodyComp=document.getElementById('presuCompBody');
+  if(bodyComp){
+    const q=(window._presuCompQuery||'').trim().toLowerCase();
+    let lista=_presusComp||[];
+    if(q){
+      const words=q.split(/\s+/);
+      lista=lista.filter(p=>{
+        const cli=allClientes.find(x=>x.id===p.clienteId);
+        const hay=[p.titulo,p.notas,p.clienteNombre,cli?.nombre].filter(Boolean).join(' ').toLowerCase();
+        return words.every(w=>hay.includes(w));
+      });
+    }
+    bodyComp.innerHTML=!lista.length
+      ?`<div class="empty"><div class="empty-ico">✅</div><p>${q?`Sin resultados para "${q}"`:'Sin presupuestos completados'}</p></div>`
+      :lista.map(p=>_presuCard(p,true)).join('');
+  }
+};
 
-window.switchPresuInlineTab = (tab) => {
-  _presuInlineTab = tab;
-  ['Pend','Comp'].forEach(t=>{
-    const el=document.getElementById('presuInlineTab'+t);
-    if(el) el.classList.toggle('active', tab===t.toLowerCase());
-  });
+window._filtrarPresusComp=(q)=>{
+  window._presuCompQuery=q;
   _renderPresuInline();
 };
 
-const _renderPresuInline = () => {
-  const el=$('tabPresuContent');if(!el)return;
-  const body=el.querySelector('#presuInlineBody');if(!body)return;
-  const bP=document.getElementById('presuInlineBadgePend');
-  const bC=document.getElementById('presuInlineBadgeComp');
-  if(bP) bP.textContent=_presusPend.length||'';
-  if(bC) bC.textContent=_presusComp.length||'';
-  const sb=document.getElementById('presuInlineSearch');
-  if(sb&&sb.value.trim()){_filtrarPresuInline(sb.value);return;}
-  if(_presuInlineTab==='pend'){
-    body.innerHTML=!_presusPend.length?`<div class="empty"><div class="empty-ico">💶</div><p>Sin presupuestos pendientes</p></div>`:_presusPend.map(p=>_presuCard(p,false)).join('');
-  } else {
-    body.innerHTML=!_presusComp.length?`<div class="empty"><div class="empty-ico">✅</div><p>Sin presupuestos completados</p></div>`:_presusComp.map(p=>_presuCard(p,true)).join('');
-  }
+// Pantalla propia de Presupuestos completados (menu lateral)
+const renderPresusCompletados=()=>{
+  _presuTabActiva='comp';   // la barra de seleccion ofrece "Restaurar" aqui
+  _suscribirPresupuestos();
+  _renderPresuInline();
 };
 
 window._filtrarPresuInline=(q)=>{
@@ -5135,9 +5187,8 @@ window._filtrarPresuInline=(q)=>{
   const words=trimmed.toLowerCase().split(/\s+/);
   const match=(p)=>{const cli=allClientes.find(x=>x.id===p.clienteId);const hay=[p.titulo,p.notas,p.clienteNombre,cli?.nombre].filter(Boolean).join(' ').toLowerCase();return words.every(w=>hay.includes(w));};
   const rP=(_presusPend||[]).filter(match);
-  const rC=(_presusComp||[]).filter(match);
-  if(!rP.length&&!rC.length){sr.innerHTML=`<div class="empty"><p>Sin resultados para "<strong>${trimmed}</strong>"</p></div>`;return;}
-  sr.innerHTML=[...rP.map(p=>_presuCard(p,false)),...rC.map(p=>_presuCard(p,true))].join('');
+  if(!rP.length){sr.innerHTML=`<div class="empty"><p>Sin resultados para "<strong>${trimmed}</strong>"</p><div style="font-size:11.5px;color:var(--tx2);margin-top:6px">Los completados están en el menú lateral</div></div>`;return;}
+  sr.innerHTML=rP.map(p=>_presuCard(p,false)).join('');
 };
 
 const _renderPresuTabInline = () => { _renderPresuInline(); };
@@ -5150,12 +5201,16 @@ const _renderGTabPresupuestos=()=>{
     <input class="sbox" id="presuInlineSearch" style="margin-bottom:10px" placeholder="🔍 Buscar por cliente, título, notas..." oninput="_filtrarPresuInline(this.value)">
     <div id="presuInlineSearchResults" style="display:none"></div>
     <div id="presuInlineTabsWrap">
-      <div class="stabs" style="margin-bottom:12px">
-        <button class="stab active" id="presuInlineTabPend" onclick="switchPresuInlineTab('pend')">⏳ Pendientes <span id="presuInlineBadgePend" style="margin-left:4px;background:rgba(255,152,0,.2);color:#ff9800;border-radius:20px;padding:1px 7px;font-size:11px;font-weight:800"></span></button>
-        <button class="stab" id="presuInlineTabComp" onclick="switchPresuInlineTab('comp')">✅ Completados <span id="presuInlineBadgeComp" style="margin-left:4px;background:rgba(76,175,80,.15);color:#4caf50;border-radius:20px;padding:1px 7px;font-size:11px;font-weight:800"></span></button>
-      </div>
       <div id="presuInlineBody"></div>
     </div>`;
+  _presuTabActiva='pend';
+  _suscribirPresupuestos();
+};
+
+// Listeners de presupuestos. Los usan tanto la pestaña del grupo (pendientes)
+// como la pantalla de Presupuestos completados del menu lateral.
+const _suscribirPresupuestos=()=>{
+  if(!CGID) return;
   if(!_unsubPresuPend){
     _unsubPresuPend = onSnapshot(
       query(collection(db,'grupos',CGID,'presupuestos'), where('estado','==','espera')),
@@ -5803,11 +5858,7 @@ const renderTabClientes=()=>{
 
   return `
   ${_recordatoriosAlertHTML()}
-  <div style="display:flex;align-items:stretch;gap:6px;margin-bottom:8px">
-    <button class="btn-nuevo" style="margin-left:0;flex:1;padding:8px 6px;font-size:12px;text-align:center" onclick="abrirFCli()">+ Añadir</button>
-    <button class="btn-nuevo" onclick="abrirCliExpress()" style="flex:1;margin-left:0;background:linear-gradient(rgba(var(--theme-rgb),.12),rgba(var(--theme-rgb),.12)),var(--card);border:1px solid rgba(var(--theme-rgb),.35);color:var(--r);padding:8px 6px;font-size:12px;text-align:center">⚡ Express</button>
-    ${('contacts' in navigator)?`<button class="btn-nuevo" onclick="importarContactosAgendaDirecto()" style="flex:1;margin-left:0;background:linear-gradient(rgba(var(--theme-rgb),.12),rgba(var(--theme-rgb),.12)),var(--card);border:1px solid rgba(var(--theme-rgb),.3);color:var(--r);padding:8px 6px;font-size:12px;text-align:center">📋 Agenda</button>`:''}
-  </div>
+  <button class="btn-nuevo" onclick="abrirCliExpress()" style="width:100%;margin-left:0;margin-bottom:8px;padding:11px 12px;font-size:13.5px;text-align:center">+ Añadir nuevo cliente</button>
   <input class="sbox" placeholder="Buscar cliente..." oninput="filtrarClis(this.value)" id="cliSearchBox">
   <div id="clisList">${htmlListaClis(ultimos,false)}</div>`;
 };
@@ -6400,8 +6451,8 @@ window.verCliente=async id=>{
     // Partes archivados de este cliente (siguen visibles en su ficha, aunque ya no estén en 'partes')
     const _bl=_archBL.get();
     const archivadosCliente=(archParteSnap?.docs||[])
-      .map(d=>({id:d.id,...d.data()}))
-      .filter(it=>it.tipo==='parte'&&!it._eliminadoDef&&!_bl.has(it.id));
+      .map(_archNormalizar)
+      .filter(it=>it.tipo==='parte'&&!it._eliminadoDef&&!_bl.has(it.id)&&!_bl.has(it._origenId));
     window._fichaHistData={
       partes:[...partesCli.map(p=>({...p,_archivado:false})),...archivadosCliente.map(p=>({...p,_archivado:true}))],
       avisos:(avisSnap?.docs||[]).map(d=>({id:d.id,...d.data()})),
@@ -7037,8 +7088,14 @@ window.abrirFCli=async(id, preData)=>{
 
 // ── Cliente Express — formulario mínimo (nombre + ubicación + color) ──
 window.abrirCliExpress=()=>{
-  abrirSB('⚡ Cliente Express',`
-    <div style="background:rgba(var(--theme-rgb),.08);border:1px solid rgba(var(--theme-rgb),.25);border-radius:14px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--r);font-weight:700">Modo rápido — solo lo esencial. Edita el resto después desde la ficha.</div>
+  // Importar desde la agenda: solo si el navegador expone la Contact Picker API
+  const _agendaHTML = ('contacts' in navigator) ? `
+    <button type="button" id="ceAgendaBtn" style="width:100%;margin-bottom:14px;padding:12px;border-radius:16px;border:1.5px dashed rgba(var(--theme-rgb),.45);background:rgba(var(--theme-rgb),.07);color:var(--r);font-size:13px;font-weight:800;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px">
+      <span style="font-size:16px">📇</span> Cargar desde la agenda del móvil
+    </button>` : '';
+  abrirSB('Añadir nuevo cliente',`
+    ${_agendaHTML}
+    <div style="background:rgba(var(--theme-rgb),.08);border:1px solid rgba(var(--theme-rgb),.25);border-radius:14px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--r);font-weight:700">Lo esencial para darlo de alta. La descripción, el color y el resto de datos se rellenan luego editando su ficha.</div>
     <div class="fsec">
       <div class="fgrp">
         <label>Nombre *</label>
@@ -7070,34 +7127,18 @@ window.abrirCliExpress=()=>{
         <input type="hidden" id="ceLng" value="">
         <div id="ceGeoInfo" style="font-size:11px;color:var(--tx2);margin-top:4px"></div>
       </div>
-      <div class="fgrp">
-        <label>Color indicador</label>
-        <div class="ind-opts" id="ceIndOpts">
-          <div class="ind-opt ind-r" data-color="rojo"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#e53935;margin-right:5px;vertical-align:middle"></span>Rojo</div>
-          <div class="ind-opt ind-y" data-color="amarillo"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ffc107;margin-right:5px;vertical-align:middle"></span>Amarillo</div>
-          <div class="ind-opt ind-g sel" data-color="verde"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#4caf50;margin-right:5px;vertical-align:middle"></span>Verde</div>
-        </div>
-        <input type="hidden" id="ceColor" value="verde">
-      </div>
     </div>
     <button class="btn btn-p" style="width:100%;margin-top:4px" id="btnGuardarCliExpress">⚡ Guardar cliente</button>
-    <button id="btnCliExpressCompleto" style="width:100%;margin-top:8px;padding:10px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--tx2);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">Formulario completo →</button>
+    
   `);
   // Bind events after DOM insertion
   setTimeout(()=>{
-    const opts=document.querySelectorAll('#ceIndOpts .ind-opt');
-    opts.forEach(el=>el.addEventListener('click',()=>{
-      opts.forEach(x=>x.classList.remove('sel'));
-      el.classList.add('sel');
-      const inp=document.getElementById('ceColor');
-      if(inp)inp.value=el.dataset.color||'verde';
-    }));
+    const agendaBtn=document.getElementById('ceAgendaBtn');
+    if(agendaBtn)agendaBtn.addEventListener('click',()=>{ cerrarSB(); setTimeout(()=>importarContactosAgendaDirecto(),150); });
     const geoBtn=document.getElementById('btnGeoExpress');
     if(geoBtn)geoBtn.addEventListener('click',usarUbicacionExpressCli);
     const saveBtn=document.getElementById('btnGuardarCliExpress');
     if(saveBtn)saveBtn.addEventListener('click',()=>_gClick(saveBtn,()=>guardarCliExpress()));
-    const fullBtn=document.getElementById('btnCliExpressCompleto');
-    if(fullBtn)fullBtn.addEventListener('click',()=>{cerrarSB();setTimeout(()=>abrirFCli(),150);});
     // Foto handlers
     window._ceFotoFile=null;
     const handleFotoExpres=async(files)=>{
@@ -10566,6 +10607,20 @@ window.desmarcarMantCal=async(id,fecha,btn)=>{
 // ARCHIVOS — ELIMINACIÓN DEFINITIVA
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
+// ── Normalizar un documento de 'archivos' ──
+// Al archivar se hace addDoc({...cliente, id:cliente.id}), asi que el documento
+// tiene DOS identificadores: el suyo propio en la coleccion 'archivos' y, en el
+// campo `id`, el del cliente o parte original.
+// Antes se mapeaba con ({id:d.id, ...d.data()}) y el `id` de los datos pisaba al
+// del documento. Resultado: al restaurar se intentaba borrar archivos/{idCliente}
+// (que no existe, asi que el archivado no desaparecia nunca) y al eliminar desde
+// archivados se borraba clientes/{idCliente}, es decir, la ficha viva.
+// A partir de aqui: `id` = documento de archivos, `_origenId` = cliente/parte.
+const _archNormalizar = (d) => {
+  const data = d.data() || {};
+  return { ...data, _origenId: data.id || d.id, _archId: d.id, id: d.id };
+};
+
 // ── Blacklist persistente: IDs definitivamente eliminados (por CGID) ──
 const _archBL={
   _key:()=>'alberto_arch_bl_'+(CGID||'_'),
@@ -10723,8 +10778,8 @@ const renderArchivos=async()=>{
     const bl=_archBL.get();
     // Filtrar: sin nombre (corruptos), marcados como eliminados en Firestore, o en blacklist local
     let items=snap.docs
-      .map(d=>({id:d.id,...d.data()}))
-      .filter(it=>(it.nombre||it.titulo)&&!it._eliminadoDef&&!bl.has(it.id));
+      .map(_archNormalizar)
+      .filter(it=>(it.nombre||it.titulo)&&!it._eliminadoDef&&!bl.has(it.id)&&!bl.has(it._origenId));
 
     window._archivosCache={};
     items.forEach(it=>{window._archivosCache[it.id]=it;});
@@ -10755,10 +10810,13 @@ window.restaurarArchivo=async(id,tipo)=>{
       data={...snap.data()};
     }
     const tipoReal=data.tipo||tipo||'cliente';
-    const originalId=data.id||id;
+    // `id` del documento de archivos vs identificador original del cliente/parte
+    const archId=data._archId||id;
+    const originalId=data._origenId||data.id||id;
     const dataLimpia={...data};
     delete dataLimpia.tipo;delete dataLimpia.eliminadoEn;delete dataLimpia.id;
     delete dataLimpia._eliminadoDef;delete dataLimpia._eliminadoDefEn;
+    delete dataLimpia._archId;delete dataLimpia._origenId;
     const col=tipoReal==='cliente'?'clientes':'partes';
     await setDoc(doc(db,'grupos',CGID,col,originalId),dataLimpia);
     // El dato ya está restaurado en 'clientes'/'partes' en este punto. Borramos
@@ -10767,10 +10825,10 @@ window.restaurarArchivo=async(id,tipo)=>{
     // archivados (con la blacklist local) para que no parezca que "sigue
     // archivado" cuando en realidad ya se ha restaurado.
     try{
-      await deleteDoc(doc(db,'grupos',CGID,'archivos',id));
+      await deleteDoc(doc(db,'grupos',CGID,'archivos',archId));
     }catch(delErr){
       console.warn('No se pudo borrar el registro de archivos tras restaurar:',delErr);
-      _archBL.add(id);
+      _archBL.add(archId);
     }
     _quitarArchCard(id);
     if(tipoReal==='cliente'){
@@ -10796,7 +10854,7 @@ window.borrarArchivo=async(id)=>{
 
   if(!esCliente){
     if(!confirm(`¿Eliminar permanentemente "${nombre}"? Esta acción no se puede deshacer.`))return;
-    await _ejecutarBorradoDefinitivo(id,null,itemData);
+    await _ejecutarBorradoDefinitivo(itemData._archId||id,null,itemData);
     return;
   }
   // Modal para clientes
@@ -10824,7 +10882,7 @@ window.borrarArchivo=async(id)=>{
     </div>`;
   document.body.appendChild(modal);
   document.getElementById('_btnPdfElim').onclick=()=>{modal.remove();window._descargarFichaCliArchivado(id);};
-  document.getElementById('_btnSoloElim').onclick=()=>{modal.remove();_ejecutarBorradoDefinitivo(id,itemData.id||id,itemData);};
+  document.getElementById('_btnSoloElim').onclick=()=>{modal.remove();_ejecutarBorradoDefinitivo(itemData._archId||id,itemData._origenId||itemData.id,itemData);};
   document.getElementById('_btnCancelElim').onclick=()=>modal.remove();
   modal.addEventListener('click',e=>{if(e.target===modal)modal.remove();});
 };
@@ -10833,7 +10891,10 @@ window.borrarArchivo=async(id)=>{
 const _ejecutarBorradoDefinitivo=async(archId,cliId,itemData)=>{
   const archRef=doc(db,'grupos',CGID,'archivos',archId);
   const esCliente=(itemData?.tipo||'cliente')==='cliente';
-  const realCliId=cliId||archId;
+  // Solo el identificador real del cliente. Antes se caia por defecto en archId,
+  // que es el id del documento de archivos: borrar por ahi no acertaba nunca, o
+  // peor, acertaba con la ficha viva cuando ambos ids coincidian.
+  const realCliId=cliId||itemData?._origenId||itemData?.id||null;
 
   // 1. Marcar en Firestore ANTES de borrar (garantía contra fallos de red)
   try{await updateDoc(archRef,{_eliminadoDef:true,_eliminadoDefEn:serverTimestamp()});}catch(e){}
@@ -10846,7 +10907,7 @@ const _ejecutarBorradoDefinitivo=async(archId,cliId,itemData)=>{
   _quitarArchCard(archId);
 
   // 4. Borrar datos relacionados si es cliente
-  if(esCliente){
+  if(esCliente && realCliId){
     const cols=['partes','mantenimientos','averias','averias_historial','presupuestos','imagenes','historial_mantenimientos'];
     await Promise.all(cols.map(async col=>{
       try{
@@ -10861,8 +10922,8 @@ const _ejecutarBorradoDefinitivo=async(archId,cliId,itemData)=>{
   try{await deleteDoc(archRef);}catch(e){console.warn('deleteDoc archivos:',e);}
 
   // 6. Limpiar estado en memoria
-  allClientes=allClientes.filter(c=>c.id!==realCliId&&c.id!==archId);
-  if(window._archivosCache){delete window._archivosCache[archId];delete window._archivosCache[realCliId];}
+  if(realCliId) allClientes=allClientes.filter(c=>c.id!==realCliId);
+  if(window._archivosCache){delete window._archivosCache[archId];if(realCliId)delete window._archivosCache[realCliId];}
 
   toast('🗑️ Eliminado definitivamente','i');
 };
@@ -10875,7 +10936,7 @@ window._selBorrarArchivosCliente=async(ids)=>{
   for(const id of ids){
     const itemData=(window._archivosCache&&window._archivosCache[id])||(window._archivosAllSorted||[]).find(x=>x.id===id);
     if(!itemData)continue;
-    await _ejecutarBorradoDefinitivo(id,itemData.id||id,itemData);
+    await _ejecutarBorradoDefinitivo(itemData._archId||id,itemData._origenId||itemData.id,itemData);
   }
   toast('🗑️ Clientes archivados eliminados','i');
 };
@@ -10892,7 +10953,8 @@ window._descargarFichaCliArchivado=async(archId)=>{
     const snap=await getDoc(doc(db,'grupos',CGID,'archivos',archId));
     if(!snap.exists()){_ejecutarBorradoDefinitivo(archId,null,{tipo:'cliente'});return;}
     const cl=snap.data();
-    const cliId=cl.id||archId;
+    const cliRealId=cl.id||null;          // identificador del cliente (para borrar)
+    const cliId=cliRealId||archId;        // el que se usa en las consultas
     const partesSnap=await getDocs(query(collection(db,'grupos',CGID,'partes'),where('clienteId','==',cliId)));
     const partesCli=partesSnap.docs.map(d=>({id:d.id,...d.data()}));
     let mantsCli=[];
@@ -10948,7 +11010,7 @@ window._descargarFichaCliArchivado=async(archId)=>{
     w.document.write(fichaHTML);w.document.close();
     setTimeout(()=>w.print(),700);
     toast('PDF generado — eliminando...','o');
-    setTimeout(()=>_ejecutarBorradoDefinitivo(archId,cliId,cl),1500);
+    setTimeout(()=>_ejecutarBorradoDefinitivo(archId,cliRealId,cl),1500);
   }catch(e){toast('Error al generar PDF: '+e.message,'e');}
 };
 
@@ -13688,6 +13750,8 @@ const renderPerfil=()=>{
       <button type="button" class="fab-pref-card ${_fabDefaultKey()==='presupuesto'?'active':''}" id="fabPrefPresupuesto" onclick="_fabSetDefault('presupuesto')">🧾<span>Presupuesto</span></button>
       <button type="button" class="fab-pref-card ${_fabDefaultKey()==='aviso'?'active':''}" id="fabPrefAviso" onclick="_fabSetDefault('aviso')">💬<span>Aviso</span></button>
       <button type="button" class="fab-pref-card ${_fabDefaultKey()==='cliente'?'active':''}" id="fabPrefCliente" onclick="_fabSetDefault('cliente')">👤<span>Cliente</span></button>
+      <button type="button" class="fab-pref-card ${_fabDefaultKey()==='cobro'?'active':''}" id="fabPrefCobro" onclick="_fabSetDefault('cobro')">💰<span>Cobro</span></button>
+      <button type="button" class="fab-pref-card ${_fabDefaultKey()==='recordatorio'?'active':''}" id="fabPrefRecordatorio" onclick="_fabSetDefault('recordatorio')">🔔<span>Recordatorio</span></button>
     </div>
   </div>
 
@@ -14032,12 +14096,9 @@ const _renderGTabAvisos=()=>{
         Nuevo aviso
       </button>
     </div>
-    <div class="stabs" style="margin-bottom:12px">
-      <button class="stab active" id="avisTabPend" onclick="switchAvisTab('pend')">💬 Pendientes <span id="avisBadgePend" style="margin-left:4px;background:rgba(171,71,188,.15);color:#ab47bc;border-radius:20px;padding:1px 7px;font-size:11px;font-weight:800"></span></button>
-      <button class="stab" id="avisTabRes" onclick="switchAvisTab('res')">✅ Resueltos <span id="avisBadgeRes" style="margin-left:4px;background:rgba(76,175,80,.15);color:#4caf50;border-radius:20px;padding:1px 7px;font-size:11px;font-weight:800"></span></button>
-    </div>
     <input class="sbox" id="avisosSearchInput" style="margin-bottom:12px" placeholder="🔍 Buscar por cliente o descripción..." value="${window._avisQuery||''}" oninput="window._filtrarAvisos(this.value)">
     <div id="avisBody"></div>`;
+  _avisTab='pend';
   _suscribirAvisos();
 };
 
@@ -14082,10 +14143,15 @@ const _suscribirAvisos=()=>{
   }
 };
 
-window.switchAvisTab=(tab)=>{
-  _avisTab=tab;
-  document.getElementById('avisTabPend')?.classList.toggle('active',tab==='pend');
-  document.getElementById('avisTabRes')?.classList.toggle('active',tab==='res');
+window._filtrarAvisosRes=(q)=>{
+  window._avisResQuery=q;
+  _renderAvisBody();
+};
+
+// Pantalla propia de Avisos resueltos (menu lateral)
+const renderAvisosResueltos=()=>{
+  _avisTab='res';   // la barra de seleccion ofrece "Restaurar" en esta pantalla
+  _suscribirAvisos();
   _renderAvisBody();
 };
 
@@ -14097,15 +14163,20 @@ window._filtrarAvisos=(q)=>{
 const _avisIco=`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`;
 const _alarmIco=`<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2"/><path d="M5 3 2 6M22 6l-3-3"/></svg>`;
 
+// Los avisos resueltos ya no son una sub-pestaña: tienen pantalla propia en el
+// menu lateral. Los mismos listeners alimentan las dos vistas, asi que aqui se
+// pintan ambas y cada una se salta sola si no esta en pantalla.
 const _renderAvisBody=()=>{
-  const body=document.getElementById('avisBody');if(!body)return;
+  const body=document.getElementById('avisBody');
+  const bodyRes=document.getElementById('avisResBody');
   const bP=document.getElementById('avisBadgePend');
-  const bR=document.getElementById('avisBadgeRes');
   if(bP)bP.textContent=_avisosPend.length||'';
-  if(bR)bR.textContent=_avisosRes.length||'';
+  if(body) body.innerHTML=_htmlListaAvisos(_avisosPend,(window._avisQuery||'').toLowerCase().trim(),false);
+  if(bodyRes) bodyRes.innerHTML=_htmlListaAvisos(_avisosRes,(window._avisResQuery||'').toLowerCase().trim(),true);
+};
 
-  let lista=_avisTab==='pend'?_avisosPend:_avisosRes;
-  const qL=(window._avisQuery||'').toLowerCase().trim();
+const _htmlListaAvisos=(listaBase,qL,esResueltos)=>{
+  let lista=listaBase||[];
   if(qL){
     lista=lista.filter(a=>{
       const cli=allClientes.find(x=>x.id===a.clienteId);
@@ -14114,12 +14185,11 @@ const _renderAvisBody=()=>{
     });
   }
   if(!lista.length){
-    body.innerHTML=`<div class="empty"><p>${qL?`Sin resultados para "${window._avisQuery}"`:(_avisTab==='pend'?'Sin avisos pendientes ✅':'Sin avisos resueltos')}</p></div>`;
-    return;
+    return `<div class="empty"><p>${qL?`Sin resultados para "${qL}"`:(esResueltos?'Sin avisos resueltos':'Sin avisos pendientes ✅')}</p></div>`;
   }
 
-  // Banner de alertas activas hoy (solo en tab pendientes)
-  const alertasHoy=_avisTab==='pend'?lista.filter(_alertaHoy):[];
+  // Banner de alertas activas hoy (solo tiene sentido en pendientes)
+  const alertasHoy=esResueltos?[]:lista.filter(_alertaHoy);
   const bannerHTML=alertasHoy.length?`
     <div style="background:var(--urgent-bg);border:1px solid var(--urgent-bd);border-radius:var(--rd);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
       <span style="color:var(--urgent);display:flex">${ICO.alert(19)}</span>
@@ -14129,7 +14199,7 @@ const _renderAvisBody=()=>{
       </div>
     </div>`:'';
 
-  body.innerHTML=bannerHTML+lista.map(a=>{
+  return bannerHTML+lista.map(a=>{
     const cli=allClientes.find(x=>x.id===a.clienteId);
     const esResuelto=a.estado==='resuelto';
     const prio=_avisPrioridad[a.prioridad||'baja'];
