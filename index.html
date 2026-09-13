@@ -68,7 +68,18 @@
   --ease-out:cubic-bezier(.4,0,.2,1);
   --dur-fast:.18s;--dur-med:.28s;--dur-slow:.42s;
 }
-html,body{background:radial-gradient(ellipse 120% 60% at 20% -10%,#1c2024 0%,var(--bg) 45%) var(--bg) fixed;}
+html,body{
+  /* Fondo con un patrón muy sutil de herramientas y oficios (llave inglesa,
+     engranaje, martillo, gota, rayo, metro, rodillo) al estilo del "collage"
+     de fondo de WhatsApp, pero con una opacidad bastante menor para que
+     apenas se note y no compita con el contenido. */
+  background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22280%22%20height%3D%22280%22%20viewBox%3D%220%200%20280%20280%22%3E%3Cg%20transform%3D%22translate(30%2C45)%20rotate(-25)%20scale(1.35)%20translate(-12%2C-12)%22%3E%3Cpath%20d%3D%22M14.7%206.3a1%201%200%200%200%200%201.4l1.6%201.6a1%201%200%200%200%201.4%200l3.77-3.77a6%206%200%200%201-7.94%207.94l-6.91%206.91a2.12%202.12%200%200%201-3-3l6.91-6.91a6%206%200%200%201%207.94-7.94l-3.76%203.76z%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(190%2C40)%20rotate(10)%20scale(1.1)%20translate(-12%2C-12)%22%3E%3Cpath%20d%3D%22M12%2015a3%203%200%201%200%200-6%203%203%200%200%200%200%206z%20M19.4%2015a1.65%201.65%200%200%200%20.33%201.82l.06.06a2%202%200%201%201-2.83%202.83l-.06-.06a1.65%201.65%200%200%200-1.82-.33%201.65%201.65%200%200%200-1%201.51V21a2%202%200%200%201-4%200v-.09A1.65%201.65%200%200%200%209%2019.4a1.65%201.65%200%200%200-1.82.33l-.06.06a2%202%200%201%201-2.83-2.83l.06-.06a1.65%201.65%200%200%200%20.33-1.82%201.65%201.65%200%200%200-1.51-1H3a2%202%200%200%201%200-4h.09A1.65%201.65%200%200%200%204.6%209a1.65%201.65%200%200%200-.33-1.82l-.06-.06a2%202%200%201%201%202.83-2.83l.06.06a1.65%201.65%200%200%200%201.82.33H9a1.65%201.65%200%200%200%201-1.51V3a2%202%200%200%201%204%200v.09a1.65%201.65%200%200%200%201%201.51%201.65%201.65%200%200%200%201.82-.33l.06-.06a2%202%200%201%201%202.83%202.83l-.06.06a1.65%201.65%200%200%200-.33%201.82V9a1.65%201.65%200%200%200%201.51%201H21a2%202%200%200%201%200%204h-.09a1.65%201.65%200%200%200-1.51%201z%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(95%2C30)%20rotate(12)%20scale(1.15)%20translate(-12%2C-12)%22%3E%3Cpath%20d%3D%22M13%202L3%2014h9l-1%208%2010-12h-9l1-8z%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(235%2C130)%20rotate(0)%20scale(1.2)%20translate(-12%2C-12)%22%3E%3Cpath%20d%3D%22M12%202.69l5.66%205.66a8%208%200%201%201-11.31%200z%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(130%2C110)%20rotate(20)%20scale(1.25)%20translate(-12%2C-12)%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M17.5%203.5l3%203-4.5%204.5-3-3z%22%2F%3E%3Cpath%20d%3D%22M13.6%208.4L3.5%2018.5a1.5%201.5%200%200%200%202%202.1L15.6%2010.5%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(40%2C185)%20rotate(-8)%20scale(1.2)%20translate(-12%2C-12)%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%229%22%20width%3D%2218%22%20height%3D%226%22%20rx%3D%221%22%2F%3E%3Cpath%20d%3D%22M7%209v2.2M11%209v3M15%209v2.2M19%209v3%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(200%2C215)%20rotate(6)%20scale(1.15)%20translate(-12%2C-12)%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%224%22%20y%3D%224%22%20width%3D%2214%22%20height%3D%226%22%20rx%3D%221.5%22%2F%3E%3Cpath%20d%3D%22M9%2010v4M9%2014h4a2%202%200%200%201%202%202v4%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(260%2C250)%20rotate(60)%20scale(1.1)%20translate(-12%2C-12)%22%3E%3Cpath%20d%3D%22M14.7%206.3a1%201%200%200%200%200%201.4l1.6%201.6a1%201%200%200%200%201.4%200l3.77-3.77a6%206%200%200%201-7.94%207.94l-6.91%206.91a2.12%202.12%200%200%201-3-3l6.91-6.91a6%206%200%200%201%207.94-7.94l-3.76%203.76z%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(15%2C250)%20rotate(-15)%20scale(0.95)%20translate(-12%2C-12)%22%3E%3Cpath%20d%3D%22M12%2015a3%203%200%201%200%200-6%203%203%200%200%200%200%206z%20M19.4%2015a1.65%201.65%200%200%200%20.33%201.82l.06.06a2%202%200%201%201-2.83%202.83l-.06-.06a1.65%201.65%200%200%200-1.82-.33%201.65%201.65%200%200%200-1%201.51V21a2%202%200%200%201-4%200v-.09A1.65%201.65%200%200%200%209%2019.4a1.65%201.65%200%200%200-1.82.33l-.06.06a2%202%200%201%201-2.83-2.83l.06-.06a1.65%201.65%200%200%200%20.33-1.82%201.65%201.65%200%200%200-1.51-1H3a2%202%200%200%201%200-4h.09A1.65%201.65%200%200%200%204.6%209a1.65%201.65%200%200%200-.33-1.82l-.06-.06a2%202%200%201%201%202.83-2.83l.06.06a1.65%201.65%200%200%200%201.82.33H9a1.65%201.65%200%200%200%201-1.51V3a2%202%200%200%201%204%200v.09a1.65%201.65%200%200%200%201%201.51%201.65%201.65%200%200%200%201.82-.33l.06-.06a2%202%200%201%201%202.83%202.83l-.06.06a1.65%201.65%200%200%200-.33%201.82V9a1.65%201.65%200%200%200%201.51%201H21a2%202%200%200%201%200%204h-.09a1.65%201.65%200%200%200-1.51%201z%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(165%2C175)%20rotate(-20)%20scale(1)%20translate(-12%2C-12)%22%3E%3Cpath%20d%3D%22M13%202L3%2014h9l-1%208%2010-12h-9l1-8z%22%20fill%3D%22none%22%20stroke%3D%22%23ffffff%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E"),radial-gradient(ellipse 120% 60% at 20% -10%,#1c2024 0%,var(--bg) 45%);
+  background-repeat:repeat,no-repeat;
+  background-size:280px 280px,auto;
+  background-position:0 0,20% -10%;
+  background-attachment:fixed,fixed;
+  background-color:var(--bg);
+}
 
 
 
@@ -85,7 +96,12 @@ body.modo-claro{
   --sh-3:0 8px 20px rgba(16,24,22,.08),0 20px 44px -16px rgba(16,24,22,.14);
   background:#f2f3f1;color:#1b211f;
 }
-html:has(body.modo-claro),body.modo-claro{background:#f2f3f1}
+html:has(body.modo-claro),body.modo-claro{
+  background-image:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22280%22%20height%3D%22280%22%20viewBox%3D%220%200%20280%20280%22%3E%3Cg%20transform%3D%22translate(30%2C45)%20rotate(-25)%20scale(1.35)%20translate(-12%2C-12)%22%3E%3Cpath%20d%3D%22M14.7%206.3a1%201%200%200%200%200%201.4l1.6%201.6a1%201%200%200%200%201.4%200l3.77-3.77a6%206%200%200%201-7.94%207.94l-6.91%206.91a2.12%202.12%200%200%201-3-3l6.91-6.91a6%206%200%200%201%207.94-7.94l-3.76%203.76z%22%20fill%3D%22none%22%20stroke%3D%22%2312241f%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(190%2C40)%20rotate(10)%20scale(1.1)%20translate(-12%2C-12)%22%3E%3Cpath%20d%3D%22M12%2015a3%203%200%201%200%200-6%203%203%200%200%200%200%206z%20M19.4%2015a1.65%201.65%200%200%200%20.33%201.82l.06.06a2%202%200%201%201-2.83%202.83l-.06-.06a1.65%201.65%200%200%200-1.82-.33%201.65%201.65%200%200%200-1%201.51V21a2%202%200%200%201-4%200v-.09A1.65%201.65%200%200%200%209%2019.4a1.65%201.65%200%200%200-1.82.33l-.06.06a2%202%200%201%201-2.83-2.83l.06-.06a1.65%201.65%200%200%200%20.33-1.82%201.65%201.65%200%200%200-1.51-1H3a2%202%200%200%201%200-4h.09A1.65%201.65%200%200%200%204.6%209a1.65%201.65%200%200%200-.33-1.82l-.06-.06a2%202%200%201%201%202.83-2.83l.06.06a1.65%201.65%200%200%200%201.82.33H9a1.65%201.65%200%200%200%201-1.51V3a2%202%200%200%201%204%200v.09a1.65%201.65%200%200%200%201%201.51%201.65%201.65%200%200%200%201.82-.33l.06-.06a2%202%200%201%201%202.83%202.83l-.06.06a1.65%201.65%200%200%200-.33%201.82V9a1.65%201.65%200%200%200%201.51%201H21a2%202%200%200%201%200%204h-.09a1.65%201.65%200%200%200-1.51%201z%22%20fill%3D%22none%22%20stroke%3D%22%2312241f%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(95%2C30)%20rotate(12)%20scale(1.15)%20translate(-12%2C-12)%22%3E%3Cpath%20d%3D%22M13%202L3%2014h9l-1%208%2010-12h-9l1-8z%22%20fill%3D%22none%22%20stroke%3D%22%2312241f%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(235%2C130)%20rotate(0)%20scale(1.2)%20translate(-12%2C-12)%22%3E%3Cpath%20d%3D%22M12%202.69l5.66%205.66a8%208%200%201%201-11.31%200z%22%20fill%3D%22none%22%20stroke%3D%22%2312241f%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(130%2C110)%20rotate(20)%20scale(1.25)%20translate(-12%2C-12)%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%2312241f%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M17.5%203.5l3%203-4.5%204.5-3-3z%22%2F%3E%3Cpath%20d%3D%22M13.6%208.4L3.5%2018.5a1.5%201.5%200%200%200%202%202.1L15.6%2010.5%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(40%2C185)%20rotate(-8)%20scale(1.2)%20translate(-12%2C-12)%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%2312241f%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%223%22%20y%3D%229%22%20width%3D%2218%22%20height%3D%226%22%20rx%3D%221%22%2F%3E%3Cpath%20d%3D%22M7%209v2.2M11%209v3M15%209v2.2M19%209v3%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(200%2C215)%20rotate(6)%20scale(1.15)%20translate(-12%2C-12)%22%3E%3Cg%20fill%3D%22none%22%20stroke%3D%22%2312241f%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%224%22%20y%3D%224%22%20width%3D%2214%22%20height%3D%226%22%20rx%3D%221.5%22%2F%3E%3Cpath%20d%3D%22M9%2010v4M9%2014h4a2%202%200%200%201%202%202v4%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(260%2C250)%20rotate(60)%20scale(1.1)%20translate(-12%2C-12)%22%3E%3Cpath%20d%3D%22M14.7%206.3a1%201%200%200%200%200%201.4l1.6%201.6a1%201%200%200%200%201.4%200l3.77-3.77a6%206%200%200%201-7.94%207.94l-6.91%206.91a2.12%202.12%200%200%201-3-3l6.91-6.91a6%206%200%200%201%207.94-7.94l-3.76%203.76z%22%20fill%3D%22none%22%20stroke%3D%22%2312241f%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(15%2C250)%20rotate(-15)%20scale(0.95)%20translate(-12%2C-12)%22%3E%3Cpath%20d%3D%22M12%2015a3%203%200%201%200%200-6%203%203%200%200%200%200%206z%20M19.4%2015a1.65%201.65%200%200%200%20.33%201.82l.06.06a2%202%200%201%201-2.83%202.83l-.06-.06a1.65%201.65%200%200%200-1.82-.33%201.65%201.65%200%200%200-1%201.51V21a2%202%200%200%201-4%200v-.09A1.65%201.65%200%200%200%209%2019.4a1.65%201.65%200%200%200-1.82.33l-.06.06a2%202%200%201%201-2.83-2.83l.06-.06a1.65%201.65%200%200%200%20.33-1.82%201.65%201.65%200%200%200-1.51-1H3a2%202%200%200%201%200-4h.09A1.65%201.65%200%200%200%204.6%209a1.65%201.65%200%200%200-.33-1.82l-.06-.06a2%202%200%201%201%202.83-2.83l.06.06a1.65%201.65%200%200%200%201.82.33H9a1.65%201.65%200%200%200%201-1.51V3a2%202%200%200%201%204%200v.09a1.65%201.65%200%200%200%201%201.51%201.65%201.65%200%200%200%201.82-.33l.06-.06a2%202%200%201%201%202.83%202.83l-.06.06a1.65%201.65%200%200%200-.33%201.82V9a1.65%201.65%200%200%200%201.51%201H21a2%202%200%200%201%200%204h-.09a1.65%201.65%200%200%200-1.51%201z%22%20fill%3D%22none%22%20stroke%3D%22%2312241f%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fg%3E%3Cg%20transform%3D%22translate(165%2C175)%20rotate(-20)%20scale(1)%20translate(-12%2C-12)%22%3E%3Cpath%20d%3D%22M13%202L3%2014h9l-1%208%2010-12h-9l1-8z%22%20fill%3D%22none%22%20stroke%3D%22%2312241f%22%20stroke-opacity%3D%220.05%22%20stroke-width%3D%221.6%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%2F%3E%3C%2Fg%3E%3C%2Fsvg%3E");
+  background-repeat:repeat;
+  background-size:280px 280px;
+  background-color:#f2f3f1;
+}
 body.modo-claro #topbar{background:rgba(255,255,255,.88);backdrop-filter:blur(20px) saturate(1.8);-webkit-backdrop-filter:blur(20px) saturate(1.8);border-bottom:1px solid rgba(0,0,0,.07);box-shadow:0 1px 0 rgba(255,255,255,.8),0 2px 12px rgba(0,0,0,.06)}
 body.modo-claro #drawer{background:var(--card);border-left:1px solid rgba(0,0,0,.09)}
 body.modo-claro #authWrap{background:#fafaf9}
@@ -193,6 +209,21 @@ body.modo-claro .stat2-num{color:var(--tx)}
 .toggle-sw input:checked+.toggle-track{background:linear-gradient(135deg,var(--r2),var(--r));border-color:transparent}
 .toggle-sw input:checked+.toggle-track::before{transform:translateX(20px)}
 .toggle-sw:active .toggle-track::before{width:21px}
+
+/* ── Slider de volumen (barra movible, arrastrable) ── */
+.vol-range{-webkit-appearance:none;appearance:none;flex:1;height:6px;border-radius:6px;
+  background:linear-gradient(90deg,var(--r),var(--r) calc(var(--v,50) * 1%),var(--glass-bg2) calc(var(--v,50) * 1%),var(--glass-bg2) 100%);
+  outline:none;cursor:pointer;transition:opacity .2s}
+.vol-range::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:20px;height:20px;border-radius:50%;
+  background:linear-gradient(135deg,var(--r3),var(--r));border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);
+  cursor:grab;transition:transform .15s var(--ease-spring)}
+.vol-range::-webkit-slider-thumb:active{cursor:grabbing;transform:scale(1.15)}
+.vol-range::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,var(--r3),var(--r));
+  border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:grab}
+.vol-range::-moz-range-track{height:6px;border-radius:6px;background:var(--glass-bg2)}
+.vol-range::-moz-range-progress{height:6px;border-radius:6px;background:var(--r)}
+.vol-range:disabled{cursor:default;opacity:.5}
+.vol-range:disabled::-webkit-slider-thumb{cursor:default}
 
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{height:100%;height:100dvh}
@@ -508,7 +539,12 @@ body.modo-claro .sbox:focus{box-shadow:inset 0 1px 2px rgba(0,0,0,.03),0 0 0 3px
 .grupo-header-img{position:absolute;inset:0;background-size:cover;background-position:center;filter:saturate(1.25) brightness(.98);transform:scale(1.02);transition:transform .5s cubic-bezier(.16,1,.3,1)}
 .grupo-header:active .grupo-header-img{transform:scale(1.06)}
 .grupo-header-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.86) 0%,rgba(0,0,0,.32) 46%,rgba(0,0,0,.08) 100%)}
-.grupo-header-inicio{position:absolute;top:14px;left:16px;z-index:3;display:flex;align-items:center;gap:7px;padding:8px 15px;border-radius:22px;background:rgba(8,12,11,.6);backdrop-filter:blur(16px) saturate(1.7);-webkit-backdrop-filter:blur(16px) saturate(1.7);border:1px solid rgba(255,255,255,.32);color:#fff;font-size:13.5px;font-weight:800;letter-spacing:.1px;cursor:pointer;transition:.2s var(--ease-out);box-shadow:0 8px 20px -6px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.2)}
+/* Fila superior del banner: agrupa el botón Inicio y el widget del
+   calendario en un mismo contenedor flex para poder centrar el calendario
+   en el hueco libre entre el botón y el borde derecho del banner. */
+.grupo-header-top{position:absolute;top:14px;left:16px;right:14px;z-index:3;display:flex;align-items:flex-start;gap:8px}
+.grupo-header-cal-wrap{flex:1;min-width:0;display:flex;justify-content:center}
+.grupo-header-inicio{flex-shrink:0;display:flex;align-items:center;gap:7px;padding:8px 15px;border-radius:22px;background:rgba(8,12,11,.6);backdrop-filter:blur(16px) saturate(1.7);-webkit-backdrop-filter:blur(16px) saturate(1.7);border:1px solid rgba(255,255,255,.32);color:#fff;font-size:13.5px;font-weight:800;letter-spacing:.1px;cursor:pointer;transition:.2s var(--ease-out);box-shadow:0 8px 20px -6px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.2)}
 .grupo-header-inicio:hover,.grupo-header-inicio:active{background:rgba(8,12,11,.78);border-color:rgba(255,255,255,.5);transform:translateY(-1px)}
 .grupo-header-content{position:absolute;bottom:0;left:0;right:0;padding:14px 16px;display:flex;align-items:center;gap:12px}
 .grupo-ava{width:60px;height:60px;border-radius:0;background:transparent;display:flex;align-items:center;justify-content:center;font-size:28px;border:none;flex-shrink:0;cursor:pointer;overflow:visible;padding:0;filter:drop-shadow(0 3px 8px rgba(0,0,0,.4))}
@@ -524,13 +560,13 @@ body.modo-claro .sbox:focus{box-shadow:inset 0 1px 2px rgba(0,0,0,.03),0 0 0 3px
 .grupo-header-text{flex:1;min-width:0}
 /* El widget se ancla arriba del banner (no centrado) para dejar SIEMPRE
    libre la franja inferior donde vive el nombre del grupo, aunque sea largo. */
-.mcal-widget{position:absolute;top:14px;right:14px;width:min(216px,53%);box-sizing:border-box;padding:7px 12px 6px;background:rgba(12,16,15,.5);backdrop-filter:blur(14px) saturate(1.6);-webkit-backdrop-filter:blur(14px) saturate(1.6);border:1px solid rgba(255,255,255,.22);border-radius:14px;cursor:pointer;transition:.2s var(--ease-out);z-index:2;box-shadow:0 8px 20px -6px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.14)}
+.mcal-widget{width:min(216px,100%);box-sizing:border-box;padding:7px 12px 6px;background:rgba(12,16,15,.5);backdrop-filter:blur(14px) saturate(1.6);-webkit-backdrop-filter:blur(14px) saturate(1.6);border:1px solid rgba(255,255,255,.22);border-radius:14px;cursor:pointer;transition:.2s var(--ease-out);box-shadow:0 8px 20px -6px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.14)}
 .mcal-widget:hover,.mcal-widget:active{background:rgba(12,16,15,.65);border-color:rgba(255,255,255,.38)}
 .mcal-month{font-size:10px;font-weight:800;color:#fff;text-align:center;margin-bottom:4px;letter-spacing:1.1px;text-transform:uppercase;text-shadow:0 1px 3px rgba(0,0,0,.5)}
 .mcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1.5px 4px}
 .mcal-grid span{font-size:9.5px;font-weight:600;color:rgba(255,255,255,.75);text-align:center;line-height:12px;height:12px;border-radius:50%;transition:background .15s ease}
 .mcal-today{background:linear-gradient(155deg,var(--r3),var(--r))!important;color:#04211d!important;font-weight:900!important;box-shadow:0 0 0 1px rgba(255,255,255,.55),0 2px 6px rgba(0,0,0,.3)}
-@media(max-width:359px){.mcal-widget{width:min(192px,55%);padding:6px 9px 5px}.mcal-month{font-size:9px}.mcal-grid span{font-size:8.5px;line-height:11px;height:11px}}
+@media(max-width:359px){.mcal-widget{width:min(192px,100%);padding:6px 9px 5px}.mcal-month{font-size:9px}.mcal-grid span{font-size:8.5px;line-height:11px;height:11px}}
 
 /* ── GTABS ── */
 /* ══ MENÚ PRINCIPAL DEL GRUPO — 3 secciones simétricas ══ */
@@ -810,33 +846,36 @@ body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
 .hg-filtros{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
 .hg-filtro{border:1px solid var(--border);background:transparent;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:800;color:var(--tx2);cursor:pointer;font-family:var(--font);transition:.15s}
 .hg-filtro.active{background:var(--r);color:#fff;border-color:var(--r)}
-.hg-event-dot.cobro{background:rgba(255,202,40,.15)}
-.hg-event-dot.aviso{background:rgba(171,71,188,.15)}
-.hg-event-dot.entrega{background:rgba(66,165,245,.12)}
+.hg-event-dot.cobro{background:rgba(34,197,94,.15)}
+.hg-event-dot.aviso{background:rgba(239,68,68,.15)}
 
 /* ── CALENDARIO GLOBAL ── */
 .calg-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;gap:8px}
-.calg-nav-btn{width:36px;height:36px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--tx2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:18px;font-weight:900;font-family:var(--font)}
+.calg-nav-btn{width:36px;height:36px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.05);color:var(--tx2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:18px;font-weight:900;font-family:var(--font);transition:transform .16s var(--ease-spring),border-color .18s ease,color .18s ease}
 .calg-nav-btn:hover{border-color:var(--r);color:var(--r)}
+.calg-nav-btn:active{transform:scale(.9)}
 .calg-title{font-size:15px;font-weight:900;color:var(--tx);text-transform:capitalize;flex:1;text-align:center}
 .calg-toolbar{display:flex;justify-content:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
-.calg-hoy-btn{font-size:11px;font-weight:800;color:var(--r);background:rgba(var(--theme-rgb),.1);border:1px solid rgba(var(--theme-rgb),.25);border-radius:20px;padding:6px 12px;cursor:pointer;white-space:nowrap;font-family:var(--font)}
+.calg-hoy-btn{font-size:11px;font-weight:800;color:var(--r);background:rgba(var(--theme-rgb),.1);border:1px solid rgba(var(--theme-rgb),.25);border-radius:20px;padding:6px 12px;cursor:pointer;white-space:nowrap;font-family:var(--font);transition:transform .16s var(--ease-spring),background .15s ease}
+.calg-hoy-btn:active{transform:scale(.94)}
 .calg-cad-btn{font-size:11px;font-weight:800;color:var(--tx2);background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:20px;padding:6px 12px;cursor:pointer;white-space:nowrap;font-family:var(--font)}
 .calg-daynames{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:6px}
 .calg-dayname{text-align:center;font-size:10px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:.5px}
 .calg-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.calg-cell{aspect-ratio:1;border-radius:12px;border:1px solid var(--border);background:var(--card2);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4px 2px;cursor:pointer;transition:.15s}
-.calg-cell:hover{border-color:rgba(var(--theme-rgb),.4)}
+.calg-cell{aspect-ratio:1;border-radius:12px;border:1px solid var(--border);background:var(--card2);display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:4px 2px;cursor:pointer;transition:transform .14s var(--ease-spring),border-color .15s ease,background .15s ease,box-shadow .15s ease}
+.calg-cell:hover{border-color:rgba(var(--theme-rgb),.4);background:var(--card)}
+.calg-cell:active{transform:scale(.94)}
 .calg-cell.other{opacity:0;pointer-events:none;border-color:transparent;background:transparent}
-.calg-cell.today{border-color:var(--r);box-shadow:0 0 0 1px rgba(var(--theme-rgb),.3)}
+.calg-cell.today{border-color:var(--r);background:rgba(var(--theme-rgb),.1);box-shadow:0 0 0 1px rgba(var(--theme-rgb),.35)}
+.calg-cell.has-events{border-color:rgba(255,255,255,.16)}
 .calg-daynum{font-size:12px;font-weight:800;color:var(--tx)}
 .calg-cell.today .calg-daynum{color:var(--r)}
 .calg-dots{display:flex;flex-wrap:wrap;gap:2px;justify-content:center;align-items:center;margin-top:3px}
-.calg-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.calg-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
 .calg-more{font-size:8px;font-weight:800;color:var(--tx2)}
-.calg-legend{display:flex;flex-wrap:wrap;gap:10px 14px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
-.calg-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--tx2);font-weight:700}
-.calg-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.calg-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
+.calg-legend-item{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--tx2);font-weight:800;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;padding:5px 10px 5px 8px}
+.calg-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
 .calg-avi-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px 14px;margin-bottom:8px}
 .calg-avi-card.atrasado{border-color:rgba(239,83,80,.4);background:rgba(239,83,80,.06)}
 
@@ -2062,6 +2101,18 @@ function _applyUpdate(){
 const $=id=>document.getElementById(id);
 const fmtM=n=>isNaN(n)||n==null?'0,00 €':parseFloat(n).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
 const fmtF=ts=>{if(!ts)return'–';try{const d=ts.toDate?ts.toDate():new Date(ts);return d.toLocaleDateString('es-ES')}catch{return'–'}};
+// ── Convierte una fecha en formato ISO 'YYYY-MM-DD' (la que usan los <input type="date">)
+// al formato español 'DD/MM/YYYY' para mostrarla en pantalla. Si ya viene en otro
+// formato o está vacía, se devuelve tal cual (o '–').
+const fmtFISO=str=>{
+  if(!str)return'–';
+  const m=String(str).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(!m)return str;
+  return `${m[3]}/${m[2]}/${m[1]}`;
+};
+// ── Igual que fmtFISO, pero con un timestamp de Firestore como reserva
+// cuando no hay fecha ISO (p.ej. fechaCompletado vacío → usar 'creado').
+const fmtFISOorTS=(iso,ts)=>iso?fmtFISO(iso):fmtF(ts);
 // ── Normaliza un teléfono para enlaces de WhatsApp (wa.me) ──
 // wa.me necesita el número completo con prefijo de país y SOLO dígitos (sin
 // "+", espacios ni guiones). Antes cada botón hacía ".replace(/\s/g,'')" y
@@ -2282,29 +2333,57 @@ const weekDates=wk=>{const[y,w]=wk.split('-W').map(Number);const jan4=new Date(y
 const freqDays={semanal:7,quincenal:14,mensual:30,bimestral:60,trimestral:90,cuatrimestral:120,semestral:180};
 const audioCtx=()=>{try{return new(window.AudioContext||window.webkitAudioContext)()}catch{return null}};
 
+// ── Volumen global de los sonidos del sistema (controlado desde Perfil) ──
+// _sndVolume: 0–1. _sndEnabled: interruptor maestro. Persisten en localStorage.
+let _sndVolume=(()=>{const v=parseFloat(localStorage.getItem('alberto_snd_vol'));return isNaN(v)?1:Math.min(1,Math.max(0,v));})();
+let _sndEnabled=localStorage.getItem('alberto_snd_on')!=='0';
+const _sndFactor=()=>_sndEnabled?_sndVolume:0;
+
+// ── Helper "retro": genera una nota con carácter de 8 bits suavizado ──
+// Onda cuadrada (el timbre clásico de chip de 8 bits) pero pasada por un
+// filtro paso-bajo suave y con una envolvente ligeramente escalonada
+// (ataque instantáneo + sostenido corto + caída rápida) en lugar de la
+// caída exponencial "analógica" de antes. Así suena a retro/consola sin
+// llegar a ser un pitido crudo de 8 bits puro.
+const _retroTone=(ac,dest,freq,t,dur,{type='square',peak=.10,filterFreq=4200}={})=>{
+  peak=peak*_sndFactor();
+  if(peak<=0) return;
+  const o=ac.createOscillator();
+  const g=ac.createGain();
+  const filt=ac.createBiquadFilter();
+  filt.type='lowpass';filt.frequency.value=filterFreq;filt.Q.value=.7;
+  o.connect(g);g.connect(filt);filt.connect(dest);
+  o.type=type;o.frequency.value=freq;
+  const t0=ac.currentTime+t;
+  g.gain.setValueAtTime(0,t0);
+  g.gain.linearRampToValueAtTime(peak,t0+.008); // ataque casi instantáneo, típico de chip
+  g.gain.setValueAtTime(peak,t0+Math.max(dur*.4,.01)); // pequeño sostenido "cuadrado"
+  g.gain.linearRampToValueAtTime(0,t0+dur); // caída lineal en vez de exponencial → más seca/retro
+  o.start(t0);o.stop(t0+dur+.03);
+};
+
 // ── Sonido: crear un documento nuevo (parte, cliente, presupuesto, aviso, cobro...) ──
-// Arpegio ascendente y luminoso en onda triangular — se siente "nuevo / recién creado".
-const _sndCreate=()=>{try{const ac=audioCtx();if(!ac)return;[[523.25,.0,.09],[659.25,.065,.10],[880,.13,.18]].forEach(([f,t,d])=>{const o=ac.createOscillator();const g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(0,ac.currentTime+t);g.gain.linearRampToValueAtTime(.15,ac.currentTime+t+.015);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+t+d);o.start(ac.currentTime+t);o.stop(ac.currentTime+t+d+.05);});}catch(e){}};
+// Arpegio ascendente de 3 notas en onda cuadrada — recuerda a un "ítem conseguido" de videojuego retro.
+const _sndCreate=()=>{try{const ac=audioCtx();if(!ac)return;[[523.25,.0,.08],[659.25,.06,.09],[880,.12,.16]].forEach(([f,t,d])=>_retroTone(ac,ac.destination,f,t,d,{type:'square',peak:.11,filterFreq:4600}));}catch(e){}};
 
 // ── Sonido sutil de confirmación (guardar / editar / aceptar) ──
-// Un "ding" cálido de dos notas en onda sinusoidal — corto y discreto.
-const _sndConfirm=()=>{try{const ac=audioCtx();if(!ac)return;[[587.33,.0,.10],[932.33,.075,.16]].forEach(([f,t,d])=>{const o=ac.createOscillator();const g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type='sine';o.frequency.value=f;g.gain.setValueAtTime(0,ac.currentTime+t);g.gain.linearRampToValueAtTime(.13,ac.currentTime+t+.02);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+t+d);o.start(ac.currentTime+t);o.stop(ac.currentTime+t+d+.05);});}catch(e){}};
+// Dos notas cuadradas cortas y limpias — un "ding" con textura de consola, discreto.
+const _sndConfirm=()=>{try{const ac=audioCtx();if(!ac)return;[[587.33,.0,.09],[932.33,.07,.13]].forEach(([f,t,d])=>_retroTone(ac,ac.destination,f,t,d,{type:'square',peak:.095,filterFreq:4000}));}catch(e){}};
 
 // ── Sonido sutil de papelera / eliminar ──
-// Trío descendente en onda diente de sierra filtrada (paso bajo) — grave y "opaco", claramente distinto a crear/confirmar.
-const _sndDelete=()=>{try{const ac=audioCtx();if(!ac)return;const filt=ac.createBiquadFilter();filt.type='lowpass';filt.frequency.value=850;filt.connect(ac.destination);[[420,.0,.08],[300,.07,.09],[185,.15,.17]].forEach(([f,t,d])=>{const o=ac.createOscillator();const g=ac.createGain();o.connect(g);g.connect(filt);o.type='sawtooth';o.frequency.value=f;g.gain.setValueAtTime(0,ac.currentTime+t);g.gain.linearRampToValueAtTime(.10,ac.currentTime+t+.015);g.gain.exponentialRampToValueAtTime(.001,ac.currentTime+t+d);o.start(ac.currentTime+t);o.stop(ac.currentTime+t+d+.05);});}catch(e){}};
+// Trío descendente en onda cuadrada muy filtrada — grave y "opaco", con ese punteo seco típico de 8 bits.
+const _sndDelete=()=>{try{const ac=audioCtx();if(!ac)return;const filt=ac.createBiquadFilter();filt.type='lowpass';filt.frequency.value=1500;filt.connect(ac.destination);[[420,.0,.07],[300,.06,.08],[185,.13,.15]].forEach(([f,t,d])=>_retroTone(ac,filt,f,t,d,{type:'square',peak:.11,filterFreq:1200}));}catch(e){}};
 
 // ── Sonido: actualización de la app disponible / aplicada ──
-// Barrido ascendente ("whoosh" de subida de versión) rematado con una campanada — inconfundible con el resto.
+// Escalera ascendente de 4 notas cuadradas (arpegio "power-up" de videojuego)
+// rematada con una campanada en triangle — el punto justo entre retro y suave.
 const _sndUpdate=()=>{try{const ac=audioCtx();if(!ac)return;
-  const o1=ac.createOscillator();const g1=ac.createGain();o1.connect(g1);g1.connect(ac.destination);
-  o1.type='sine';o1.frequency.setValueAtTime(420,ac.currentTime);o1.frequency.exponentialRampToValueAtTime(900,ac.currentTime+.28);
-  g1.gain.setValueAtTime(0,ac.currentTime);g1.gain.linearRampToValueAtTime(.11,ac.currentTime+.05);g1.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.32);
-  o1.start();o1.stop(ac.currentTime+.34);
+  const vol=_sndFactor(); if(vol<=0) return;
+  [[440,.0,.09],[554.37,.07,.09],[659.25,.14,.09],[880,.21,.14]].forEach(([f,t,d])=>_retroTone(ac,ac.destination,f,t,d,{type:'square',peak:.10,filterFreq:4800}));
   const o2=ac.createOscillator();const g2=ac.createGain();o2.connect(g2);g2.connect(ac.destination);
   o2.type='triangle';o2.frequency.value=1046.5;
-  g2.gain.setValueAtTime(0,ac.currentTime+.3);g2.gain.linearRampToValueAtTime(.15,ac.currentTime+.32);g2.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.58);
-  o2.start(ac.currentTime+.3);o2.stop(ac.currentTime+.62);
+  g2.gain.setValueAtTime(0,ac.currentTime+.34);g2.gain.linearRampToValueAtTime(.15*vol,ac.currentTime+.36);g2.gain.exponentialRampToValueAtTime(.001,ac.currentTime+.62);
+  o2.start(ac.currentTime+.34);o2.stop(ac.currentTime+.66);
 }catch(e){}};
 
 // ── Auto-sonido en toasts de éxito y en confirmaciones de borrado ──
@@ -4305,11 +4384,13 @@ const renderGrupo=()=>{
   <div class="grupo-header" onclick="abrirEditarGrupo()">
     <div class="grupo-header-img" style="background-image:url('${bg}')"></div>
     <div class="grupo-header-ov"></div>
-    <div class="grupo-header-inicio" onclick="event.stopPropagation();goScreen('inicio')">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      Inicio
+    <div class="grupo-header-top">
+      <div class="grupo-header-inicio" onclick="event.stopPropagation();goScreen('inicio')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Inicio
+      </div>
+      <div class="grupo-header-cal-wrap">${_mcalGrupoHTML()}</div>
     </div>
-    ${_mcalGrupoHTML()}
     <div class="grupo-header-content">
       <div class="grupo-header-text">
         <div class="grupo-title">${CG.nombre||'Grupo'}</div>
@@ -4497,7 +4578,7 @@ const _renderGTabMantenimientos_Excl = () => {
   el.innerHTML=`
     <button onclick="abrirProgramarMantSB()" style="display:flex;align-items:center;justify-content:center;gap:8px;width:100%;background:linear-gradient(135deg,#2e7d32,#388e3c);border:none;border-radius:16px;padding:13px 16px;cursor:pointer;font-family:var(--font);font-size:14px;font-weight:900;color:#fff;margin-bottom:16px;box-shadow:0 4px 16px rgba(46,125,50,.4)">+ Programar mantenimiento</button>
     <div style="font-size:13px;font-weight:700;color:var(--tx2);margin-bottom:10px">${mants.length} mantenimiento${mants.length!==1?'s':''} activo${mants.length!==1?'s':''}</div>
-    ${mants.length?mants.map(m=>`<div class="card mant-card" style="margin-bottom:8px;cursor:pointer" onclick="verMant('${m.id}')"><div style="display:flex;align-items:center;gap:12px;min-width:0"><div style="flex-shrink:0;width:38px;height:38px;border-radius:14px;background:rgba(255,152,0,.12);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></div><div style="flex:1;min-width:0;overflow:hidden"><div style="font-size:14px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.nombreTrabajo}</div><div style="font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.clienteNombre||'–'} · ${m.fechaProxima||'–'}</div></div><div style="color:var(--tx3);font-size:20px;flex-shrink:0">›</div></div></div>`).join(''):
+    ${mants.length?mants.map(m=>`<div class="card mant-card" style="margin-bottom:8px;cursor:pointer" onclick="verMant('${m.id}')"><div style="display:flex;align-items:center;gap:12px;min-width:0"><div style="flex-shrink:0;width:38px;height:38px;border-radius:14px;background:rgba(255,152,0,.12);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></div><div style="flex:1;min-width:0;overflow:hidden"><div style="font-size:14px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.nombreTrabajo}</div><div style="font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.clienteNombre||'–'} · ${fmtFISO(m.fechaProxima)}</div></div><div style="color:var(--tx3);font-size:20px;flex-shrink:0">›</div></div></div>`).join(''):
     `<div class="empty"><p>Sin mantenimientos pendientes</p></div>`}`;
 };
 
@@ -5014,7 +5095,7 @@ const _renderGTabMantenimientos=()=>{
               <div style="flex-shrink:0;width:38px;height:38px;border-radius:14px;background:rgba(255,152,0,.12);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></div>
               <div style="flex:1;min-width:0;overflow:hidden">
                 <div style="font-size:14px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.nombreTrabajo}</div>
-                <div style="font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.clienteNombre||'–'} · ${m.fechaProxima||'–'} ${m.frecuencia?`· ${m.frecuencia}`:''}</div>
+                <div style="font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.clienteNombre||'–'} · ${fmtFISO(m.fechaProxima)} ${m.frecuencia?`· ${m.frecuencia}`:''}</div>
                 ${(m.clienteDireccion||m.clienteTelefono)?`<div style="font-size:11px;color:var(--tx2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${[m.clienteDireccion,m.clienteTelefono].filter(Boolean).join(' · ')}</div>`:''}
                 ${m.notas?`<div style="font-size:11px;color:var(--tx2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.notas}</div>`:''}
               </div>
@@ -5238,7 +5319,7 @@ window._filtrarGMantInline=(q)=>{
     const hay=[m.nombreTrabajo,m.clienteNombre,m.notas,m.frecuencia,m.equipos].filter(Boolean).join(' ').toLowerCase();
     return words.every(w=>hay.includes(w));
   }):mants;
-  const mkCard=(m)=>`<div class="card mant-card" style="margin-bottom:8px;cursor:pointer" onclick="verMant('${m.id}')"><div style="display:flex;align-items:center;gap:12px;min-width:0"><div style="flex-shrink:0;width:38px;height:38px;border-radius:14px;background:rgba(255,152,0,.12);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></div><div style="flex:1;min-width:0;overflow:hidden"><div style="font-size:14px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.nombreTrabajo}</div><div style="font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.clienteNombre||'–'} · ${m.fechaProxima||'–'}${m.frecuencia?' · '+m.frecuencia:''}</div></div><button onclick="event.stopPropagation();usarMantenimiento('${m.id}')" style="flex-shrink:0;border:none;background:rgba(255,152,0,.15);color:#ff9800;border-radius:12px;padding:5px 8px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font)">Usar</button></div></div>`;
+  const mkCard=(m)=>`<div class="card mant-card" style="margin-bottom:8px;cursor:pointer" onclick="verMant('${m.id}')"><div style="display:flex;align-items:center;gap:12px;min-width:0"><div style="flex-shrink:0;width:38px;height:38px;border-radius:14px;background:rgba(255,152,0,.12);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></div><div style="flex:1;min-width:0;overflow:hidden"><div style="font-size:14px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.nombreTrabajo}</div><div style="font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.clienteNombre||'–'} · ${fmtFISO(m.fechaProxima)}${m.frecuencia?' · '+m.frecuencia:''}</div></div><button onclick="event.stopPropagation();usarMantenimiento('${m.id}')" style="flex-shrink:0;border:none;background:rgba(255,152,0,.15);color:#ff9800;border-radius:12px;padding:5px 8px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font)">Usar</button></div></div>`;
   la.innerHTML=list.length?list.map(mkCard).join(''):`<div class="empty"><p>Sin resultados para "<strong>${(q||'').trim()}</strong>"</p></div>`;
 };
 window.setMantTabInline=(t)=>{window._gMantTabInline=t;_renderGTabMantenimientos()};
@@ -5759,7 +5840,7 @@ window.verCliente=async id=>{
               <span style="display:flex;align-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
               <div style="flex:1;min-width:0">
                 <div style="font-size:13px;font-weight:900;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h.nombreTrabajo}</div>
-                <div style="font-size:11px;color:#4caf50;font-weight:700">Mantenimiento realizado · ${h.fechaCompletado||fmtF(h.creado)}${h.completadoPor?` · ${h.completadoPor}`:''}</div>
+                <div style="font-size:11px;color:#4caf50;font-weight:700">Mantenimiento realizado · ${fmtFISOorTS(h.fechaCompletado,h.creado)}${h.completadoPor?` · ${h.completadoPor}`:''}</div>
               </div>
               <span style="font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px;background:rgba(76,175,80,.2);color:#4caf50;white-space:nowrap">${h.frecuencia||'Único'}</span>
             </div>
@@ -5821,7 +5902,7 @@ window.verCliente=async id=>{
             <span class="tl-card-title">${h.nombreTrabajo}</span>
             <span class="tl-card-badge" style="background:rgba(76,175,80,.15);color:#4caf50">Realizado</span>
           </div>
-          <div class="tl-card-sub">${h.fechaCompletado||fmtF(h.creado)}${h.completadoPor?` · ${h.completadoPor}`:''}${h.frecuencia?` · ${h.frecuencia}`:''}</div>
+          <div class="tl-card-sub">${fmtFISOorTS(h.fechaCompletado,h.creado)}${h.completadoPor?` · ${h.completadoPor}`:''}${h.frecuencia?` · ${h.frecuencia}`:''}</div>
         </div>
       </div>`;
     }
@@ -8901,7 +8982,7 @@ const renderMantenimiento=()=>{
           <div style="flex-shrink:0;width:38px;height:38px;border-radius:14px;background:rgba(255,152,0,.12);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></div>
           <div style="flex:1;min-width:0;overflow:hidden">
             <div style="font-size:14px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.nombreTrabajo}</div>
-            <div style="font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.clienteNombre||'–'} · ${m.fechaProxima||'–'} ${m.frecuencia?`· ${m.frecuencia}`:''}</div>
+            <div style="font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.clienteNombre||'–'} · ${fmtFISO(m.fechaProxima)} ${m.frecuencia?`· ${m.frecuencia}`:''}</div>
             ${m.notas?`<div style="font-size:11px;color:var(--tx2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.notas}</div>`:''}
           </div>
           <button onclick="event.stopPropagation();usarMantenimiento('${m.id}')" style="flex-shrink:0;border:none;background:rgba(255,152,0,.15);color:#ff9800;border-radius:12px;padding:5px 8px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font)">Usar</button>
@@ -9039,7 +9120,7 @@ window._mantQSet=(q)=>{
       <div style="flex-shrink:0;width:38px;height:38px;border-radius:14px;background:rgba(255,152,0,.12);display:flex;align-items:center;justify-content:center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M4.93 19.07l1.41-1.41M19.07 19.07l-1.41-1.41M12 2v2M12 20v2M2 12h2M20 12h2"/></svg></div>
       <div style="flex:1;min-width:0;overflow:hidden">
         <div style="font-size:14px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.nombreTrabajo}</div>
-        <div style="font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.clienteNombre||'–'} · ${m.fechaProxima||'–'}${m.frecuencia?' · '+m.frecuencia:''}</div>
+        <div style="font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${m.clienteNombre||'–'} · ${fmtFISO(m.fechaProxima)}${m.frecuencia?' · '+m.frecuencia:''}</div>
       </div>
       <button onclick="event.stopPropagation();usarMantenimiento('${m.id}')" style="flex-shrink:0;border:none;background:rgba(255,152,0,.15);color:#ff9800;border-radius:12px;padding:5px 8px;font-size:11px;font-weight:900;cursor:pointer;font-family:var(--font)">Usar</button>
     </div>
@@ -9993,7 +10074,7 @@ window.abrirParteDesdeMantenimiento=(m,cli,fechaCompletado)=>{
   const equipos=(m.equipos||'').trim();
 
   // Descripción pre-rellenada combinando el nombre del trabajo y los equipos
-  const descAuto=`Mantenimiento realizado: ${m.nombreTrabajo}\nFecha: ${fechaCompletado}${equipos?'\n\nEquipos mantenidos:\n'+equipos:''}${m.notas?'\n\nNotas: '+m.notas:''}`;
+  const descAuto=`Mantenimiento realizado: ${m.nombreTrabajo}\nFecha: ${fmtFISO(fechaCompletado)}${equipos?'\n\nEquipos mantenidos:\n'+equipos:''}${m.notas?'\n\nNotas: '+m.notas:''}`;
 
   const cliOpts=allClientes.filter(c=>!c.archivado).map(c=>`<option value="${c.id}" data-edif="${(c.edificio||'').replace(/"/g,'&quot;')}" data-dir="${(c.direccion||'').replace(/"/g,'&quot;')}" data-tel="${(c.telefono||'').replace(/"/g,'&quot;')}" ${c.id===cliId?'selected':''}>${c.nombre}</option>`).join('');
   const chipsTpl=plantillas.map(t=>`<div class="pchip" onclick="document.getElementById('pTit').value='${t}'">${t}</div>`).join('');
@@ -10002,7 +10083,7 @@ window.abrirParteDesdeMantenimiento=(m,cli,fechaCompletado)=>{
     <div style="background:linear-gradient(135deg,rgba(76,175,80,.15),rgba(76,175,80,.05));border-radius:14px;padding:12px 14px;margin-bottom:16px;border:1px solid rgba(76,175,80,.2)">
       <div style="font-size:12px;font-weight:900;color:#4caf50;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px">Mantenimiento completado</div>
       <div style="font-size:13px;font-weight:800;color:var(--tx)">${m.nombreTrabajo}</div>
-      <div style="font-size:12px;color:var(--tx2)">${fechaCompletado} · ${cliNom}${m.frecuencia?` · ${m.frecuencia}`:''}</div>
+      <div style="font-size:12px;color:var(--tx2)">${fmtFISO(fechaCompletado)} · ${cliNom}${m.frecuencia?` · ${m.frecuencia}`:''}</div>
     </div>
     <div class="fsec"><div class="fsec-title">Información general</div>
       <div class="fgrp"><label>Título del parte *</label>
@@ -10104,6 +10185,12 @@ const _archBL={
 // ── Quita una card del DOM con animación ──
 const _quitarArchCard=id=>{
   if(window._archivosCache)delete window._archivosCache[id];
+  // Importante: también hay que quitarlo de la lista en memoria usada por el
+  // buscador (_filtrarArchivos). Si no se hace, al restaurar/eliminar un
+  // elemento y luego escribir en el buscador, el elemento "resucitaba" en la
+  // lista porque _filtrarArchivos reconstruye el HTML a partir de este array
+  // cacheado en vez de volver a consultar el servidor.
+  if(window._archivosAllSorted) window._archivosAllSorted=window._archivosAllSorted.filter(it=>it.id!==id);
   const cont=$('archivosContent');
   if(!cont)return;
   const card=cont.querySelector(`.arch-card[data-archid="${id}"]`);
@@ -10282,7 +10369,17 @@ window.restaurarArchivo=async(id,tipo)=>{
     delete dataLimpia._eliminadoDef;delete dataLimpia._eliminadoDefEn;
     const col=tipoReal==='cliente'?'clientes':'partes';
     await setDoc(doc(db,'grupos',CGID,col,originalId),dataLimpia);
-    await deleteDoc(doc(db,'grupos',CGID,'archivos',id));
+    // El dato ya está restaurado en 'clientes'/'partes' en este punto. Borramos
+    // el registro de 'archivos' en su propio try/catch: si por lo que sea
+    // fallara (red, permisos...), igualmente lo ocultamos ya de la lista de
+    // archivados (con la blacklist local) para que no parezca que "sigue
+    // archivado" cuando en realidad ya se ha restaurado.
+    try{
+      await deleteDoc(doc(db,'grupos',CGID,'archivos',id));
+    }catch(delErr){
+      console.warn('No se pudo borrar el registro de archivos tras restaurar:',delErr);
+      _archBL.add(id);
+    }
     _quitarArchCard(id);
     if(tipoReal==='cliente'){
       try{const cs=await getDocs(collection(db,'grupos',CGID,'clientes'));allClientes=cs.docs.map(d=>({id:d.id,...d.data()}));}catch(e){}
@@ -10449,7 +10546,7 @@ window._descargarFichaCliArchivado=async(archId)=>{
         <div class="total"><div style="font-size:13px;font-weight:800;color:#555">Total facturado (${partesCli.length} partes)</div><div style="font-size:20px;font-weight:900;color:var(--r)">${fmtM(facTotal)}</div></div>
         <div class="sec">🔧 Partes de trabajo (${partesCli.length})</div>
         ${partesCli.length?partesCli.sort((a,b)=>_tsN(b.creado)-_tsN(a.creado)).map(p=>`<div class="row ${p.estado==='completado'?'ok':''}"><div style="flex:1"><div class="rtit">${p.titulo||'–'}</div><div class="rsub">${fmtF(p.creado)}${p.operario?' · '+p.operario:''}</div></div><div style="font-size:13px;font-weight:900;color:var(--r)">${fmtM(calcTotal(p))}</div></div>`).join(''):'<div style="color:#aaa;font-size:12px">Sin partes</div>'}
-        ${mantsCli.length?`<div class="sec">⚙️ Mantenimientos (${mantsCli.length})</div>${mantsCli.map(m=>`<div class="row"><div style="flex:1"><div class="rtit">${m.nombreTrabajo||'–'}</div><div class="rsub">${m.frecuencia||''}${m.fechaProxima?' · Próx: '+m.fechaProxima:''}</div></div></div>`).join('')}`:''}
+        ${mantsCli.length?`<div class="sec">⚙️ Mantenimientos (${mantsCli.length})</div>${mantsCli.map(m=>`<div class="row"><div style="flex:1"><div class="rtit">${m.nombreTrabajo||'–'}</div><div class="rsub">${m.frecuencia||''}${m.fechaProxima?' · Próx: '+fmtFISO(m.fechaProxima):''}</div></div></div>`).join('')}`:''}
         ${averiasCli.length?`<div class="sec">⚠️ Averías (${averiasCli.length})</div>${averiasCli.map(a=>`<div class="row ${a.estado==='resuelta'?'ok':''}"><div style="flex:1"><div class="rtit">${a.tipo||'Avería'}</div><div class="rsub">${fmtF(a.creado)}</div></div></div>`).join('')}`:''}
       </div>
       <div class="footer"><span>${cl.nombre||'Cliente'} · ${hoy}</span><span>${CG?.nombre||'Alberto'}</span></div>
@@ -12793,12 +12890,12 @@ window.abrirHMFicha=(idx)=>{
   document.getElementById('hmFichaTitle').textContent=item.nombreTrabajo||'Mantenimiento';
   const esHistorial=!!item._esHistorial;
   const esCompletado=!esHistorial&&item.estado==='completado';
-  const fecha=item.fechaCompletado||item.ultimoCompletado||(item.creado?.seconds?new Date(item.creado.seconds*1000).toLocaleDateString('es-ES'):null)||'—';
+  const fecha=fmtFISO(item.fechaCompletado||item.ultimoCompletado)!=='–'?fmtFISO(item.fechaCompletado||item.ultimoCompletado):((item.creado?.seconds?new Date(item.creado.seconds*1000).toLocaleDateString('es-ES'):null)||'—');
   const rows=[
     ['Trabajo',item.nombreTrabajo],
     ['Cliente',item.clienteNombre],
     ['Frecuencia',item.frecuencia||'Sin recurrencia'],
-    esHistorial?['Realizado',fecha]:['Próxima fecha',item.fechaProxima||'—'],
+    esHistorial?['Realizado',fecha]:['Próxima fecha',fmtFISO(item.fechaProxima)],
     esHistorial&&item.completadoPor?['Realizado por',item.completadoPor]:null,
     item.clienteDireccion||item.direccion?['Dirección',item.clienteDireccion||item.direccion]:null,
     item.clienteEdificio||item.edificio?['Edificio',item.clienteEdificio||item.edificio]:null,
@@ -12892,7 +12989,7 @@ window.verHistorialMantCliente=async(clienteId)=>{
         'rgba(255,152,0,.25)','rgba(255,152,0,.12)','#ff9800',
         `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><circle cx="12" cy="12" r="7"/></svg>`,
         'rgba(255,152,0,.15)','Activo',
-        `${m.frecuencia||'Sin recurrencia'} · Próximo: ${m.fechaProxima||'—'}`
+        `${m.frecuencia||'Sin recurrencia'} · Próximo: ${fmtFISO(m.fechaProxima)}`
       )).join('');
     }
 
@@ -12903,7 +13000,7 @@ window.verHistorialMantCliente=async(clienteId)=>{
         'rgba(76,175,80,.25)','rgba(76,175,80,.12)','#4caf50',
         `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`,
         'rgba(76,175,80,.15)','Completado',
-        `Completado: ${m.ultimoCompletado||fmtF(m.completadoEn)||'—'}${m.completadoPor?' · '+m.completadoPor:''}`
+        `Completado: ${fmtFISOorTS(m.ultimoCompletado,m.completadoEn)||'—'}${m.completadoPor?' · '+m.completadoPor:''}`
       )).join('');
     }
 
@@ -12914,7 +13011,7 @@ window.verHistorialMantCliente=async(clienteId)=>{
         'rgba(33,150,243,.2)','rgba(33,150,243,.1)','#2196f3',
         `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2196f3" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`,
         'rgba(33,150,243,.15)','Realizado',
-        `${h.fechaCompletado||fmtF(h.creado)||'—'}${h.completadoPor?' · '+h.completadoPor:''}${h.frecuencia?' · '+h.frecuencia:''}`
+        `${fmtFISOorTS(h.fechaCompletado,h.creado)||'—'}${h.completadoPor?' · '+h.completadoPor:''}${h.frecuencia?' · '+h.frecuencia:''}`
       )).join('');
     }
 
@@ -13382,6 +13479,24 @@ const renderPerfil=()=>{
     <div class="fsec-title">♿ Accesibilidad</div>
     <div class="toggle-row"><span class="toggle-label">📳 Vibración</span><label class="toggle-sw"><input type="checkbox" id="toggleHaptic" onchange="toggleHaptic(this.checked)" ${localStorage.getItem('alberto_haptic')!=='0'?'checked':''}><span class="toggle-track"></span></label></div>
   </div>
+
+  <!-- ── SONIDOS DEL SISTEMA ── -->
+  <div class="fsec">
+    <div class="fsec-title">🔊 Sonidos del sistema</div>
+    <div class="toggle-row" style="margin-bottom:16px">
+      <span class="toggle-label">Sonidos activados</span>
+      <label class="toggle-sw"><input type="checkbox" id="toggleSonido" onchange="toggleSonidoActivo(this.checked)" ${_sndEnabled?'checked':''}><span class="toggle-track"></span></label>
+    </div>
+    <div id="volSliderWrap" style="opacity:${_sndEnabled?'1':'.4'};transition:opacity .2s">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:15px;flex-shrink:0" id="volIcoMin">🔈</span>
+        <input type="range" class="vol-range" id="sliderVolumen" min="0" max="100" step="1"
+          value="${Math.round(_sndVolume*100)}" style="--v:${Math.round(_sndVolume*100)}" ${_sndEnabled?'':'disabled'}
+          oninput="this.style.setProperty('--v',this.value);setVolumenSonido(this.value)" onchange="previewVolumenSonido()">
+        <span style="font-size:15px;flex-shrink:0">🔊</span>
+      </div>
+      <div style="text-align:center;font-size:12px;font-weight:800;color:var(--tx2);margin-top:8px" id="volPct">${Math.round(_sndVolume*100)}%</div>
+    </div>
   </div>
 
   <!-- ── SEGURIDAD ── -->
@@ -13791,7 +13906,7 @@ const _renderAvisBody=()=>{
       if(esAlertaHoy){
         alertaChip=`<span style="display:inline-flex;align-items:center;gap:4px;background:var(--urgent-bg);color:var(--urgent);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:800;animation:notifPop .5s var(--ease-spring)">${_alarmIco} ¡Hoy!</span>`;
       } else if(esAlertaFutura){
-        alertaChip=`<span style="display:inline-flex;align-items:center;gap:4px;background:var(--info-bg);color:var(--info);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:800">${_alarmIco} ${a.fechaAlerta}</span>`;
+        alertaChip=`<span style="display:inline-flex;align-items:center;gap:4px;background:var(--info-bg);color:var(--info);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:800">${_alarmIco} ${fmtFISO(a.fechaAlerta)}</span>`;
       }
     }
 
@@ -13849,7 +13964,7 @@ window.imprimirAvisos=()=>{
       <td class="td-cliente">${cli?.nombre||'—'}</td>
       <td class="td-trabajo">${a.descripcion||'Sin descripción'}</td>
       <td class="td-estado">${esResuelto?'<span class="estado-comp">✓ Resuelto</span>':`<span style="color:${prio.color};font-weight:700">${prio.ico} ${prio.label}</span>`}</td>
-      <td class="td-fecha">${a.fechaAlerta||'—'}</td>
+      <td class="td-fecha">${fmtFISO(a.fechaAlerta)||'—'}</td>
     </tr>`;
   }).join('');
 
@@ -14468,7 +14583,7 @@ window._hmGrupoFiltrar = (q) => {
       </div>
       <div style="flex:1;min-width:0">
         <div style="font-size:13px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h.nombreTrabajo||'—'}</div>
-        <div style="font-size:11px;color:var(--tx2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h.clienteNombre||'—'} · ${h.fechaCompletado||fmtF(h.creado)||'—'}${h.completadoPor?' · '+h.completadoPor:''}</div>
+        <div style="font-size:11px;color:var(--tx2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h.clienteNombre||'—'} · ${fmtFISOorTS(h.fechaCompletado,h.creado)||'—'}${h.completadoPor?' · '+h.completadoPor:''}</div>
       </div>
       <span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:20px;background:rgba(76,175,80,.12);color:#4caf50;flex-shrink:0;white-space:nowrap">${h.frecuencia||'Único'}</span>
       <span style="color:var(--tx3);font-size:16px;flex-shrink:0">›</span>
@@ -14767,14 +14882,12 @@ window._hgNavegar=(tipo,id,cliId)=>{
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// CALENDARIO GLOBAL (partes, presupuestos, cobros, avisos)
+// CALENDARIO GLOBAL (presupuestos, cobros, avisos)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const CALG_TIPOS={
-  parte:{ico:'📋',color:'#42a5f5',label:'Parte'},
-  presu:{ico:'💶',color:'#ab47bc',label:'Presupuesto'},
-  aviso:{ico:'💬',color:'#ab47bc',label:'Aviso'},
-  entrega:{ico:'📦',color:'#42a5f5',label:'Entrega'},
-  cobro:{ico:'💰',color:'#ffca28',label:'Cobro'}
+  presu:{ico:'💶',color:'#3b82f6',label:'Presupuesto'},
+  aviso:{ico:'💬',color:'#ef4444',label:'Aviso'},
+  cobro:{ico:'💰',color:'#22c55e',label:'Cobro'}
 };
 const _calgEstadoBadge={
   'completado':'<span style="font-size:10px;background:rgba(76,175,80,.12);color:#4caf50;border-radius:10px;padding:2px 7px;font-weight:800">Completado</span>',
@@ -14819,11 +14932,10 @@ const _calgCargarDatos=async()=>{
 
   const faltaPresus=!presusArr||!presusArr.length;
 
-  const [prSnap,avisSnap,cobSnap,entSnap]=await Promise.all([
+  const [prSnap,avisSnap,cobSnap]=await Promise.all([
     faltaPresus?getDocs(query(collection(db,'grupos',CGID,'presupuestos'),orderBy('creado','desc'))).catch(()=>null):null,
     (!_avisosPend?.length&&!_avisosRes?.length)?getDocs(collection(db,'grupos',CGID,'avisos')).catch(()=>null):null,
     (!_simplePend?.cobro?.length&&!_simpleComp?.cobro?.length)?getDocs(collection(db,'grupos',CGID,'cobros')).catch(()=>null):null,
-    (!_simplePend?.entrega?.length&&!_simpleComp?.entrega?.length)?getDocs(collection(db,'grupos',CGID,'entregas')).catch(()=>null):null,
   ]);
 
   // Helper: aplica el resultado de Firestore, y si offline vino vacío
@@ -14882,10 +14994,10 @@ const _calgCargarDatos=async()=>{
     }
   });
 
-  // ── Cobros y entregas (colecciones reales 'cobros'/'entregas' vía _SIMPLE_CONF: titulo, fecha, estado pendiente/completado) ──
-  ['cobro','entrega'].forEach(subTipo=>{
-    const snap=subTipo==='cobro'?cobSnap:entSnap;
-    const colName=subTipo+'s'; // 'cobros' / 'entregas' — mismas claves que usa el resto de la app
+  // ── Cobros (colección real 'cobros' vía _SIMPLE_CONF: titulo, fecha, estado pendiente/completado) ──
+  ['cobro'].forEach(subTipo=>{
+    const snap=cobSnap;
+    const colName=subTipo+'s'; // 'cobros' — misma clave que usa el resto de la app
     let arr;
     if(snap){
       arr=snap.docs.map(d=>({id:d.id,...d.data()}));
@@ -14952,7 +15064,7 @@ const _calgRenderGrid=()=>{
     const evs=mapa[fStr]||[];
     const esHoy=fStr===hoyStr;
     const dotsHtml=evs.slice(0,4).map(e=>`<span class="calg-dot" style="background:${(CALG_TIPOS[e.tipo]||{}).color||'#888'}"></span>`).join('')+(evs.length>4?`<span class="calg-more">+${evs.length-4}</span>`:'');
-    celdas+=`<div class="calg-cell${esHoy?' today':''}" onclick="_calgAbrirDia('${fStr}')">
+    celdas+=`<div class="calg-cell${esHoy?' today':''}${evs.length?' has-events':''}" onclick="_calgAbrirDia('${fStr}')">
       <div class="calg-daynum">${diaNum}</div>
       <div class="calg-dots">${dotsHtml}</div>
     </div>`;
@@ -15030,29 +15142,29 @@ window._calgAbrirDia=(fStr)=>{
     });
   }
   if(esFuturoOHoy){
-    html+=`<button class="btn btn-p" style="width:100%;margin-top:14px" onclick="_calgFormNuevoAviso('${fStr}')">➕ Añadir aviso, entrega o cobro</button>`;
+    html+=`<button class="btn btn-p" style="width:100%;margin-top:14px" onclick="_calgFormNuevoAviso('${fStr}')">➕ Añadir aviso, presupuesto o cobro</button>`;
   }
   abrirSB(`📅 ${titulo}`,html);
 };
 
 // Abrir el creador correspondiente (usa exactamente los mismos formularios y
-// colecciones que ya existen en la app: avisos / cobros / entregas), con la
+// colecciones que ya existen en la app: avisos / presupuestos / cobros), con la
 // fecha del día pulsado en el calendario ya rellenada.
 window._calgFormNuevoAviso=(fStr)=>{
   abrirSB('➕ Nuevo en el calendario',`
     <div style="font-size:13px;color:var(--tx2);margin-bottom:12px">¿Qué quieres añadir el ${_fmtFechaSimple(fStr)}?</div>
     <div style="display:flex;flex-direction:column;gap:10px">
-      <button onclick="cerrarSB();setTimeout(()=>abrirNuevoAviso('${fStr}'),150)" style="display:flex;align-items:center;gap:12px;background:rgba(171,71,188,.1);border:1px solid rgba(171,71,188,.3);border-radius:16px;padding:14px 16px;cursor:pointer;font-family:var(--font)">
+      <button onclick="cerrarSB();setTimeout(()=>abrirNuevoAviso('${fStr}'),150)" style="display:flex;align-items:center;gap:12px;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:16px;padding:14px 16px;cursor:pointer;font-family:var(--font)">
         <span style="font-size:22px">💬</span>
         <div style="text-align:left;flex:1"><div style="font-size:14px;font-weight:900;color:var(--tx)">Aviso</div><div style="font-size:11px;color:var(--tx2)">Con prioridad y alerta programada</div></div>
         <span style="color:var(--tx2)">›</span>
       </button>
-      <button onclick="cerrarSB();setTimeout(()=>abrirNuevoSimple('entrega',null,'${fStr}'),150)" style="display:flex;align-items:center;gap:12px;background:rgba(66,165,245,.1);border:1px solid rgba(66,165,245,.3);border-radius:16px;padding:14px 16px;cursor:pointer;font-family:var(--font)">
-        <span style="font-size:22px">📦</span>
-        <div style="text-align:left;flex:1"><div style="font-size:14px;font-weight:900;color:var(--tx)">Entrega</div></div>
+      <button onclick="cerrarSB();setTimeout(()=>abrirNuevoPresupuesto(),150)" style="display:flex;align-items:center;gap:12px;background:rgba(59,130,246,.1);border:1px solid rgba(59,130,246,.3);border-radius:16px;padding:14px 16px;cursor:pointer;font-family:var(--font)">
+        <span style="font-size:22px">💶</span>
+        <div style="text-align:left;flex:1"><div style="font-size:14px;font-weight:900;color:var(--tx)">Presupuesto</div></div>
         <span style="color:var(--tx2)">›</span>
       </button>
-      <button onclick="cerrarSB();setTimeout(()=>abrirNuevoSimple('cobro',null,'${fStr}'),150)" style="display:flex;align-items:center;gap:12px;background:rgba(255,202,40,.1);border:1px solid rgba(255,202,40,.3);border-radius:16px;padding:14px 16px;cursor:pointer;font-family:var(--font)">
+      <button onclick="cerrarSB();setTimeout(()=>abrirNuevoSimple('cobro',null,'${fStr}'),150)" style="display:flex;align-items:center;gap:12px;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);border-radius:16px;padding:14px 16px;cursor:pointer;font-family:var(--font)">
         <span style="font-size:22px">💰</span>
         <div style="text-align:left;flex:1"><div style="font-size:14px;font-weight:900;color:var(--tx)">Cobro</div></div>
         <span style="color:var(--tx2)">›</span>
@@ -15085,10 +15197,9 @@ window._calgNavegar=(tipo,id,cliId)=>{
   if(!CGID)return;
   // No navegamos a otra pantalla: abrimos el detalle directamente encima,
   // así al cerrarlo se vuelve al calendario sin tener que reabrirlo.
-  if(tipo==='parte'){ if(typeof verParte==='function') verParte(id); }
-  else if(tipo==='presu'){ if(typeof verPresupuesto==='function') verPresupuesto(id); }
+  if(tipo==='presu'){ if(typeof verPresupuesto==='function') verPresupuesto(id); }
   else if(tipo==='aviso'){ if(typeof editarAviso==='function') editarAviso(id); }
-  else if(tipo==='cobro'||tipo==='entrega'){ if(typeof verSimple==='function') verSimple(tipo,id); }
+  else if(tipo==='cobro'){ if(typeof verSimple==='function') verSimple(tipo,id); }
 };
 
 
@@ -15096,6 +15207,23 @@ window._calgNavegar=(tipo,id,cliId)=>{
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ACCESIBILIDAD
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// ── Volumen / interruptor de los sonidos del sistema (Perfil > Sonidos) ──
+window.toggleSonidoActivo=activar=>{
+  _sndEnabled=!!activar;
+  localStorage.setItem('alberto_snd_on',activar?'1':'0');
+  const slider=$('sliderVolumen'); if(slider) slider.disabled=!activar;
+  const wrap=$('volSliderWrap'); if(wrap) wrap.style.opacity=activar?'1':'.4';
+  if(activar) _sndConfirm();
+};
+window.setVolumenSonido=(val,{preview=false}={})=>{
+  const pct=Math.min(100,Math.max(0,parseInt(val,10)||0));
+  _sndVolume=pct/100;
+  localStorage.setItem('alberto_snd_vol',String(_sndVolume));
+  const lbl=$('volPct'); if(lbl) lbl.textContent=pct+'%';
+  return pct;
+};
+window.previewVolumenSonido=()=>{ if(_sndEnabled) _sndConfirm(); };
+
 window.toggleHaptic=activar=>{
   localStorage.setItem('alberto_haptic',activar?'1':'0');
   toast(activar?'📳 Vibración activada':'📳 Vibración desactivada','o');
