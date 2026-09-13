@@ -77,6 +77,8 @@
   --dur-fast:.18s;--dur-med:.28s;--dur-slow:.42s;
 }
 html,body{
+  /* Sin "tirar para recargar": recargaba la pagina y se perdia lo escrito */
+  overscroll-behavior-y:none;
   /* Fondo liso (sin collage) */
   background-image:none;
   background-color:#0d0d0d;   /* mismo tono que <body>: sin salto al rebotar el scroll */
@@ -726,17 +728,17 @@ body.sel-mode .scroll-pad{padding-bottom:140px}
 /* ── SLIDE-OVER (SB) ── */
 #sbOverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1180;display:none;backdrop-filter:blur(3px)}
 /* ── PRESUPUESTO MODAL ── */
-#presuModal{position:fixed;inset:0;z-index:1195;display:none;align-items:flex-end;justify-content:center;padding:0}
+#presuModal{position:fixed;inset:0;z-index:1195;display:none;align-items:flex-end;justify-content:center;padding:0;overscroll-behavior:none;touch-action:none}
 #presuModal.open{display:flex}
 #presuModalOverlay{position:absolute;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-#presuModalBox{position:relative;z-index:1;background:rgba(17,17,17,.98);border-radius:24px 24px 0 0;border:none;width:100%;max-width:100%;max-height:92vh;display:flex;flex-direction:column;box-shadow:0 -8px 48px rgba(0,0,0,.5);animation:presuModalIn .34s cubic-bezier(.16,1,.3,1)}
+#presuModalBox{position:relative;z-index:1;background:rgba(17,17,17,.98);border-radius:24px 24px 0 0;border:none;width:100%;max-width:100%;max-height:86vh;display:flex;flex-direction:column;box-shadow:0 -8px 48px rgba(0,0,0,.5);animation:presuModalIn .34s cubic-bezier(.16,1,.3,1)}
 @keyframes presuModalIn{from{transform:translateY(100%)}to{transform:translateY(0)}}
 #presuModalHead{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0;min-height:62px}
 #presuModalHead h2{flex:1;font-size:16px;font-weight:900;color:var(--tx);margin:0}
-#presuModalHead .pm-close{background:rgba(255,255,255,.08);border:none;border-radius:12px;width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--tx2);font-size:18px;font-family:var(--font)}
-#presuModalBody{overflow-y:auto;overflow-x:hidden;padding:18px 20px 32px;flex:1;min-height:0;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain}
+#presuModalHead .pm-close{flex-shrink:0;margin-left:12px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;color:var(--tx2);font-size:18px;font-family:var(--font)}
+#presuModalBody{overflow-y:auto;overflow-x:hidden;padding:18px 20px 32px;flex:1;min-height:0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
 body.modo-claro #presuModalBox{background:var(--card)}
-body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
+body.modo-claro #presuModalHead body.modo-claro .pm-close{background:rgba(0,0,0,.06)}
 
 #sb{position:fixed;bottom:-100%;left:0;right:0;max-height:92vh;background:rgba(17,17,17,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:24px 24px 0 0;z-index:1190;display:flex;flex-direction:column;transition:bottom .38s cubic-bezier(.16,1,.3,1),box-shadow .38s ease;border-top:1px solid var(--border);box-shadow:none}
 #sb.open{bottom:0;box-shadow:0 -8px 48px rgba(0,0,0,.5)}
@@ -746,18 +748,22 @@ body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
    Avisos y Presupuestos de la pantalla principal. La cabecera hereda el
    redondeo de la hoja, asi que el color nunca asoma por las esquinas. */
 .sb-head.con-acento{
-  background:rgba(var(--acento),.10);
-  border-bottom:1px solid rgba(var(--acento),.22);
+  background:rgba(var(--acento),.16);
+  border-bottom:1px solid rgba(var(--acento),.3);
   border-radius:24px 24px 0 0;
 }
+body.modo-claro .sb-head.con-acento{background:rgba(var(--acento),.14)}
 .sb-head.con-acento .sb-ico{
   width:34px;height:34px;border-radius:12px;flex-shrink:0;margin-right:12px;
   display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1;
-  background:rgba(var(--acento),.16);
-  border:1px solid rgba(var(--acento),.3);
+  background:rgba(var(--acento),.22);
+  border:1px solid rgba(var(--acento),.38);
 }
 .sb-head .sb-ico{display:none}
-#presuModalHead{--acento:59,130,246;background:rgba(var(--acento),.10);border-bottom:1px solid rgba(var(--acento),.22);border-radius:22px 22px 0 0}
+#presuModalHead{--acento:63,111,163;background:rgba(var(--acento),.16);border-bottom:1px solid rgba(var(--acento),.3);border-radius:24px 24px 0 0}
+body.modo-claro #presuModalHead{background:rgba(var(--acento),.14)}
+#presuModalHead .sb-ico{width:34px;height:34px;border-radius:12px;flex-shrink:0;margin-right:12px;display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1;background:rgba(var(--acento),.22);border:1px solid rgba(var(--acento),.38)}
+#presuModalHead #presuModalTitle{flex:1;min-width:0;margin:0;font-size:17px;font-weight:800;color:var(--tx);line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Etiquetas de campo algo mas legibles dentro de los formularios */
 .fsec .fgrp label{letter-spacing:1.2px;font-size:10.5px}
 /* Al enfocar un campo se resalta con el color del documento que estas creando */
@@ -1683,6 +1689,7 @@ body.is-scrolling .presu-card{
     <div id="presuModalOverlay" onclick="cerrarPresuModal()"></div>
     <div id="presuModalBox">
       <div id="presuModalHead">
+        <span class="sb-ico">💶</span>
         <h2 id="presuModalTitle">Nuevo presupuesto</h2>
         <button class="pm-close" onclick="cerrarPresuModal()">✕</button>
       </div>
@@ -3598,14 +3605,17 @@ const _sbSetBack=()=>{
 // Colores por tipo de documento: los mismos que ya usan el calendario,
 // las tarjetas y el menú, para que el lenguaje visual sea uno solo.
 const _SB_ACENTOS={
-  aviso:        {rgb:'239,68,68',  ico:'💬'},
-  presupuesto:  {rgb:'59,130,246', ico:'💶'},
-  cobro:        {rgb:'34,197,94',  ico:'💰'},
-  recordatorio: {rgb:'234,179,8',  ico:'🔔'},
-  equipo:       {rgb:'20,184,166', ico:'🔧'},
-  mantenimiento:{rgb:'255,152,0',  ico:'🛠️'},
-  parte:        {rgb:'171,71,188', ico:'📋'},
-  cliente:      {rgb:'',           ico:'👤'}   // usa el color del grupo
+  // Mismos colores que las pestañas Clientes / Avisos / Presupuestos de la
+  // pantalla principal (.gt-cli, .gt-avis, .gt-presu), para que el formulario
+  // y la sección de la que sale hablen el mismo idioma.
+  cliente:      {rgb:'201,129,47',  ico:'👤'},   // ocre, como la pestaña Clientes
+  aviso:        {rgb:'184,83,79',   ico:'💬'},   // rojo terroso, como Avisos
+  presupuesto:  {rgb:'63,111,163',  ico:'💶'},   // azul, como Presupuestos
+  cobro:        {rgb:'52,140,90',   ico:'💰'},
+  recordatorio: {rgb:'190,140,30',  ico:'🔔'},
+  equipo:       {rgb:'20,140,130',  ico:'🔧'},
+  mantenimiento:{rgb:'194,116,40',  ico:'🛠️'},
+  parte:        {rgb:'132,80,150',  ico:'📋'}
 };
 
 window.abrirSB=(titulo,html,cliId,tipo)=>{
