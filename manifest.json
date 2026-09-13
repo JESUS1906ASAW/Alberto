@@ -10,8 +10,8 @@
   "start_url": "/Alberto/",
   "scope": "/Alberto/",
   "id": "alberto-sa-app",
-  "theme_color": "#0b1220",
-  "background_color": "#0b1220",
+  "theme_color": "#000000",
+  "background_color": "#000000",
   "categories": ["business", "productivity", "utilities"],
   "prefer_related_applications": false,
   "screenshots": [

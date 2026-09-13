@@ -27,7 +27,13 @@
 <link rel="manifest" href="/Alberto/manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" type="image/png" href="icon-192.png">
-<meta name="theme-color" content="#0f766e">
+<meta name="theme-color" id="metaThemeColor" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- Fondo negro aplicado antes que cualquier otra hoja de estilos: sin esto
+     el navegador pinta el documento en blanco hasta que llega el CSS, y se ve
+     un destello blanco antes de la pantalla de carga. -->
+<style>html,body{background:#000;margin:0}</style>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="dns-prefetch" href="https://www.gstatic.com">
@@ -726,7 +732,29 @@ body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
 
 #sb{position:fixed;bottom:-100%;left:0;right:0;max-height:92vh;background:rgba(17,17,17,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:24px 24px 0 0;z-index:1190;display:flex;flex-direction:column;transition:bottom .38s cubic-bezier(.16,1,.3,1),box-shadow .38s ease;border-top:1px solid var(--border);box-shadow:none}
 #sb.open{bottom:0;box-shadow:0 -8px 48px rgba(0,0,0,.5)}
-.sb-head{padding:16px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.sb-head{position:relative;padding:16px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+/* ── Acento por tipo de documento ──
+   Cada formulario de creación se tiñe con el color que ese documento ya usa
+   en el calendario, las tarjetas y el menú, para que al abrirlo sepas de un
+   vistazo qué estás creando sin tener que leer el título. */
+.sb-head.con-acento{
+  background:linear-gradient(180deg,rgba(var(--acento),.16),rgba(var(--acento),0));
+  border-bottom-color:rgba(var(--acento),.3);
+}
+.sb-head.con-acento::before{
+  content:'';position:absolute;left:0;right:0;top:0;height:3px;
+  background:linear-gradient(to right,rgb(var(--acento)),rgba(var(--acento),.35));
+}
+.sb-head.con-acento .sb-ico{
+  width:30px;height:30px;border-radius:10px;flex-shrink:0;margin-right:11px;
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+  background:rgba(var(--acento),.18);border:1px solid rgba(var(--acento),.3);
+}
+.sb-head .sb-ico{display:none}
+#presuModalHead{--acento:59,130,246;position:relative;background:linear-gradient(180deg,rgba(var(--acento),.16),rgba(var(--acento),0));border-bottom-color:rgba(var(--acento),.3)}
+#presuModalHead::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(to right,rgb(var(--acento)),rgba(var(--acento),.35))}
+/* Etiquetas de campo algo mas legibles dentro de los formularios */
+.fsec .fgrp label{letter-spacing:1.2px;font-size:10.5px}
 .sb-head h2{font-size:17px;font-weight:800;color:var(--tx);flex:1}
 .sb-close{width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,.08);color:var(--tx2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .sb-back{height:34px;padding:0 12px 0 6px;border-radius:50px;border:none;background:rgba(255,255,255,.08);color:var(--r);font-size:22px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-right:10px;line-height:1}
@@ -1229,7 +1257,7 @@ body.is-scrolling .presu-card{
 
 /* ══ PANTALLA DE CARGA (SPLASH) ══ */
 #splashScreen{
-  position:fixed;inset:0;z-index:999999;
+  position:fixed;inset:0;z-index:999999;background-color:#000;
   background:radial-gradient(ellipse 70% 55% at 50% 42%,#1f2023 0%,#000000 68%);
   display:flex;flex-direction:column;align-items:center;justify-content:center;
   gap:18px;
@@ -1632,6 +1660,7 @@ body.is-scrolling .presu-card{
   <div id="sb">
     <div class="sb-head">
       <button class="sb-back" id="sbBack" onclick="sbVolverCliente()" style="display:none">‹</button>
+      <span class="sb-ico" id="sbIco"></span>
       <h2 id="sbTitle">Detalles</h2>
       <button class="sb-close" onclick="cerrarSBTotal()">✕</button>
     </div>
@@ -3555,9 +3584,36 @@ const _sbSetBack=()=>{
 // abrirSB(titulo, html, cliId?)
 // cliId: si se pasa, activa el retorno a ese cliente
 // si ya hay un _sbReturnCli activo y no se pasa cliId, se preserva automáticamente
-window.abrirSB=(titulo,html,cliId)=>{
+// Colores por tipo de documento: los mismos que ya usan el calendario,
+// las tarjetas y el menú, para que el lenguaje visual sea uno solo.
+const _SB_ACENTOS={
+  aviso:        {rgb:'239,68,68',  ico:'💬'},
+  presupuesto:  {rgb:'59,130,246', ico:'💶'},
+  cobro:        {rgb:'34,197,94',  ico:'💰'},
+  recordatorio: {rgb:'234,179,8',  ico:'🔔'},
+  equipo:       {rgb:'20,184,166', ico:'🔧'},
+  mantenimiento:{rgb:'255,152,0',  ico:'🛠️'},
+  parte:        {rgb:'171,71,188', ico:'📋'},
+  cliente:      {rgb:'',           ico:'👤'}   // usa el color del grupo
+};
+
+window.abrirSB=(titulo,html,cliId,tipo)=>{
   if(cliId!==undefined) _sbReturnCli=cliId||null;
   // si cliId no se pasa (undefined), _sbReturnCli se mantiene como está
+  const head=document.querySelector('#sb .sb-head');
+  const ico=$('sbIco');
+  const acc=tipo?_SB_ACENTOS[tipo]:null;
+  if(head){
+    if(acc){
+      head.style.setProperty('--acento', acc.rgb || getComputedStyle(document.body).getPropertyValue('--theme-rgb').trim());
+      head.classList.add('con-acento');
+      if(ico) ico.textContent=acc.ico;
+    }else{
+      head.classList.remove('con-acento');
+      head.style.removeProperty('--acento');
+      if(ico) ico.textContent='';
+    }
+  }
   $('sbTitle').textContent=titulo;
   $('sbBody').innerHTML=html;
   $('sbOverlay').style.display='block';
@@ -5294,7 +5350,7 @@ window.abrirNuevoSimple=(tipo,editId,presetFecha,presetCliId)=>{
   const conf=_SIMPLE_CONF[tipo];
   const editing=editId?((_simplePend[tipo]||[]).find(x=>x.id===editId)||(_simpleComp[tipo]||[]).find(x=>x.id===editId)):null;
   const cliId=editing?.clienteId||presetCliId||'';
-  abrirSB(editing?`✏️ Editar ${conf.labelSing.toLowerCase()}`:`+ ${conf.art} ${conf.labelSing.toLowerCase()}`,`
+  abrirSB(editing?`Editar ${conf.labelSing.toLowerCase()}`:`${conf.art} ${conf.labelSing.toLowerCase()}`,`
     <div class="fsec">
       <div class="fgrp"><label>Título</label><input id="smpTitulo" placeholder="${conf.tituloPh}" value="${(editing?.titulo||'').replace(/"/g,'&quot;')}"></div>
       ${tipo==='cobro'?`<div class="fgrp"><label>Importe (€) <span style="font-weight:400;color:var(--tx2);font-size:11px">(opcional)</span></label><input id="smpImporte" type="number" step="0.01" min="0" placeholder="0.00" value="${editing?.importe??''}"></div>`:''}
@@ -5311,7 +5367,7 @@ window.abrirNuevoSimple=(tipo,editId,presetFecha,presetCliId)=>{
       </div>
       <button class="btn btn-p" style="width:100%;margin-top:6px" onclick="_gClick(this,()=>guardarSimple('${tipo}'${editing?`,'${editId}'`:''}))">💾 Guardar</button>
     </div>
-  `);
+  `, undefined, tipo);
   setTimeout(()=>{
     if(document.getElementById('smpCli-wrap')) _buildCliSelect('smpCli',cliId,()=>{});
     _setSimplePrio(editing?.prioridad||'normal');
@@ -5910,7 +5966,7 @@ window.abrirProgramarMantSB = async () => {
     <div id="_mantSBList"></div>
   `;
 
-  abrirSB('Programar mantenimiento', html, undefined);
+  abrirSB('Programar mantenimiento', html, undefined, 'mantenimiento');
   // Renderizar lista tras abrir
   setTimeout(() => _renderSBMantSelector(), 50);
   window._filtrarMantSB = _renderSBMantSelector;
@@ -5957,7 +6013,7 @@ window._abrirMantSBFormNuevo = (plantilla) => {
       <button class="btn btn-p" onclick="window.guardarMantSBNuevo()">💾 Programar mantenimiento</button>
     </div>
   `;
-  abrirSB('Nuevo mantenimiento', html, undefined);
+  abrirSB('Nuevo mantenimiento', html, undefined, 'mantenimiento');
   setTimeout(()=>{
     _buildCliSelect('_mantSBCli',p.clienteId||'',id=>{
       const c=allClientes.find(x=>x.id===id);
@@ -6456,7 +6512,7 @@ window.abrirFormRecordatorio=(id,presetCliId)=>{
       <div class="fgrp"><label>Notas</label><textarea id="_recNotas" placeholder="Detalles, referencias, lo que necesites recordar...">${r?.notas||''}</textarea></div>
       <button class="btn btn-p" onclick="guardarRecordatorio('${id||''}')">💾 ${r?'Guardar cambios':'Crear recordatorio'}</button>
     </div>`;
-  abrirSB(r?'Editar recordatorio':'Nuevo recordatorio preventivo', html, undefined);
+  abrirSB(r?'Editar recordatorio':'Nuevo recordatorio preventivo', html, undefined, 'recordatorio');
   setTimeout(()=>{
     const _recPre = r?.clienteId || presetCliId || '';
     _buildCliSelect('_recCli', _recPre, cliId=>_recRefrescarSelectEquipo(cliId));
@@ -6603,7 +6659,7 @@ window.abrirEquiposClienteSB=(cliId)=>{
     <button class="btn btn-p" style="width:100%;margin-bottom:14px" onclick="abrirFormEquipo('${cliId}')">+ Añadir equipo</button>
     ${equipos.length?equipos.map(mkCard).join(''):`<div class="empty" style="padding:20px"><div class="empty-ico" style="font-size:32px">🔧</div><p>Sin equipos registrados para este cliente</p></div>`}
   `;
-  abrirSB(`🔧 Equipos de ${c.nombre}`,html,cliId);
+  abrirSB(`Equipos de ${c.nombre}`,html,cliId,'equipo');
 };
 
 // ─── Alta rápida de equipo (mínimo: tipo + marca/modelo) ───
@@ -6622,7 +6678,7 @@ window.abrirFormEquipo=(cliId,id)=>{
       </div>
       <button class="btn btn-p" onclick="guardarEquipo('${cliId}','${id||''}')">💾 ${e?'Guardar cambios':'Añadir equipo'}</button>
     </div>`;
-  abrirSB(e?'Editar equipo':'Nuevo equipo',html,cliId);
+  abrirSB(e?'Editar equipo':'Nuevo equipo',html,cliId,'equipo');
 };
 
 window.guardarEquipo=(cliId,id)=>{
@@ -6788,7 +6844,7 @@ window.verEquipo=(id)=>{
       </div>
     </div>`).join(''):`<div class="empty" style="padding:14px"><p style="font-size:12.5px">Sin mantenimientos realizados todavía</p></div>`}
   `;
-  abrirSB(`🔧 ${e.tipo||'Equipo'}`,html,e.clienteId);
+  abrirSB(`${e.tipo||'Equipo'}`,html,e.clienteId,'equipo');
 };
 
 // Crea un recordatorio preventivo pre-vinculado a este equipo (y a su cliente)
@@ -7389,7 +7445,7 @@ window.abrirFCli=async(id, preData)=>{
     <button class="btn btn-p" onclick="_gClick(this,()=>guardarCli('${id||''}'))">💾 Guardar cliente</button>
     ${id?`<button class="btn btn-del" style="margin-top:8px" onclick="archivarCli('${id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:5px"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Mover a archivos</button>`:''}
   `;
-  abrirSB(id?'Editar cliente':'Nuevo cliente',html);
+  abrirSB(id?'Editar cliente':'Nuevo cliente',html,undefined,'cliente');
 };
 
 
@@ -7400,7 +7456,7 @@ window.abrirCliExpress=()=>{
     <button type="button" id="ceAgendaBtn" style="width:100%;margin-bottom:14px;padding:12px;border-radius:16px;border:1.5px dashed rgba(var(--theme-rgb),.45);background:rgba(var(--theme-rgb),.07);color:var(--r);font-size:13px;font-weight:800;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:8px">
       <span style="font-size:16px">📇</span> Cargar desde la agenda del móvil
     </button>` : '';
-  abrirSB('Añadir nuevo cliente',`
+  abrirSB('Nuevo cliente',`
     ${_agendaHTML}
     <div style="background:rgba(var(--theme-rgb),.08);border:1px solid rgba(var(--theme-rgb),.25);border-radius:14px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--r);font-weight:700">Lo esencial para darlo de alta. La descripción, el color y el resto de datos se rellenan luego editando su ficha.</div>
     <div class="fsec">
@@ -7437,7 +7493,7 @@ window.abrirCliExpress=()=>{
     </div>
     <button class="btn btn-p" style="width:100%;margin-top:4px" id="btnGuardarCliExpress">⚡ Guardar cliente</button>
     
-  `);
+  `, undefined, 'cliente');
   // Bind events after DOM insertion
   setTimeout(()=>{
     const agendaBtn=document.getElementById('ceAgendaBtn');
@@ -8567,7 +8623,7 @@ window.abrirSelectorParte=async(preCliId)=>{
       <button class="btn btn-s" onclick="abrirFParte(null,'${preCliId||''}')">✏️ Completo</button>
     </div>
     <div style="font-size:11px;color:var(--tx3);text-align:center;margin-top:6px">Express: solo cliente, título y estado</div>
-  `,preCliId||null);
+  `, preCliId||null, 'parte');
 };
 
 // ── Mejora 6: Parte Express — formulario mínimo (3 campos) ──
@@ -8575,7 +8631,7 @@ window.abrirParteExpress=(preCliId,preData)=>{
   const vd=preData||{};
   const ocultarVolver=!!vd._ocultarVolver;
   const preNombrePersonalizado=(!preCliId&&vd.clienteNombre)?vd.clienteNombre:'';
-  abrirSB('⚡ Parte Express',`
+  abrirSB('Parte exprés',`
     <div style="background:rgba(var(--theme-rgb),.08);border:1px solid rgba(var(--theme-rgb),.25);border-radius:14px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:var(--r);font-weight:700">Modo rápido — rellena solo lo esencial ahora, edita el resto después</div>
     <div class="fsec">
       <div class="fgrp"><label>Cliente *</label><div id="pCli-wrap"></div></div>
@@ -8589,7 +8645,7 @@ window.abrirParteExpress=(preCliId,preData)=>{
     <input type="hidden" id="pDesp" value="0"><input type="hidden" id="pPlant" value=""><input type="hidden" id="pPlantFull" value="">
     <button class="btn btn-p" style="width:100%;margin-top:4px" onclick="_gClick(this,()=>guardarParte(''))">⚡ Guardar parte</button>
     ${ocultarVolver?'':`<button onclick="abrirSelectorParte('${preCliId||''}')" style="width:100%;margin-top:8px;padding:10px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--tx2);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font)">← Volver al selector</button>`}
-  `);
+  `, undefined, 'parte');
   setTimeout(()=>_buildCliSelect('pCli',preCliId||'',id=>{
     const c=allClientes.find(x=>x.id===id);
     if(c){const ef=$('pEdif'),df=$('pDir'),tf=$('pTel');if(ef)ef.value=c.edificio||'';if(df)df.value=c.direccion||'';if(tf)tf.value=c.telefono||'';}
@@ -14741,7 +14797,7 @@ ${(()=>{
 // ── Abrir bottom-sheet para nuevo aviso ──
 window.abrirNuevoAviso=(presetFecha,presetCliId)=>{
   const hoy=_hoyStr();
-  abrirSB('💬 Nuevo aviso',`
+  abrirSB('Nuevo aviso',`
     <div class="fsec">
       <div class="fgrp">
         <label>Descripción del aviso</label>
@@ -14778,7 +14834,7 @@ window.abrirNuevoAviso=(presetFecha,presetCliId)=>{
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:6px;vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg>
         Guardar aviso
       </button>
-    </div>`);
+    </div>`, undefined, 'aviso');
   setTimeout(()=>_buildCliSelect('avisCli',presetCliId||'',()=>{}),0);
 };
 
@@ -14789,7 +14845,7 @@ window.editarAviso=(id)=>{
     ||((window._fichaHistData&&window._fichaHistData.avisos)||[]).find(x=>x.id===id);
   if(!a){toast('Aviso no encontrado','e');return;}
   const hoy=_hoyStr();
-  abrirSB('✏️ Editar aviso',`
+  abrirSB('Editar aviso',`
     <div class="fsec">
       <div class="fgrp">
         <label>Descripción del aviso</label>
@@ -14826,7 +14882,7 @@ window.editarAviso=(id)=>{
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:6px;vertical-align:-2px"><polyline points="20 6 9 17 4 12"/></svg>
         Guardar cambios
       </button>
-    </div>`);
+    </div>`, undefined, 'aviso');
   setTimeout(()=>_buildCliSelect('avisCli',a.clienteId||'',()=>{},!a.clienteId?(a.clienteNombre||''):''),0);
 };
 
@@ -16051,6 +16107,10 @@ const _aplicarModoClaro=()=>{
   const claro=localStorage.getItem('alberto_claro')==='1';
   if(claro)document.body.classList.add('modo-claro');
   else document.body.classList.remove('modo-claro');
+  // La barra de estado arranca en negro (por la pantalla de carga) y luego
+  // se iguala al fondo real de la app.
+  const meta=document.getElementById('metaThemeColor');
+  if(meta) meta.setAttribute('content', claro ? '#f2f3f1' : '#0d0d0d');
 };
 
 // Aplicar tema y modo guardados al cargar
