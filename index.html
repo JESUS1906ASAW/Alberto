@@ -403,7 +403,7 @@ body.modo-claro .cli-sel-dropdown{background:var(--card)}
 .card:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:rgba(255,255,255,.12)}
 
 /* ── SBOX ── */
-.sbox{width:100%;background:rgba(255,255,255,.055);border:1px solid var(--border);border-radius:15px;padding:12px 15px;color:var(--tx);font-size:14px;font-family:var(--font);outline:none;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;margin-bottom:12px;box-shadow:inset 0 1px 2px rgba(0,0,0,.12)}
+.sbox{width:100%;background:rgba(255,255,255,.055);border:1px solid var(--border);border-radius:16px;padding:12px 15px;color:var(--tx);font-size:14px;font-family:var(--font);outline:none;transition:border-color .18s ease,box-shadow .18s ease,background .18s ease;margin-bottom:12px;box-shadow:inset 0 1px 2px rgba(0,0,0,.12)}
 .sbox::placeholder{color:var(--tx3)}
 .sbox:focus{border-color:rgba(var(--theme-rgb),.55);background:rgba(255,255,255,.075);box-shadow:inset 0 1px 2px rgba(0,0,0,.1),0 0 0 3px rgba(var(--theme-rgb),.14)}
 body.modo-claro .sbox{box-shadow:inset 0 1px 2px rgba(0,0,0,.04)}
@@ -627,6 +627,13 @@ body.modo-claro .gtab-item.gt-presu{border-color:rgba(64,124,182,.28)}
   border:2px solid rgba(255,255,255,.45);background:rgba(0,0,0,.28);backdrop-filter:blur(4px);
   align-items:center;justify-content:center;z-index:5;transition:background .18s var(--ease-spring),border-color .18s ease,transform .22s var(--ease-spring);
 }
+/* Alineacion de icono + texto dentro de los botones.
+   Antes cada boton lo resolvia a mano con margin-right y vertical-align
+   negativos, que se descuadran en cuanto cambia el tamano del icono. */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;line-height:1.2}
+.btn>svg{flex-shrink:0;vertical-align:middle!important;margin-right:0!important}
+.btn-sm>svg{margin-right:0!important}
+
 /* Encabezados de bloque de la ficha del cliente */
 .ficha-sec-tit{display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:900;color:var(--r);letter-spacing:1.6px;text-transform:uppercase;margin:20px 0 10px}
 .ficha-sec-tit::after{content:'';flex:1;height:1px;background:linear-gradient(to right,rgba(var(--theme-rgb),.35),transparent)}
@@ -682,7 +689,7 @@ body.sel-mode .scroll-pad{padding-bottom:140px}
 .parte-card.pend::before{background:#ff9800}
 .parte-card.done::before{background:#4caf50}
 .parte-card:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.3)}
-.parte-ico{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.parte-ico{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
 .parte-info{flex:1;min-width:0}
 .parte-title{font-size:15px;font-weight:800;color:#fff}
 .parte-sub{font-size:12px;color:var(--tx2);margin-top:3px}
@@ -826,7 +833,7 @@ body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
 .cal-mes-title::after{content:'';flex:1;height:1px;background:rgba(var(--theme-rgb),.2)}
 
 /* ── CALENDARIO MEJORADO ── */
-.cal-task{padding:14px 16px;border-radius:13px;font-size:13px;margin-bottom:8px;background:rgba(255,255,255,.04);border:1px solid var(--border);transition:.15s;position:relative;overflow:hidden}
+.cal-task{padding:14px 16px;border-radius:14px;font-size:13px;margin-bottom:8px;background:rgba(255,255,255,.04);border:1px solid var(--border);transition:.15s;position:relative;overflow:hidden}
 .cal-task::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--task-color,var(--r));border-radius:0}
 
 
@@ -841,9 +848,9 @@ body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
 
 
 /* ── HISTORIAL GLOBAL ── */
-.hg-event{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px 14px;margin-bottom:7px;display:flex;align-items:flex-start;gap:12px;transition:.15s;cursor:pointer}
+.hg-event{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:7px;display:flex;align-items:flex-start;gap:12px;transition:.15s;cursor:pointer}
 .hg-event:hover{border-color:rgba(var(--theme-rgb),.4)}
-.hg-event-dot{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
+.hg-event-dot{width:36px;height:36px;border-radius:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:16px}
 .hg-event-dot.mant{background:rgba(255,152,0,.12)}
 .hg-event-dot.parte{background:rgba(66,165,245,.12)}
 
@@ -883,7 +890,7 @@ body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
 .calg-legend{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px;padding-top:14px;border-top:1px solid var(--border)}
 .calg-legend-item{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--tx2);font-weight:800;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:20px;padding:5px 10px 5px 8px}
 .calg-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
-.calg-avi-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px 14px;margin-bottom:8px}
+.calg-avi-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:8px}
 .calg-avi-card.atrasado{border-color:rgba(239,83,80,.4);background:rgba(239,83,80,.06)}
 
 /* ── MAPA CLIENTES ── */
@@ -1590,7 +1597,7 @@ body.is-scrolling .presu-card{
           <div style="font-size:13px;font-weight:800;color:var(--tx)">Instalar Alberto</div>
           <div style="font-size:11px;color:var(--tx2);margin-top:1px">Accede más rápido desde tu pantalla de inicio</div>
         </div>
-        <button onclick="installPWAFromAuth()" style="background:var(--r);color:#fff;border:none;border-radius:9px;padding:8px 13px;font-size:12px;font-weight:800;font-family:var(--font);cursor:pointer;flex-shrink:0;white-space:nowrap">Instalar</button>
+        <button onclick="installPWAFromAuth()" style="background:var(--r);color:#fff;border:none;border-radius:10px;padding:8px 13px;font-size:12px;font-weight:800;font-family:var(--font);cursor:pointer;flex-shrink:0;white-space:nowrap">Instalar</button>
         <button onclick="cerrarAuthInstallBanner()" style="background:transparent;border:none;color:var(--tx2);font-size:20px;cursor:pointer;padding:2px 4px;line-height:1;flex-shrink:0">✕</button>
       </div>
     </div>
@@ -6233,7 +6240,7 @@ const _recordatoriosAlertHTML=()=>{
       return `
       <div style="background:rgba(239,68,68,.13);border:1px solid rgba(239,68,68,.4);border-radius:14px;padding:12px 14px;display:flex;align-items:flex-start;gap:10px">
         <div style="flex-shrink:0;width:34px;height:34px;border-radius:12px;background:rgba(239,68,68,.2);display:flex;align-items:center;justify-content:center;margin-top:1px">
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
         <div style="flex:1;min-width:0">
           <div style="font-size:12.5px;font-weight:900;color:#ef4444;text-transform:uppercase;letter-spacing:.3px">${esHoy?'Mantenimiento hoy':'Mantenimiento pendiente'} · ${fechaFmt}</div>
@@ -10679,7 +10686,7 @@ body{font-family:'Inter',sans-serif;background:#fff;color:#1a1a1a;font-size:12px
 
 /* ── Encabezado ── */
 .page-header{background:linear-gradient(135deg,#08403c,${accentColor} 40%,#0f766e);color:#fff;padding:18px 22px 16px;border-radius:10px 8px 0 0;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0}
-.ph-brand{width:34px;height:34px;border-radius:9px;display:block;margin-bottom:6px}
+.ph-brand{width:34px;height:34px;border-radius:10px;display:block;margin-bottom:6px}
 .ph-title{font-size:18px;font-weight:900;margin-bottom:2px}
 .ph-sub{font-size:11px;opacity:.8;font-weight:500}
 .ph-meta{text-align:right;font-size:11px;opacity:.8;line-height:1.8}
@@ -11077,8 +11084,8 @@ const _renderArchivosCard=(it)=>{
     ${esCliente?'<div class="sel-check"></div>':''}
     <div class="arch-card-ico">
       ${esCliente
-        ?`<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`
-        :`<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`}
+        ?`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`
+        :`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`}
     </div>
     <div class="arch-info">
       <div class="arch-name">${nombreMostrar}</div>
@@ -12955,31 +12962,32 @@ const _renderVerPresupuesto=(prId,p)=>{
           <img src="${p.firmaCliente}" style="max-width:100%;max-height:130px;display:block;margin:0 auto">
         </div>
         <div style="display:flex;gap:8px;margin-top:8px">
-          <button class="btn btn-s btn-sm" style="flex:1" onclick="editarFirmaPresupuesto('${prId}')">✏️ Editar firma</button>
-          <button class="btn btn-del btn-sm" style="flex:1" onclick="eliminarFirmaPresupuesto('${prId}')">🗑️ Eliminar firma</button>
+          <button class="btn btn-s btn-sm" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;line-height:1.15" onclick="editarFirmaPresupuesto('${prId}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Editar firma</button>
+          <button class="btn btn-del btn-sm" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;line-height:1.15" onclick="eliminarFirmaPresupuesto('${prId}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>Eliminar firma</button>
         </div>
       </div>
     `:`
       <div style="margin-bottom:14px">
         <div style="display:flex;gap:8px">
-          <button class="btn btn-s btn-sm" style="flex:1" onclick="editarFirmaPresupuesto('${prId}',true)">✍️ Firmar ahora</button>
-          <button class="btn btn-s btn-sm" style="flex:1;color:var(--r);border-color:rgba(var(--theme-rgb),.35)" onclick="usarMiFirmaPresupuesto('${prId}')">📋 Usar mi firma</button>
+          <button class="btn btn-s btn-sm" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;line-height:1.15" onclick="editarFirmaPresupuesto('${prId}',true)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Firmar ahora</button>
+          <button class="btn btn-s btn-sm" style="flex:1;color:var(--r);border-color:rgba(var(--theme-rgb),.35);display:flex;align-items:center;justify-content:center;gap:7px;line-height:1.15" onclick="usarMiFirmaPresupuesto('${prId}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>Usar mi firma</button>
         </div>
       </div>
     `}
     <div style="display:flex;gap:8px;margin-bottom:8px">
-      <button class="btn ${isAcep?'btn-s':'btn-p'}" style="flex:1" onclick="toggleEstadoPresupuesto('${prId}','${isAcep?'espera':'aceptado'}')">${isAcep?'↩️ Marcar como pendiente':'✅ Marcar como completado'}</button>
-      <button class="btn btn-s" style="width:44px;flex-shrink:0;padding:0" onclick="usarPresupuesto('${prId}')" title="Usar como base">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+      <button class="btn ${isAcep?'btn-s':'btn-p'}" style="flex:1 1 0;min-width:0;padding-left:8px;padding-right:8px;display:flex;align-items:center;justify-content:center;gap:7px;line-height:1.15" onclick="toggleEstadoPresupuesto('${prId}','${isAcep?'espera':'aceptado'}')">${isAcep?`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>Marcar pendiente`:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>Completado`}</button>
+      <button class="btn btn-s" style="flex:1 1 0;min-width:0;padding-left:8px;padding-right:8px;display:flex;align-items:center;justify-content:center;gap:7px;line-height:1.15" onclick="usarPresupuesto('${prId}')" title="Crear un presupuesto nuevo copiando este">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>
+        Usar como plantilla
       </button>
       <button class="btn btn-del" style="width:44px;flex-shrink:0;padding:0" onclick="borrarPresupuesto('${prId}')" title="Eliminar">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
       </button>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      ${prTel?`<button class="btn btn-s" style="flex:1;min-width:0;border:1px solid rgba(37,211,102,.45);color:#25d366;display:flex;align-items:center;justify-content:center" onclick="_recordarPresupuesto('${prId}','${prTel.replace(/\\s/g,'')}')" title="Abre WhatsApp con un mensaje de texto, sin adjuntar el PDF"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="margin-right:7px;vertical-align:-3px;flex-shrink:0"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.17 8.17 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.79.98-.14.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.22.25-.85.84-.85 2.04s.87 2.37 1 2.53c.12.16 1.71 2.61 4.15 3.66.58.25 1.03.4 1.38.51.58.19 1.11.16 1.53.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.05.14-1.16-.06-.11-.22-.17-.47-.29z"/></svg>Enviar SMS</button>
-      <button class="btn" style="flex:1;min-width:0;background:#25d366;border:1px solid #25d366;color:#06331a;font-weight:900;display:flex;align-items:center;justify-content:center" onclick="enviarPresupuestoWhatsAppPDF('${prId}')" title="Genera el PDF del presupuesto y lo envía por WhatsApp"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="margin-right:7px;vertical-align:-3px;flex-shrink:0"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.17 8.17 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.79.98-.14.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.22.25-.85.84-.85 2.04s.87 2.37 1 2.53c.12.16 1.71 2.61 4.15 3.66.58.25 1.03.4 1.38.51.58.19 1.11.16 1.53.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.05.14-1.16-.06-.11-.22-.17-.47-.29z"/></svg>Enviar PDF</button>`:''}
-      <button class="btn btn-s" style="flex:1;min-width:0" onclick="exportarPresupuestoPDF('${prId}')" title="Guardar presupuesto en PDF"><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' style='margin-right:4px'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>Guardar PDF</button>
+      ${prTel?`<button class="btn btn-s" style="flex:1;min-width:0;border:1px solid rgba(37,211,102,.45);color:#25d366;display:flex;align-items:center;justify-content:center;gap:9px;line-height:1.15" onclick="_recordarPresupuesto('${prId}','${prTel.replace(/\\s/g,'')}')" title="Abre WhatsApp con un mensaje de texto, sin adjuntar el PDF"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.17 8.17 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.79.98-.14.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.22.25-.85.84-.85 2.04s.87 2.37 1 2.53c.12.16 1.71 2.61 4.15 3.66.58.25 1.03.4 1.38.51.58.19 1.11.16 1.53.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.05.14-1.16-.06-.11-.22-.17-.47-.29z"/></svg>Enviar SMS</button>
+      <button class="btn" style="flex:1;min-width:0;background:#25d366;border:1px solid #25d366;color:#06331a;font-weight:900;display:flex;align-items:center;justify-content:center;gap:9px;line-height:1.15" onclick="enviarPresupuestoWhatsAppPDF('${prId}')" title="Genera el PDF del presupuesto y lo envía por WhatsApp"><svg width="30" height="30" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.17 8.17 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.79.98-.14.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.22.25-.85.84-.85 2.04s.87 2.37 1 2.53c.12.16 1.71 2.61 4.15 3.66.58.25 1.03.4 1.38.51.58.19 1.11.16 1.53.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.05.14-1.16-.06-.11-.22-.17-.47-.29z"/></svg>Enviar PDF</button>`:''}
+      <button class="btn btn-s" style="flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:9px;line-height:1.15" onclick="exportarPresupuestoPDF('${prId}')" title="Guardar presupuesto en PDF"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Guardar PDF</button>
     </div>
   `);
 };
