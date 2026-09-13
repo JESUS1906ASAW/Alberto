@@ -5197,8 +5197,13 @@ const _renderGTabPresupuestos=()=>{
   const el=$('tabPresuContent');if(!el)return;
   if(!CGID){el.innerHTML=`<div class="empty"><p>Selecciona un grupo primero</p></div>`;return;}
   el.innerHTML=`
-    <button class="btn btn-p" style="margin-bottom:12px;width:100%" onclick="abrirNuevoPresupuesto()">+ Nuevo presupuesto</button>
-    <input class="sbox" id="presuInlineSearch" style="margin-bottom:10px" placeholder="🔍 Buscar por cliente, título, notas..." oninput="_filtrarPresuInline(this.value)">
+    <div style="margin-bottom:14px">
+      <button class="btn btn-p" style="width:100%" onclick="abrirNuevoPresupuesto()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:6px;vertical-align:-2px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Nuevo presupuesto
+      </button>
+    </div>
+    <input class="sbox" id="presuInlineSearch" style="margin-bottom:12px" placeholder="🔍 Buscar por cliente, título, notas..." oninput="_filtrarPresuInline(this.value)">
     <div id="presuInlineSearchResults" style="display:none"></div>
     <div id="presuInlineTabsWrap">
       <div id="presuInlineBody"></div>
