@@ -5858,8 +5858,13 @@ const renderTabClientes=()=>{
 
   return `
   ${_recordatoriosAlertHTML()}
-  <button class="btn-nuevo" onclick="abrirCliExpress()" style="width:100%;margin-left:0;margin-bottom:8px;padding:11px 12px;font-size:13.5px;text-align:center">+ Añadir nuevo cliente</button>
-  <input class="sbox" placeholder="Buscar cliente..." oninput="filtrarClis(this.value)" id="cliSearchBox">
+  <div style="margin-bottom:14px">
+    <button class="btn btn-p" style="width:100%" onclick="abrirCliExpress()">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="margin-right:6px;vertical-align:-2px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Nuevo cliente
+    </button>
+  </div>
+  <input class="sbox" id="cliSearchBox" style="margin-bottom:12px" placeholder="🔍 Buscar por nombre o teléfono..." oninput="filtrarClis(this.value)">
   <div id="clisList">${htmlListaClis(ultimos,false)}</div>`;
 };
 
