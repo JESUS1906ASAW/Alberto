@@ -2090,6 +2090,16 @@ if('serviceWorker' in navigator){
     // Verificar actualizaciones cada 60 minutos
     setInterval(()=>r.update(),60*60*1000);
 
+    // Subida en segundo plano de las fotos hechas sin cobertura. Con Background
+    // Sync el navegador las sube aunque la app esté cerrada; el periodic sync
+    // es el respaldo por si el evento puntual no llega a dispararse.
+    try{ r.sync?.register('subir-imagenes').catch(()=>{}); }catch(e){}
+    if(r.periodicSync && navigator.permissions){
+      navigator.permissions.query({name:'periodic-background-sync'})
+        .then(p=>{ if(p.state==='granted') r.periodicSync.register('subir-imagenes',{minInterval:60*60*1000}).catch(()=>{}); })
+        .catch(()=>{});
+    }
+
   }).catch(()=>{});
 
   // Recargar cuando el nuevo SW tome control
@@ -2497,18 +2507,175 @@ const comprimirImgBlob=async(file)=>{
   });
 };
 
-// Sube a Cloudinary y devuelve { url, publicId }
+// ══════════════════════════════════════════════════════════════
+// COLA DE SUBIDA DE IMÁGENES (modo offline)
+// Firestore ya encola sus escrituras solo y las conserva aunque cierres la
+// app. Las fotos no: van a Cloudinary por HTTP y sin red se perdían.
+// Ahora se guardan en IndexedDB y las sube el service worker en segundo
+// plano, aunque la app esté cerrada. Mientras tanto la foto se ve igual,
+// porque el documento guarda su versión local.
+// ══════════════════════════════════════════════════════════════
+const _COLA_DB='alberto_cola', _COLA_STORE='imagenes';
+let _colaDBPromise=null;
+const _colaDB=()=>{
+  if(_colaDBPromise) return _colaDBPromise;
+  _colaDBPromise=new Promise((res,rej)=>{
+    const r=indexedDB.open(_COLA_DB,1);
+    r.onupgradeneeded=()=>{ if(!r.result.objectStoreNames.contains(_COLA_STORE)) r.result.createObjectStore(_COLA_STORE,{keyPath:'id'}); };
+    r.onsuccess=()=>res(r.result);
+    r.onerror=()=>rej(r.error);
+  }).catch(()=>null);
+  return _colaDBPromise;
+};
+const _colaPut=async(reg)=>{
+  const db=await _colaDB(); if(!db) return false;
+  return new Promise(res=>{
+    try{ const tx=db.transaction(_COLA_STORE,'readwrite'); tx.objectStore(_COLA_STORE).put(reg); tx.oncomplete=()=>res(true); tx.onerror=()=>res(false); }
+    catch(e){ res(false); }
+  });
+};
+const _colaTodos=async()=>{
+  const db=await _colaDB(); if(!db) return [];
+  return new Promise(res=>{
+    const out=[];
+    try{
+      const tx=db.transaction(_COLA_STORE,'readonly').objectStore(_COLA_STORE).openCursor();
+      tx.onsuccess=ev=>{ const c=ev.target.result; if(!c) return res(out); out.push(c.value); c.continue(); };
+      tx.onerror=()=>res(out);
+    }catch(e){ res(out); }
+  });
+};
+const _colaBorrar=async(id)=>{
+  const db=await _colaDB(); if(!db) return;
+  try{ db.transaction(_COLA_STORE,'readwrite').objectStore(_COLA_STORE).delete(id); }catch(e){}
+};
+
+// Pide al service worker que suba la cola. Con Background Sync lo hará
+// aunque cierres la app; si el navegador no lo soporta, se intenta al vuelo.
+const _pedirSubidaCola=async()=>{
+  try{
+    const reg=await navigator.serviceWorker?.ready;
+    if(reg?.sync){ await reg.sync.register('subir-imagenes'); return; }
+    reg?.active?.postMessage({type:'PROCESAR_COLA'});
+  }catch(e){
+    try{ (await navigator.serviceWorker?.ready)?.active?.postMessage({type:'PROCESAR_COLA'}); }catch(e2){}
+  }
+};
+
+const _blobADataURL=(blob)=>new Promise((res,rej)=>{
+  const fr=new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=rej; fr.readAsDataURL(blob);
+});
+
+// Sube a Cloudinary y devuelve { url, publicId }. Sin red, encola y devuelve
+// la imagen local para que la app siga funcionando exactamente igual.
 const _subirImgCloudinary=async(file, folder='grupos')=>{
   const blob = await comprimirImgBlob(file);
-  const fd = new FormData();
-  fd.append('file', blob, 'foto.jpg');
-  fd.append('upload_preset', _CLD_PRESET);
-  fd.append('folder', folder);
-  const resp = await fetch(`https://api.cloudinary.com/v1_1/${_CLD_CLOUD}/image/upload`, {method:'POST', body:fd});
-  if(!resp.ok) throw new Error('Cloudinary error '+resp.status);
-  const data = await resp.json();
-  return { url: data.secure_url, publicId: data.public_id };
+  if(navigator.onLine !== false){
+    try{
+      const fd = new FormData();
+      fd.append('file', blob, 'foto.jpg');
+      fd.append('upload_preset', _CLD_PRESET);
+      fd.append('folder', folder);
+      const resp = await fetch(`https://api.cloudinary.com/v1_1/${_CLD_CLOUD}/image/upload`, {method:'POST', body:fd});
+      if(!resp.ok) throw new Error('Cloudinary error '+resp.status);
+      const data = await resp.json();
+      return { url: data.secure_url, publicId: data.public_id };
+    }catch(e){ /* sin red o Cloudinary caído: a la cola */ }
+  }
+  const dataURL = await _blobADataURL(blob);
+  const id = 'img_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+  await _colaPut({ id, blob, folder, dataURL, cloud:_CLD_CLOUD, preset:_CLD_PRESET,
+                   estado:'pendiente', intentos:0, creado:Date.now(), gid:CGID||null });
+  _pedirSubidaCola();
+  toast('Sin conexión: la foto se subirá sola al volver internet','i');
+  return { url: dataURL, publicId: null, pendienteId: id };
 };
+
+// Subida desde la propia app. Es el camino que SIEMPRE funciona: no depende
+// de Background Sync (que no existe en iPhone) ni de que el service worker
+// instalado sea el nuevo. El del service worker es un extra que ademas sube
+// con la app cerrada, pero este de aqui es la garantia de que nada se pierde.
+let _colaSubiendo=false;
+const _subirColaAhora=async()=>{
+  if(_colaSubiendo || navigator.onLine===false) return;
+  const pendientes=(await _colaTodos()).filter(r=>(r.estado==='pendiente'||r.estado==='fallida')&&r.blob);
+  if(!pendientes.length) return;
+  _colaSubiendo=true;
+  let subidas=0;
+  try{
+    for(const reg of pendientes){
+      try{
+        const fd=new FormData();
+        fd.append('file', reg.blob, 'foto.jpg');
+        fd.append('upload_preset', reg.preset||_CLD_PRESET);
+        fd.append('folder', reg.folder||'grupos');
+        const resp=await fetch(`https://api.cloudinary.com/v1_1/${reg.cloud||_CLD_CLOUD}/image/upload`,{method:'POST',body:fd});
+        if(!resp.ok) throw new Error('Cloudinary '+resp.status);
+        const data=await resp.json();
+        await _colaPut({...reg, estado:'subida', url:data.secure_url, publicId:data.public_id, blob:null, subidoEn:Date.now()});
+        subidas++;
+      }catch(e){
+        const intentos=(reg.intentos||0)+1;
+        await _colaPut({...reg, intentos, estado:'pendiente'});
+        break;   // si falla una, probablemente no hay red: parar y reintentar luego
+      }
+    }
+  } finally { _colaSubiendo=false; }
+  if(subidas){
+    await _aplicarImagenesSubidas();
+    toast(`${subidas} foto${subidas!==1?'s':''} pendiente${subidas!==1?'s':''} subida${subidas!==1?'s':''}`,'o');
+  }
+};
+
+// Cuando el service worker termina de subir, reemplaza la imagen local por la
+// definitiva en los documentos que la estuvieran usando.
+const _aplicarImagenesSubidas=async()=>{
+  const regs=(await _colaTodos()).filter(r=>r.estado==='subida'&&r.url&&r.dataURL);
+  if(!regs.length) return;
+  const cols=['imagenes','clientes','mantenimientos','averias','grupos'];
+  for(const reg of regs){
+    let aplicado=false;
+    if(reg.gid){
+      for(const col of cols.slice(0,4)){
+        try{
+          const snap=await getDocs(query(collection(db,'grupos',reg.gid,col),where('url','==',reg.dataURL)));
+          for(const d of snap.docs){ await updateDoc(d.ref,{url:reg.url,publicId:reg.publicId||null}); aplicado=true; }
+        }catch(e){}
+      }
+      // Fotos guardadas dentro del propio cliente (campo foto/fotoURL)
+      try{
+        const snap=await getDocs(query(collection(db,'grupos',reg.gid,'clientes'),where('foto','==',reg.dataURL)));
+        for(const d of snap.docs){ await updateDoc(d.ref,{foto:reg.url}); aplicado=true; }
+      }catch(e){}
+    }
+    // Equipos: viven en memoria y en su propia colección
+    if(Array.isArray(allEquipos)&&allEquipos.some(e=>Array.isArray(e.fotos)&&e.fotos.includes(reg.dataURL))){
+      allEquipos=allEquipos.map(e=>Array.isArray(e.fotos)&&e.fotos.includes(reg.dataURL)
+        ? {...e, fotos:e.fotos.map(f=>f===reg.dataURL?reg.url:f)} : e);
+      _eqSaveAll(); aplicado=true;
+    }
+    await _colaBorrar(reg.id);
+    if(aplicado) console.info('[Cola] Imagen definitiva aplicada:',reg.id);
+  }
+};
+
+// Cuántas fotos quedan por subir (para el indicador de la interfaz)
+window._imagenesPendientes=async()=>(await _colaTodos()).filter(r=>r.estado==='pendiente'||r.estado==='fallida').length;
+
+// Al volver la red y al abrir la app: procesar lo que quede pendiente
+window.addEventListener('online', ()=>{ _pedirSubidaCola(); setTimeout(()=>_subirColaAhora(),1500); });
+navigator.serviceWorker?.addEventListener?.('message', e=>{
+  if(e.data?.type==='IMAGENES_SUBIDAS'){
+    _aplicarImagenesSubidas();
+    toast(`${e.data.n} foto${e.data.n!==1?'s':''} subida${e.data.n!==1?'s':''}`,'o');
+  }
+});
+// Al arrancar: aplicar lo que el service worker ya subiera y encargarnos del resto
+setTimeout(()=>{ _aplicarImagenesSubidas(); _pedirSubidaCola(); _subirColaAhora(); }, 6000);
+// Y cada vez que vuelves a la app desde segundo plano
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) _subirColaAhora(); });
+// Red intermitente: reintento periodico mientras queden fotos en cola
+setInterval(()=>{ _subirColaAhora(); }, 3*60*1000);
 
 // COMPATIBILIDAD: comprimirImg legacy (base64) — solo para lectura de fotos antiguas
 const comprimirImg=async(file)=>{
@@ -12361,7 +12528,7 @@ const _presuCard = (p, comp=false) => {
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
             ${telCard?`${!comp?`<button class="icon-btn" style="color:#25d366;border-color:rgba(37,211,102,.35)" onclick="event.stopPropagation();_recordarPresupuesto('${p.id}','${telCard}')" title="Enviar SMS por WhatsApp (mensaje de texto, sin PDF)">${ICO.message(14)}</button>`:''}
             <button class="icon-btn wa" onclick="event.stopPropagation();enviarPresupuestoWhatsAppPDF('${p.id}')" title="Enviar PDF del presupuesto por WhatsApp">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.8-.7-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 20.2 12 8.2 8.2 0 0 1 12 20.2z"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.17 8.17 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.79.98-.14.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.22.25-.85.84-.85 2.04s.87 2.37 1 2.53c.12.16 1.71 2.61 4.15 3.66.58.25 1.03.4 1.38.51.58.19 1.11.16 1.53.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.05.14-1.16-.06-.11-.22-.17-.47-.29z"/></svg>
             </button>`:''}
             <span class="presu-badge ${comp?'aceptado':'espera'}">${comp?'Completado':'Pendiente'}</span>
           </div>
@@ -12710,7 +12877,7 @@ window.guardarPresupuesto=async(editId)=>{
           Exportar como PDF
         </button>
         <button class="btn btn-ok" style="width:100%;padding:14px;font-size:14px;background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.4);color:#25d366" onclick="cerrarSBTotal();enviarPresupuestoWhatsAppPDF('${newId}')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right:6px;vertical-align:-3px"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.8-.7-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 20.2 12 8.2 8.2 0 0 1 12 20.2z"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right:6px;vertical-align:-3px"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.17 8.17 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.79.98-.14.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.22.25-.85.84-.85 2.04s.87 2.37 1 2.53c.12.16 1.71 2.61 4.15 3.66.58.25 1.03.4 1.38.51.58.19 1.11.16 1.53.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.05.14-1.16-.06-.11-.22-.17-.47-.29z"/></svg>
           Compartir PDF por WhatsApp
         </button>
         <button class="btn btn-s" style="width:100%;padding:14px;font-size:14px" onclick="cerrarSBTotal();toast('Presupuesto guardado','o')">
@@ -12810,8 +12977,8 @@ const _renderVerPresupuesto=(prId,p)=>{
       </button>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      ${prTel?`<button class="btn" style="flex:1;min-width:0;background:#25d366;border:1px solid #25d366;color:#06331a;font-weight:900" onclick="enviarPresupuestoWhatsAppPDF('${prId}')" title="Genera el PDF del presupuesto y lo envía por WhatsApp"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right:6px;vertical-align:-2px"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.8-.7-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/></svg>Enviar PDF</button>
-      <button class="btn btn-s" style="flex:1;min-width:0;border:1px solid rgba(37,211,102,.45);color:#25d366" onclick="_recordarPresupuesto('${prId}','${prTel.replace(/\s/g,'')}')" title="Abre WhatsApp con un mensaje de texto, sin adjuntar el PDF"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="margin-right:6px;vertical-align:-2px"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.8-.7-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/></svg>Enviar SMS</button>`:''}
+      ${prTel?`<button class="btn btn-s" style="flex:1;min-width:0;border:1px solid rgba(37,211,102,.45);color:#25d366;display:flex;align-items:center;justify-content:center" onclick="_recordarPresupuesto('${prId}','${prTel.replace(/\\s/g,'')}')" title="Abre WhatsApp con un mensaje de texto, sin adjuntar el PDF"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="margin-right:7px;vertical-align:-3px;flex-shrink:0"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.17 8.17 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.79.98-.14.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.22.25-.85.84-.85 2.04s.87 2.37 1 2.53c.12.16 1.71 2.61 4.15 3.66.58.25 1.03.4 1.38.51.58.19 1.11.16 1.53.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.05.14-1.16-.06-.11-.22-.17-.47-.29z"/></svg>Enviar SMS</button>
+      <button class="btn" style="flex:1;min-width:0;background:#25d366;border:1px solid #25d366;color:#06331a;font-weight:900;display:flex;align-items:center;justify-content:center" onclick="enviarPresupuestoWhatsAppPDF('${prId}')" title="Genera el PDF del presupuesto y lo envía por WhatsApp"><svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" style="margin-right:7px;vertical-align:-3px;flex-shrink:0"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0 0 12.04 2zm0 18.15h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.17 8.17 0 0 1-1.26-4.38c0-4.54 3.7-8.23 8.25-8.23 2.2 0 4.27.86 5.83 2.42a8.19 8.19 0 0 1 2.41 5.82c0 4.54-3.7 8.23-8.24 8.23zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.79.98-.14.16-.29.18-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.01-.38.11-.5.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.41-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.22.25-.85.84-.85 2.04s.87 2.37 1 2.53c.12.16 1.71 2.61 4.15 3.66.58.25 1.03.4 1.38.51.58.19 1.11.16 1.53.1.47-.07 1.44-.59 1.64-1.16.2-.57.2-1.05.14-1.16-.06-.11-.22-.17-.47-.29z"/></svg>Enviar PDF</button>`:''}
       <button class="btn btn-s" style="flex:1;min-width:0" onclick="exportarPresupuestoPDF('${prId}')" title="Guardar presupuesto en PDF"><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' style='margin-right:4px'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>Guardar PDF</button>
     </div>
   `);
