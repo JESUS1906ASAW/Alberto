@@ -526,7 +526,11 @@ body.modo-claro .sbox:focus{box-shadow:inset 0 1px 2px rgba(0,0,0,.03),0 0 0 3px
 .gtile-name{position:absolute;bottom:12px;left:12px;right:12px;font-size:15px;font-weight:900;color:#fff;text-shadow:0 1px 6px rgba(0,0,0,.6)}
 
 /* ── GRUPO HEADER ── */
-.grupo-header{height:215px;border-radius:20px;overflow:hidden;position:relative;cursor:pointer;margin-bottom:16px;flex-shrink:0;box-shadow:0 10px 24px -12px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.06)}
+.grupo-header{
+  /* 14px arriba + alto real del calendario + 10px de hueco + bloque del nombre */
+  --mcal-filas:6;
+  --mcal-alto:calc(32.5px + 14.5px * var(--mcal-filas));
+  height:calc(14px + var(--mcal-alto) + 10px + 59px);border-radius:20px;overflow:hidden;position:relative;cursor:pointer;margin-bottom:16px;flex-shrink:0;box-shadow:0 10px 24px -12px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.06)}
 .grupo-header-img{position:absolute;inset:0;background-size:cover;background-position:center;filter:saturate(1.25) brightness(.98);transform:scale(1.02);transition:transform .5s cubic-bezier(.16,1,.3,1)}
 .grupo-header:active .grupo-header-img{transform:scale(1.06)}
 .grupo-header-ov{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.86) 0%,rgba(0,0,0,.32) 46%,rgba(0,0,0,.08) 100%)}
@@ -537,11 +541,11 @@ body.modo-claro .sbox:focus{box-shadow:inset 0 1px 2px rgba(0,0,0,.03),0 0 0 3px
 .grupo-header-cal-wrap{flex:1;min-width:0;display:flex}
 .grupo-header-inicio{flex-shrink:0;display:flex;align-items:center;gap:7px;padding:8px 15px;border-radius:22px;background:rgba(8,12,11,.32);backdrop-filter:blur(16px) saturate(1.7);-webkit-backdrop-filter:blur(16px) saturate(1.7);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.92);font-size:13.5px;font-weight:800;letter-spacing:.1px;cursor:pointer;transition:.2s var(--ease-out);box-shadow:0 8px 20px -6px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.2)}
 .grupo-header-inicio:hover,.grupo-header-inicio:active{background:rgba(8,12,11,.6);border-color:rgba(255,255,255,.38);color:#fff;transform:translateY(-1px)}
-.grupo-header-content{position:absolute;bottom:0;left:0;right:0;padding:14px 16px;display:flex;align-items:center;gap:12px}
+.grupo-header-content{position:absolute;bottom:0;left:0;right:0;padding:11px 16px;display:flex;align-items:center;gap:12px}
 
 
-.grupo-title{font-size:18px;line-height:22px;font-weight:900;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.55);letter-spacing:-.2px;word-wrap:break-word;overflow-wrap:break-word}
-.grupo-sub{font-size:12px;line-height:15px;color:rgba(255,255,255,.7);margin-top:2px;font-weight:600}
+.grupo-title{font-size:18px;line-height:21px;font-weight:900;color:#fff;text-shadow:0 2px 10px rgba(0,0,0,.55);letter-spacing:-.2px;word-wrap:break-word;overflow-wrap:break-word}
+.grupo-sub{font-size:12px;line-height:14px;color:rgba(255,255,255,.7);margin-top:2px;font-weight:600}
 
 /* ── Widget mini-calendario dentro del banner de grupo ── */
 /* La caja de texto ya no tiene flex-shrink:0 (evitaba que se ajustara al
@@ -557,7 +561,7 @@ body.modo-claro .sbox:focus{box-shadow:inset 0 1px 2px rgba(0,0,0,.03),0 0 0 3px
 .mcal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1.5px 4px}
 .mcal-grid span{font-size:10.5px;font-weight:600;color:rgba(255,255,255,.75);text-align:center;line-height:13px;height:13px;border-radius:50%;transition:background .15s ease}
 .mcal-today{background:linear-gradient(155deg,var(--r3),var(--r))!important;color:#04211d!important;font-weight:900!important;box-shadow:0 0 0 1px rgba(255,255,255,.55),0 2px 6px rgba(0,0,0,.3)}
-@media(max-width:359px){.grupo-header{height:205px}.mcal-widget{padding:7px 9px 6px}.mcal-month{font-size:9.5px;line-height:12px}.mcal-grid span{font-size:9.5px;line-height:12px;height:12px}}
+@media(max-width:359px){.grupo-header{--mcal-alto:calc(30px + 13.5px * var(--mcal-filas))}.mcal-widget{padding:7px 9px 6px}.mcal-month{font-size:9.5px;line-height:12px}.mcal-grid span{font-size:9.5px;line-height:12px;height:12px}}
 
 /* ── GTABS ── */
 /* ══ MENÚ PRINCIPAL DEL GRUPO — 3 secciones simétricas ══ */
@@ -2219,7 +2223,21 @@ window._buildCliSelect = (hiddenId, preCliId, onchangeCb, preNombrePersonalizado
   const hidden = document.getElementById(hiddenId);
   if(!sel && preNombrePersonalizado) hidden.dataset.nombrePersonalizado = preNombrePersonalizado;
 
-  const close = () => { dropdown.style.display='none'; trigger.classList.remove('open'); };
+  // Si el usuario escribe un nombre y cierra sin pulsar "Guardar sin ficha",
+  // el texto se conservaba solo en la caja de busqueda y se perdia al guardar:
+  // el aviso salia sin cliente o con un nombre que no era el suyo. Ahora al
+  // cerrar se adopta ese texto como nombre del cliente sin ficha.
+  const _adoptarTextoLibre = () => {
+    if(hidden.value) return;                       // hay ficha elegida
+    if(hidden.dataset.nombrePersonalizado) return; // ya hay nombre libre
+    const si = document.getElementById(hiddenId+'-search');
+    const txt = (si?.value||'').trim();
+    if(!txt) return;
+    hidden.dataset.nombrePersonalizado = txt;
+    trigger.innerHTML = `<span class="cli-sel-txt"><strong style="font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.3px">${txt}</strong></span>`;
+    if(onchangeCb) onchangeCb('', txt);
+  };
+  const close = () => { _adoptarTextoLibre(); dropdown.style.display='none'; trigger.classList.remove('open'); };
   const open = () => {
     dropdown.style.display='flex';
     dropdown.style.flexDirection='column';
@@ -2924,6 +2942,14 @@ window._fabSetDefault=(key)=>{
         : {fn:'_selRestaurarPresupuestos',label:'Restaurar',icon:ICO.undo(15)}},
     archcliente:{deleteFn:'_selBorrarArchivosCliente',label:'cliente archivado',plural:'clientes archivados',
       secondary:()=>({fn:'_selRestaurarArchivosCliente',label:'Restaurar',icon:ICO.undo(15)})},
+    cobro:{deleteFn:'_selDeleteCobros',label:'cobro',plural:'cobros',
+      secondary:()=> _simpleTabActiva?.cobro==='pend'
+        ? {fn:'_selCompletarCobros',label:'Completar',icon:ICO.check(15)}
+        : {fn:'_selRestaurarCobros',label:'Restaurar',icon:ICO.undo(15)}},
+    recordatorio:{deleteFn:'_selDeleteRecordatorios',label:'recordatorio',plural:'recordatorios',
+      secondary:()=> _compSub==='recordatorios'
+        ? {fn:'_selRestaurarRecordatorios',label:'Restaurar',icon:ICO.undo(15)}
+        : {fn:'_selCompletarRecordatorios',label:'Completar',icon:ICO.check(15)}},
   };
 
   window._selMode={active:false,type:null,ids:new Set()};
@@ -3045,6 +3071,49 @@ window._selDeleteClientes=async(ids)=>{
   }
   toast(`🗑️ ${ids.length>1?'Clientes eliminados':'Cliente eliminado'}`,'o');
 };
+// ── Cobros ──
+window._selDeleteCobros=async(ids)=>{
+  toast('Eliminando…','i');
+  for(const id of ids){ try{ await deleteDoc(doc(db,'grupos',CGID,'cobros',id)); }catch(e){} }
+  toast(`🗑️ ${ids.length>1?'Cobros eliminados':'Cobro eliminado'}`,'o');
+};
+window._selCompletarCobros=async(ids)=>{
+  toast('Actualizando…','i');
+  for(const id of ids){ try{ await updateDoc(doc(db,'grupos',CGID,'cobros',id),{estado:'completado',completadoEn:serverTimestamp()}); }catch(e){} }
+  toast(`✅ ${ids.length>1?'Cobros completados':'Cobro completado'}`,'o');
+};
+window._selRestaurarCobros=async(ids)=>{
+  toast('Actualizando…','i');
+  for(const id of ids){ try{ await updateDoc(doc(db,'grupos',CGID,'cobros',id),{estado:'pendiente'}); }catch(e){} }
+  toast(`↩️ ${ids.length>1?'Cobros restaurados a pendientes':'Cobro restaurado a pendiente'}`,'o');
+};
+
+// ── Recordatorios preventivos ──
+window._selDeleteRecordatorios=async(ids)=>{
+  _asegurarLocalesCargados();
+  allRecordatorios=(allRecordatorios||[]).filter(r=>!ids.includes(r.id));
+  _recSaveAll();
+  if(typeof renderRecordatorios==='function' && document.querySelector('#screenRecordatorios.active')) renderRecordatorios();
+  if(typeof _renderCompLista==='function') _renderCompLista();
+  toast(`🗑️ ${ids.length>1?'Recordatorios eliminados':'Recordatorio eliminado'}`,'o');
+};
+window._selCompletarRecordatorios=async(ids)=>{
+  _asegurarLocalesCargados();
+  allRecordatorios=(allRecordatorios||[]).map(r=>ids.includes(r.id)?{...r,estado:'completado',completadoEn:Date.now()}:r);
+  _recSaveAll();
+  if(typeof renderRecordatorios==='function' && document.querySelector('#screenRecordatorios.active')) renderRecordatorios();
+  if(typeof _renderCompLista==='function') _renderCompLista();
+  toast(`✅ ${ids.length>1?'Recordatorios completados':'Recordatorio completado'}`,'o');
+};
+window._selRestaurarRecordatorios=async(ids)=>{
+  _asegurarLocalesCargados();
+  allRecordatorios=(allRecordatorios||[]).map(r=>ids.includes(r.id)?{...r,estado:'pendiente',completadoEn:null}:r);
+  _recSaveAll();
+  if(typeof renderRecordatorios==='function' && document.querySelector('#screenRecordatorios.active')) renderRecordatorios();
+  if(typeof _renderCompLista==='function') _renderCompLista();
+  toast(`↩️ ${ids.length>1?'Recordatorios restaurados a pendientes':'Recordatorio restaurado a pendiente'}`,'o');
+};
+
 window._selDeleteAvisos=async(ids)=>{
   toast('Eliminando…','i');
   for(const id of ids){
@@ -4651,10 +4720,9 @@ const _mcalGrupoHTML=()=>{
   let cells='';
   for(let i=0;i<startDay;i++) cells+='<span></span>';
   for(let d=1; d<=daysInMonth; d++) cells+=`<span${d===today?' class="mcal-today"':''}>${d}</span>`;
-  // Relleno hasta 42 casillas (6 filas): asi el widget mide siempre lo mismo,
-  // tenga el mes 4, 5 o 6 semanas, y la separacion con el nombre del grupo no
-  // cambia de un mes a otro.
-  for(let i=startDay+daysInMonth; i<42; i++) cells+='<span></span>';
+  // Filas reales del mes (4, 5 o 6). El banner ajusta su alto con esto, asi no
+  // queda una franja vacia bajo el calendario en los meses cortos.
+  window._mcalFilas = Math.ceil((startDay+daysInMonth)/7);
   return `
   <div class="mcal-widget" onclick="event.stopPropagation();goScreen('calendario')" title="Ir al calendario">
     <div class="mcal-month">${meses[month]} ${year}</div>
@@ -4665,8 +4733,11 @@ const _mcalGrupoHTML=()=>{
 const renderGrupo=()=>{
   if(!CG)return;
   const bg=CG.fondoImg||FONDOS[0];
+  // Se genera antes que la plantilla: deja fijado window._mcalFilas, que es lo
+  // que usa el banner para ajustar su alto al mes en curso.
+  const _mcalHTML=_mcalGrupoHTML();
   let html=`
-  <div class="grupo-header" onclick="abrirEditarGrupo()">
+  <div class="grupo-header" style="--mcal-filas:${window._mcalFilas||6}" onclick="abrirEditarGrupo()">
     <div class="grupo-header-img" style="background-image:url('${bg}')"></div>
     <div class="grupo-header-ov"></div>
     <div class="grupo-header-top">
@@ -4674,7 +4745,7 @@ const renderGrupo=()=>{
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
         Inicio
       </div>
-      <div class="grupo-header-cal-wrap">${_mcalGrupoHTML()}</div>
+      <div class="grupo-header-cal-wrap">${_mcalHTML}</div>
     </div>
     <div class="grupo-header-content">
       <div class="grupo-header-text">
@@ -4893,7 +4964,8 @@ const _simpleCardHtml=(tipo,item,completado)=>{
   const fechaTxt=_fmtFechaSimple(item.fecha);
   const fecha=completado?(item.completadoEn||item.creado):item.creado;
   const importeTxt=(tipo==='cobro'&&item.importe)?`<span style="font-size:11px;font-weight:900;color:var(--r);margin-left:6px">${fmtM(item.importe)}</span>`:'';
-  return `<div class="averia-card ${completado?'resuelta':''}" style="cursor:pointer;border-left:${borderLeft}" onclick="verSimple('${tipo}','${item.id}')">
+  return `<div class="averia-card ${completado?'resuelta':''}" data-sel-id="${item.id}" data-sel-type="${tipo}" style="cursor:pointer;border-left:${borderLeft}" onclick="verSimple('${tipo}','${item.id}')">
+    <div class="sel-check"></div>
     <div class="averia-header">
       <div class="averia-ico" style="background:${completado?'rgba(76,175,80,.12)':'rgba('+conf.colorRgb+',.15)'}">${_simpleIco(tipo,completado?'#4caf50':'rgb('+conf.colorRgb+')')}</div>
       <div style="flex:1;min-width:0">
@@ -5033,13 +5105,24 @@ window.abrirNuevoSimple=(tipo,editId,presetFecha)=>{
   },80);
 };
 
+// Nombre del cliente de un formulario: ficha elegida > nombre libre guardado >
+// texto que quedo escrito en el buscador del selector.
+window._cliNombreDe=(hiddenId)=>{
+  const el=document.getElementById(hiddenId);
+  const cli=el?.value?allClientes.find(c=>c.id===el.value):null;
+  if(cli) return cli.nombre||'';
+  const libre=el?.dataset?.nombrePersonalizado||'';
+  if(libre) return libre;
+  return (document.getElementById(hiddenId+'-search')?.value||'').trim();
+};
+
 window.guardarSimple=async(tipo,editId)=>{
   const conf=_SIMPLE_CONF[tipo];
   const titulo=($('smpTitulo')?.value||'').trim();
   if(!titulo){ toast('Escribe un título','e'); return; }
   const cliId=$('smpCli')?.value||'';
   const cli=allClientes.find(c=>c.id===cliId);
-  const nombrePersonal=$('smpCli')?.dataset?.nombrePersonalizado||'';
+  const nombrePersonal=window._cliNombreDe('smpCli');
   const data={
     titulo,
     clienteId:cliId,
@@ -5985,7 +6068,8 @@ const _recCardHtml=(r)=>{
     const hoy=_recHoyStr();
     const vencido=r.estado!=='completado'&&r.fecha&&r.fecha<=hoy;
     const fechaFmt=typeof fmtFISO==='function'?fmtFISO(r.fecha):r.fecha;
-    return `<div class="card" style="margin-bottom:10px;${vencido?'border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.06)':''}">
+    return `<div class="card" data-sel-id="${r.id}" data-sel-type="recordatorio" style="margin-bottom:10px;${vencido?'border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.06)':''}">
+      <div class="sel-check"></div>
       <div style="display:flex;align-items:flex-start;gap:12px">
         <div style="flex-shrink:0;width:38px;height:38px;border-radius:14px;background:${r.estado==='completado'?'rgba(76,175,80,.12)':vencido?'rgba(239,68,68,.15)':'rgba(255,152,0,.12)'};display:flex;align-items:center;justify-content:center">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${r.estado==='completado'?'#4caf50':vencido?'#ef4444':'#ff9800'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -6196,13 +6280,13 @@ window.guardarRecordatorio=(id)=>{
   if(id){
     const i=allRecordatorios.findIndex(x=>x.id===id);
     if(i>=0){
-      allRecordatorios[i]={...allRecordatorios[i], clienteId:clienteId||null, clienteNombre:cliente?cliente.nombre:(allRecordatorios[i].clienteNombre||''), equipoId:equipoId||null, equipoNombre:equipo?equipo.tipo:(allRecordatorios[i].equipoNombre||''), titulo, fecha, notas};
+      allRecordatorios[i]={...allRecordatorios[i], clienteId:clienteId||null, clienteNombre:(window._cliNombreDe('_recCli')||allRecordatorios[i].clienteNombre||''), equipoId:equipoId||null, equipoNombre:equipo?equipo.tipo:(allRecordatorios[i].equipoNombre||''), titulo, fecha, notas};
     }
   } else {
     allRecordatorios.push({
       id:'rec_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),
       clienteId:clienteId||null,
-      clienteNombre:cliente?cliente.nombre:'',
+      clienteNombre:window._cliNombreDe('_recCli'),
       equipoId:equipoId||null,
       equipoNombre:equipo?equipo.tipo:'',
       titulo, fecha, notas,
@@ -7742,15 +7826,95 @@ window.importarContactoAgenda=async()=>{
   }
 };
 
+// ══════════════════════════════════════════════════════════════
+// ARCHIVADO EN CASCADA DE CLIENTES
+// Archivar un cliente movia solo su ficha y dejaba huerfanos sus avisos,
+// cobros, presupuestos, imagenes y recordatorios. Ahora todo lo suyo se mueve
+// a 'archivos' (se conserva, se oculta) y vuelve entero al restaurarlo.
+// Cada documento movido guarda _colOrigen para saber a que coleccion regresa.
+// ══════════════════════════════════════════════════════════════
+const _ARCH_COLS = [
+  {col:'avisos',        tipo:'aviso'},
+  {col:'cobros',        tipo:'cobro'},
+  {col:'presupuestos',  tipo:'presupuesto'},
+  {col:'imagenes',      tipo:'imagen'},
+  {col:'recordatorios', tipo:'recordatorio'}
+];
+
+// Mueve a 'archivos' todo lo asociado al cliente. Devuelve cuantos documentos movio.
+const _archivarDocsDeCliente = async (cliId) => {
+  if(!CGID || !cliId) return 0;
+  let n = 0;
+  for(const {col,tipo} of _ARCH_COLS){
+    let snap;
+    try { snap = await getDocs(query(collection(db,'grupos',CGID,col), where('clienteId','==',cliId))); }
+    catch(e){ continue; }
+    for(const d of snap.docs){
+      const data = d.data();
+      try{
+        await addDoc(collection(db,'grupos',CGID,'archivos'), {
+          ...data, id:d.id, tipo, clienteId:cliId, _colOrigen:col, eliminadoEn:serverTimestamp()
+        });
+        await deleteDoc(doc(db,'grupos',CGID,col,d.id));
+        n++;
+      }catch(e){ /* si falla uno, seguimos con el resto */ }
+    }
+  }
+  // Los recordatorios viven tambien en memoria y en cache local: si no los
+  // quitamos aqui, la salvaguarda anti-perdida volveria a subirlos.
+  if(Array.isArray(allRecordatorios) && allRecordatorios.some(r=>r.clienteId===cliId)){
+    allRecordatorios = allRecordatorios.filter(r=>r.clienteId!==cliId);
+    if(typeof _lcSave==='function' && CGID) _lcSave('recordatorios', CGID, allRecordatorios);
+  }
+  return n;
+};
+
+// Devuelve a sus colecciones todo lo que se archivo en cascada con el cliente.
+const _restaurarDocsDeCliente = async (cliId) => {
+  if(!CGID || !cliId) return 0;
+  let n = 0;
+  let snap;
+  try { snap = await getDocs(query(collection(db,'grupos',CGID,'archivos'), where('clienteId','==',cliId))); }
+  catch(e){ return 0; }
+  for(const d of snap.docs){
+    const data = d.data();
+    // Solo lo que se archivo junto al cliente. Lo archivado a mano antes
+    // (por ejemplo un parte suelto) no lleva _colOrigen y se queda donde esta.
+    if(!data._colOrigen) continue;
+    const limpio = {...data};
+    ['tipo','eliminadoEn','_colOrigen','_eliminadoDef','_eliminadoDefEn','_archId','_origenId'].forEach(k=>delete limpio[k]);
+    delete limpio.id;
+    try{
+      await setDoc(doc(db,'grupos',CGID,data._colOrigen,data.id||d.id), limpio);
+      await deleteDoc(doc(db,'grupos',CGID,'archivos',d.id));
+      n++;
+    }catch(e){ /* seguimos */ }
+  }
+  return n;
+};
+
+// Borrado definitivo: tambien lo archivado en cascada.
+const _eliminarDocsArchivadosDeCliente = async (cliId) => {
+  if(!CGID || !cliId) return;
+  try{
+    const snap = await getDocs(query(collection(db,'grupos',CGID,'archivos'), where('clienteId','==',cliId)));
+    for(const d of snap.docs){
+      try{ await deleteDoc(doc(db,'grupos',CGID,'archivos',d.id)); }catch(e){}
+    }
+  }catch(e){}
+};
+
 window.archivarCli=async(id)=>{
   if(!confirm('¿Mover este cliente a archivos?'))return;
   const c=allClientes.find(x=>x.id===id);if(!c)return;
   try{
+    const movidos=await _archivarDocsDeCliente(id);
     await addDoc(collection(db,'grupos',CGID,'archivos'),{...c,id:c.id,tipo:'cliente',eliminadoEn:serverTimestamp()});
     await deleteDoc(doc(db,'grupos',CGID,'clientes',id));
     allClientes=allClientes.filter(x=>x.id!==id);
     _sbReturnCli=null;
-    cerrarSB();toast('Cliente archivado','i');
+    cerrarSB();
+    toast(movidos?`Cliente archivado con ${movidos} documento${movidos!==1?'s':''}`:'Cliente archivado','i');
   }catch(e){toast('Error','e')}
 };
 
@@ -7761,11 +7925,12 @@ window.swipeArchivarCli=async(id)=>{
   if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
   const c=allClientes.find(x=>x.id===id);if(!c)return;
   try{
+    const movidos=await _archivarDocsDeCliente(id);
     await addDoc(collection(db,'grupos',CGID,'archivos'),{...c,id:c.id,tipo:'cliente',eliminadoEn:serverTimestamp()});
     await deleteDoc(doc(db,'grupos',CGID,'clientes',id));
     allClientes=allClientes.filter(x=>x.id!==id);
     if(document.getElementById('clisList')) filtrarClis(document.getElementById('cliSearchBox')?.value||'');
-    toast('🗄️ Cliente archivado','i');
+    toast(movidos?`🗄️ Cliente archivado con ${movidos} documento${movidos!==1?'s':''}`:'🗄️ Cliente archivado','i');
   }catch(e){
     console.error('swipeArchivarCli',e);
     toast('Sin conexión: se archivará al recuperar internet','i');
@@ -8053,8 +8218,7 @@ window.guardarParte=async(id)=>{
   const tit=$('pTit').value.trim();
   if(!tit){toast('El título es obligatorio','e');return}
   const cliId=$('pCli').value;
-  const nombrePersonalizadoParte=$('pCli')?.dataset?.nombrePersonalizado||'';
-  const cliNom=cliId?(allClientes.find(c=>c.id===cliId)?.nombre||''):nombrePersonalizadoParte;
+  const cliNom=window._cliNombreDe('pCli');
   const esPlant=$('pPlant')?.checked||false;
   const esPlantFull=$('pPlantFull')?.checked||false;
   const edificioParte=$('pEdif')?.value.trim()||'';
@@ -10763,7 +10927,7 @@ const _renderArchivosCard=(it)=>{
   // que "mantener pulsado" no seleccione texto ni abra el menú nativo.
   const selAttrs = esCliente ? `data-sel-id="${it.id}" data-sel-type="archcliente"` : '';
   return `
-  <div class="arch-card" data-archid="${it.id}" ${selAttrs} ${esCliente?'':`onclick="_verParteArchivado('${it.id}')" style="cursor:pointer"`}>
+  <div class="arch-card" data-archid="${it.id}" ${selAttrs} onclick="${esCliente?`_verClienteArchivado('${it.id}')`:`_verParteArchivado('${it.id}')`}" style="cursor:pointer">
     ${esCliente?'<div class="sel-check"></div>':''}
     <div class="arch-card-ico">
       ${esCliente
@@ -10779,6 +10943,72 @@ const _renderArchivosCard=(it)=>{
       <button class="btn btn-del btn-sm" title="Eliminar definitivamente" onclick="event.stopPropagation();borrarArchivo('${it.id}')">🗑</button>
     </div>
   </div>`;
+};
+
+// ─── Ficha de un CLIENTE archivado: sus datos y todo lo que se archivo con el ───
+// Solo lectura: estos documentos no aparecen en ninguna seccion normal de la
+// app mientras el cliente siga archivado.
+window._verClienteArchivado=async(archId)=>{
+  const c=(window._archivosCache&&window._archivosCache[archId])||(window._archivosAllSorted||[]).find(x=>x.id===archId);
+  if(!c || c.tipo!=='cliente') return;
+  const cliId=c._origenId||c.id;
+  const fila=(et,val)=>val?`<div style="display:flex;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)"><span style="font-size:11.5px;color:var(--tx2);font-weight:700;min-width:88px">${et}</span><span style="font-size:13px;color:var(--tx);font-weight:600;flex:1">${val}</span></div>`:'';
+
+  abrirSB(c.nombre||'Cliente archivado',`
+    <div style="background:rgba(255,152,0,.1);border:1px solid rgba(255,152,0,.3);border-radius:14px;padding:10px 14px;margin-bottom:14px;font-size:12px;font-weight:800;color:#ff9800">
+      🗄️ Cliente archivado el ${fmtF(c.eliminadoEn)} · vista de solo lectura
+    </div>
+    <div class="card" style="margin-bottom:14px">
+      ${fila('Teléfono',c.telefono)}
+      ${fila('Dirección',c.direccion)}
+      ${fila('Edificio',c.edificio)}
+      ${fila('Email',c.email)}
+      ${fila('Notas',c.descripcion||c.notas)}
+    </div>
+    <div style="font-size:10px;font-weight:800;color:var(--tx2);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Documentos archivados</div>
+    <div id="_archCliDocs"><div class="empty"><p>Cargando…</p></div></div>
+    <button class="btn btn-ok" style="width:100%;margin-top:16px" onclick="cerrarSB();restaurarArchivo('${archId}','cliente')">↩ Restaurar cliente y todos sus documentos</button>
+  `);
+
+  // Los documentos se cargan aparte para que la ficha se abra al instante
+  const cont=document.getElementById('_archCliDocs');
+  if(!cont) return;
+  let docs=[];
+  try{
+    const snap=await getDocs(query(collection(db,'grupos',CGID,'archivos'),where('clienteId','==',cliId)));
+    docs=snap.docs.map(_archNormalizar).filter(d=>!d._eliminadoDef);
+  }catch(e){ cont.innerHTML=`<div class="empty"><p>No se pudieron cargar (sin conexión)</p></div>`; return; }
+
+  if(!docs.length){ cont.innerHTML=`<div class="empty"><p>Este cliente no tenía documentos</p></div>`; return; }
+
+  const META={
+    aviso:{ico:'💬',label:'Avisos'}, cobro:{ico:'💰',label:'Cobros'},
+    presupuesto:{ico:'💶',label:'Presupuestos'}, recordatorio:{ico:'🔔',label:'Recordatorios preventivos'},
+    imagen:{ico:'🖼️',label:'Imágenes'}, parte:{ico:'🔧',label:'Partes'}
+  };
+  const grupos={};
+  docs.forEach(d=>{ (grupos[d.tipo]=grupos[d.tipo]||[]).push(d); });
+
+  const estadoTxt=(d)=>{
+    const e=(d.estado||'').toLowerCase();
+    if(e==='resuelto'||e==='completado'||e==='aceptado') return `<span style="color:#4caf50;font-weight:800">${e.charAt(0).toUpperCase()+e.slice(1)}</span>`;
+    if(e) return `<span style="color:#ff9800;font-weight:800">${e.charAt(0).toUpperCase()+e.slice(1)}</span>`;
+    return '';
+  };
+
+  cont.innerHTML=Object.entries(grupos).map(([tipo,arr])=>{
+    const m=META[tipo]||{ico:'📄',label:tipo};
+    return `<div style="margin-bottom:16px">
+      <div style="font-size:12px;font-weight:800;color:var(--tx2);margin-bottom:8px">${m.ico} ${m.label} (${arr.length})</div>
+      ${arr.map(d=>{
+        if(tipo==='imagen'&&d.url) return `<div style="display:inline-block;margin:0 6px 6px 0"><img loading="lazy" decoding="async" src="${d.url}" style="width:76px;height:76px;object-fit:cover;border-radius:12px;border:1px solid var(--border)"></div>`;
+        return `<div class="card" style="margin-bottom:6px;padding:10px 12px">
+          <div style="font-size:13px;font-weight:800;color:var(--tx)">${d.titulo||d.descripcion||d.nombre||m.label}</div>
+          <div style="font-size:11.5px;color:var(--tx2);margin-top:3px">${estadoTxt(d)}${d.estado&&d.fecha?' · ':''}${d.fecha?_fmtFechaSimple(d.fecha):''}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
 };
 
 // ─── Ver ficha completa de un PARTE archivado (antes de restaurarlo) ───
@@ -10911,6 +11141,12 @@ window.restaurarArchivo=async(id,tipo)=>{
     // fallara (red, permisos...), igualmente lo ocultamos ya de la lista de
     // archivados (con la blacklist local) para que no parezca que "sigue
     // archivado" cuando en realidad ya se ha restaurado.
+    // Todo lo que se archivo junto al cliente vuelve a su seccion, con su
+    // estado intacto (pendiente, resuelto, completado...).
+    let restaurados=0;
+    if(tipoReal==='cliente'){
+      try{ restaurados=await _restaurarDocsDeCliente(originalId); }catch(e){}
+    }
     try{
       await deleteDoc(doc(db,'grupos',CGID,'archivos',archId));
     }catch(delErr){
@@ -10921,7 +11157,7 @@ window.restaurarArchivo=async(id,tipo)=>{
     if(tipoReal==='cliente'){
       try{const cs=await getDocs(collection(db,'grupos',CGID,'clientes'));allClientes=cs.docs.map(d=>({id:d.id,...d.data()}));}catch(e){}
     }
-    toast('↩️ Elemento restaurado','o');
+    toast(restaurados?`↩️ Cliente restaurado con ${restaurados} documento${restaurados!==1?'s':''}`:'↩️ Elemento restaurado','o');
   }catch(e){toast('Error al restaurar: '+e.message,'e');console.error(e);}
 };
 
@@ -10995,7 +11231,9 @@ const _ejecutarBorradoDefinitivo=async(archId,cliId,itemData)=>{
 
   // 4. Borrar datos relacionados si es cliente
   if(esCliente && realCliId){
-    const cols=['partes','mantenimientos','averias','averias_historial','presupuestos','imagenes','historial_mantenimientos'];
+    // Lo que se archivo en cascada con el cliente se borra tambien
+    try{ await _eliminarDocsArchivadosDeCliente(realCliId); }catch(e){}
+    const cols=['partes','mantenimientos','averias','averias_historial','presupuestos','imagenes','historial_mantenimientos','avisos','cobros','recordatorios'];
     await Promise.all(cols.map(async col=>{
       try{
         const sn=await getDocs(query(collection(db,'grupos',CGID,col),where('clienteId','==',realCliId)));
@@ -12405,7 +12643,7 @@ window.editarPresupuesto=async(prId)=>{
 window.guardarPresupuesto=async(editId)=>{
   const cliEl=$('prCli');
   const cliId=cliEl?.value||'';
-  const nombrePersonal=cliEl?.dataset?.nombrePersonalizado||'';
+  const nombrePersonal=window._cliNombreDe(cliEl?.id||'');
   const tituloEl=$('prTitulo');
   const titulo=tituloEl?tituloEl.value.trim():'';
   if((!cliId&&!nombrePersonal)||!titulo){toast('Selecciona cliente y pon un título','e');return}
@@ -14434,8 +14672,7 @@ window.editarAviso=(id)=>{
 window.guardarNuevoAviso=async()=>{
   const desc=(document.getElementById('avisDescInput')?.value||'').trim();
   const cliId=_getCliSelectVal('avisCli');
-  const nombrePersonal=document.getElementById('avisCli')?.dataset?.nombrePersonalizado||'';
-  const cliNom=cliId?(allClientes.find(c=>c.id===cliId)?.nombre||''):nombrePersonal;
+  const cliNom=window._cliNombreDe('avisCli');
   const prio=document.getElementById('avisPrio')?.value||'baja';
   const fechaAlerta=document.getElementById('avisFechaAlerta')?.value||null;
   if(!desc&&!cliId&&!cliNom){toast('Escribe una descripción o elige un cliente','i');return;}
@@ -14460,8 +14697,7 @@ window.guardarNuevoAviso=async()=>{
 window.actualizarAviso=async(id)=>{
   const desc=(document.getElementById('avisDescInput')?.value||'').trim();
   const cliId=_getCliSelectVal('avisCli');
-  const nombrePersonal=document.getElementById('avisCli')?.dataset?.nombrePersonalizado||'';
-  const cliNom=cliId?(allClientes.find(c=>c.id===cliId)?.nombre||''):nombrePersonal;
+  const cliNom=window._cliNombreDe('avisCli');
   const prio=document.getElementById('avisPrio')?.value||'baja';
   const fechaAlerta=document.getElementById('avisFechaAlerta')?.value||null;
   if(!desc&&!cliId&&!cliNom){toast('Escribe una descripción o elige un cliente','i');return;}
