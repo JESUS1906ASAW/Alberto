@@ -1919,7 +1919,7 @@ try {
 // ESTADO GLOBAL
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let CU=null, CUD=null, CGID=null, CG=null;
-let allGrupos=[], allClientes=[], allPartes=[], allMantenimientos=[], allRecordatorios=[], allEquipos=[];
+let allGrupos=[], allClientes=[], allPartes=[], allMantenimientos=[], allRecordatorios=[];
 let _mantHistCache=[];
 let unsubP=null, unsubC=null, unsubG=null, unsubN=null, unsubM=null;
 const tipoU='trabajador';
@@ -3667,7 +3667,7 @@ window.doLogout=async()=>{
   _limpiarAvisosSubs();
   if(unsubM){unsubM();unsubM=null}
   CU=null;CUD=null;CGID=null;CG=null;
-  allGrupos=[];allClientes=[];allPartes=[];allMantenimientos=[];allRecordatorios=[];allEquipos=[];
+  allGrupos=[];allClientes=[];allPartes=[];allMantenimientos=[];allRecordatorios=[];
   _mantHistCache=[];
   screenHistory=[];
   sessionStorage.removeItem('alberto_cgid');
@@ -4274,7 +4274,6 @@ window.abrirGrupo=async id=>{
     allPartes            = _lcLoad('partes',        id) || allPartes   || [];
     allMantenimientos    = _lcLoad('mantenimientos',id) || allMantenimientos || [];
     allRecordatorios     = _lcLoad('recordatorios', id) || allRecordatorios || [];
-    allEquipos           = _lcLoad('equipos',       id) || allEquipos || [];
     _averiasPend         = _lcLoad('averias_pend',  id) || _averiasPend || [];
     _averiasRes          = _lcLoad('averias_res',   id) || _averiasRes  || [];
     _presusPend          = _lcLoad('presus_pend',   id) || _presusPend  || [];
@@ -4311,8 +4310,6 @@ window.abrirGrupo=async id=>{
   try{ if(CU) localStorage.setItem('alberto_ultimo_grupo_'+CU.uid, id); }catch(e){}
   // Recordatorios preventivos: solo locales (no se sincronizan por Firestore)
   allRecordatorios = _lcLoad('recordatorios', id) || [];
-  // Equipos asociados a clientes: solo locales (no se sincronizan por Firestore)
-  allEquipos = _lcLoad('equipos', id) || [];
 
   // ── 2. Listeners en tiempo real ──
   if(unsubP){unsubP();unsubP=null}
@@ -5867,42 +5864,19 @@ window.abrirFormRecordatorio=(id)=>{
       <div class="fgrp"><label>Cliente</label>
         <div id="_recCli-wrap"></div>
       </div>
-      <div class="fgrp" id="_recEquipo-wrap" style="display:none">
-        <label>Equipo (opcional)</label>
-        <select id="_recEquipo"><option value="">Sin equipo asociado</option></select>
-      </div>
       <div class="fgrp"><label>¿Qué hay que hacer? *</label><input id="_recTitulo" value="${(r?.titulo||'').replace(/"/g,'&quot;')}" placeholder="Ej: Revisión anual bomba de riego"></div>
       <div class="fgrp"><label>Fecha *</label><input type="date" id="_recFecha" value="${r?.fecha||new Date().toISOString().split('T')[0]}"></div>
       <div class="fgrp"><label>Notas</label><textarea id="_recNotas" placeholder="Detalles, referencias, lo que necesites recordar...">${r?.notas||''}</textarea></div>
       <button class="btn btn-p" onclick="guardarRecordatorio('${id||''}')">💾 ${r?'Guardar cambios':'Crear recordatorio'}</button>
     </div>`;
   abrirSB(r?'Editar recordatorio':'Nuevo recordatorio preventivo', html, undefined);
-  setTimeout(()=>{
-    _buildCliSelect('_recCli', r?.clienteId||'', cliId=>_recRefrescarSelectEquipo(cliId));
-    _recRefrescarSelectEquipo(r?.clienteId||'', r?.equipoId||'');
-  }, 30);
-};
-
-// Repuebla el <select> de equipo según el cliente elegido en el formulario de recordatorio.
-// Se oculta si el cliente no tiene equipos dados de alta (o no hay cliente seleccionado).
-window._recRefrescarSelectEquipo=(cliId,preEquipoId)=>{
-  const wrap=document.getElementById('_recEquipo-wrap');
-  const sel=document.getElementById('_recEquipo');
-  if(!wrap||!sel) return;
-  const equipos=cliId?_eqDeCliente(cliId):[];
-  if(!equipos.length){ wrap.style.display='none'; sel.innerHTML='<option value="">Sin equipo asociado</option>'; return; }
-  wrap.style.display='block';
-  sel.innerHTML='<option value="">Sin equipo asociado</option>'+equipos.map(e=>
-    `<option value="${e.id}" ${e.id===preEquipoId?'selected':''}>${e.tipo||'Equipo'}${e.marca?' · '+e.marca:''}${e.modelo?' '+e.modelo:''}</option>`
-  ).join('');
+  setTimeout(()=>{ _buildCliSelect('_recCli', r?.clienteId||'', ()=>{}); }, 30);
 };
 
 window.guardarRecordatorio=(id)=>{
   const cliInput=document.getElementById('_recCli');
   const clienteId=cliInput?cliInput.value:'';
   const cliente=clienteId?allClientes.find(c=>c.id===clienteId):null;
-  const equipoId=document.getElementById('_recEquipo')?.value||'';
-  const equipo=equipoId?(allEquipos||[]).find(x=>x.id===equipoId):null;
   const titulo=(document.getElementById('_recTitulo')?.value||'').trim();
   const fecha=document.getElementById('_recFecha')?.value||'';
   const notas=(document.getElementById('_recNotas')?.value||'').trim();
@@ -5915,15 +5889,13 @@ window.guardarRecordatorio=(id)=>{
   if(id){
     const i=allRecordatorios.findIndex(x=>x.id===id);
     if(i>=0){
-      allRecordatorios[i]={...allRecordatorios[i], clienteId:clienteId||null, clienteNombre:cliente?cliente.nombre:(allRecordatorios[i].clienteNombre||''), equipoId:equipoId||null, equipoNombre:equipo?equipo.tipo:(allRecordatorios[i].equipoNombre||''), titulo, fecha, notas};
+      allRecordatorios[i]={...allRecordatorios[i], clienteId:clienteId||null, clienteNombre:cliente?cliente.nombre:(allRecordatorios[i].clienteNombre||''), titulo, fecha, notas};
     }
   } else {
     allRecordatorios.push({
       id:'rec_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),
       clienteId:clienteId||null,
       clienteNombre:cliente?cliente.nombre:'',
-      equipoId:equipoId||null,
-      equipoNombre:equipo?equipo.tipo:'',
       titulo, fecha, notas,
       estado:'pendiente',
       creadoEn:Date.now()
@@ -5954,252 +5926,6 @@ window.eliminarRecordatorio=(id)=>{
   toast('🗑 Recordatorio eliminado','o');
   if(document.querySelector('#screenRecordatorios.active')) renderRecordatorios();
   _recRefrescarClientesTab();
-};
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// EQUIPOS ASOCIADOS AL CLIENTE
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Ficha de equipo por cliente: datos básicos + ficha técnica reducida +
-// historial (solo recordatorios preventivos vinculados — sin enlazar con
-// avisos/presupuestos/cobros a propósito, para que sea un módulo ligero e
-// independiente). Se guarda en localStorage por grupo (CGID), igual que
-// Recordatorios preventivos: no se sincroniza por Firestore.
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const _eqSaveAll=()=>{ if(CGID) _lcSave('equipos',CGID,allEquipos); };
-const _eqDeCliente=cliId=>(allEquipos||[]).filter(e=>e.clienteId===cliId).sort((a,b)=>(b.creadoEn||0)-(a.creadoEn||0));
-const _eqEstadoConf={
-  ok:{label:'OK',color:'#4caf50',bg:'rgba(76,175,80,.13)'},
-  revisar:{label:'Revisar',color:'#ff9800',bg:'rgba(255,152,0,.13)'},
-  sustituir:{label:'Sustituir',color:'#ef4444',bg:'rgba(239,68,68,.13)'}
-};
-
-// Comprime una foto de equipo a dataURL ligero (para no saturar localStorage)
-const _comprimirImgEquipo=(file)=>new Promise((res,rej)=>{
-  const MAX=800;
-  const imgEl=new Image();const reader=new FileReader();
-  reader.onload=e=>{imgEl.src=e.target.result};
-  imgEl.onload=()=>{
-    const canvas=document.createElement('canvas');
-    let w=imgEl.width,h=imgEl.height;
-    if(w>MAX||h>MAX){const r=Math.min(MAX/w,MAX/h);w=Math.round(w*r);h=Math.round(h*r);}
-    canvas.width=w;canvas.height=h;
-    canvas.getContext('2d').drawImage(imgEl,0,0,w,h);
-    res(canvas.toDataURL('image/jpeg',.65));
-  };
-  imgEl.onerror=rej;reader.readAsDataURL(file);
-});
-
-// ─── Lista de equipos de un cliente (abierta desde el botón "Equipos" en su ficha) ───
-window.abrirEquiposClienteSB=(cliId)=>{
-  const c=allClientes.find(x=>x.id===cliId);if(!c)return;
-  _sbReturnCli=cliId;
-  const equipos=_eqDeCliente(cliId);
-  const mkCard=(e)=>{
-    const foto=e.fotos&&e.fotos[0];
-    const est=_eqEstadoConf[e.estado||'ok'];
-    return `<div class="card" style="margin-bottom:10px;cursor:pointer;display:flex;gap:12px;align-items:center" onclick="verEquipo('${e.id}')">
-      ${foto?`<div style="width:46px;height:46px;border-radius:12px;overflow:hidden;flex-shrink:0"><img src="${foto}" style="width:100%;height:100%;object-fit:cover"></div>`
-        :`<div style="width:46px;height:46px;border-radius:12px;flex-shrink:0;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;font-size:20px">🔧</div>`}
-      <div style="flex:1;min-width:0">
-        <div style="font-size:13.5px;font-weight:900;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.tipo||'Equipo'}${e.marca?` · ${e.marca}`:''}</div>
-        <div style="font-size:11.5px;color:var(--tx2);margin-top:2px">${e.modelo||'Sin modelo'}${e.serie?` · Nº ${e.serie}`:''}</div>
-      </div>
-      <span style="font-size:10.5px;font-weight:900;padding:3px 9px;border-radius:20px;background:${est.bg};color:${est.color};white-space:nowrap;flex-shrink:0">${est.label}</span>
-    </div>`;
-  };
-  const html=`
-    <button class="btn btn-p" style="width:100%;margin-bottom:14px" onclick="abrirFormEquipo('${cliId}')">+ Añadir equipo</button>
-    ${equipos.length?equipos.map(mkCard).join(''):`<div class="empty" style="padding:20px"><div class="empty-ico" style="font-size:32px">🔧</div><p>Sin equipos registrados para este cliente</p></div>`}
-  `;
-  abrirSB(`🔧 Equipos de ${c.nombre}`,html,cliId);
-};
-
-// ─── Alta rápida de equipo (mínimo: tipo + marca/modelo) ───
-window.abrirFormEquipo=(cliId,id)=>{
-  const e=id?(allEquipos||[]).find(x=>x.id===id):null;
-  const html=`
-    <div class="fsec">
-      <div class="fgrp"><label>Tipo de equipo *</label><input id="_eqTipo" value="${(e?.tipo||'').replace(/"/g,'&quot;')}" placeholder="Ej: Bomba sumergible, cuadro eléctrico..."></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="fgrp"><label>Marca</label><input id="_eqMarca" value="${(e?.marca||'').replace(/"/g,'&quot;')}" placeholder="Ej: Grundfos"></div>
-        <div class="fgrp"><label>Modelo</label><input id="_eqModelo" value="${(e?.modelo||'').replace(/"/g,'&quot;')}" placeholder="Ej: CR3-8"></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div class="fgrp"><label>Nº de serie</label><input id="_eqSerie" value="${(e?.serie||'').replace(/"/g,'&quot;')}" placeholder="Opcional"></div>
-        <div class="fgrp"><label>Fecha instalación</label><input type="date" id="_eqFechaInst" value="${e?.fechaInstalacion||''}"></div>
-      </div>
-      <button class="btn btn-p" onclick="guardarEquipo('${cliId}','${id||''}')">💾 ${e?'Guardar cambios':'Añadir equipo'}</button>
-    </div>`;
-  abrirSB(e?'Editar equipo':'Nuevo equipo',html,cliId);
-};
-
-window.guardarEquipo=(cliId,id)=>{
-  const tipo=(document.getElementById('_eqTipo')?.value||'').trim();
-  const marca=(document.getElementById('_eqMarca')?.value||'').trim();
-  const modelo=(document.getElementById('_eqModelo')?.value||'').trim();
-  const serie=(document.getElementById('_eqSerie')?.value||'').trim();
-  const fechaInstalacion=document.getElementById('_eqFechaInst')?.value||'';
-  if(!tipo){ toast('Escribe el tipo de equipo','e'); return; }
-  if(!CGID){ toast('No hay grupo activo','e'); return; }
-  if(!Array.isArray(allEquipos)) allEquipos=[];
-
-  let equipoId=id;
-  if(id){
-    const i=allEquipos.findIndex(x=>x.id===id);
-    if(i>=0) allEquipos[i]={...allEquipos[i],tipo,marca,modelo,serie,fechaInstalacion};
-  } else {
-    equipoId='eq_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
-    allEquipos.push({
-      id:equipoId, clienteId:cliId, tipo, marca, modelo, serie, fechaInstalacion,
-      fotos:[], estado:'ok', garantiaHasta:'', vidaUtilAnios:null,
-      creadoEn:Date.now()
-    });
-  }
-  _eqSaveAll();
-  toast(id?'✓ Equipo actualizado':'✓ Equipo añadido','o');
-  verEquipo(equipoId);
-};
-
-window.eliminarEquipo=(id)=>{
-  if(!confirm('¿Eliminar este equipo? Los recordatorios ya creados no se borran, pero dejarán de estar vinculados a él.')) return;
-  const e=(allEquipos||[]).find(x=>x.id===id);
-  allEquipos=(allEquipos||[]).filter(x=>x.id!==id);
-  // Los recordatorios que apuntaban a este equipo conservan el nombre como texto, pero pierden el enlace
-  (allRecordatorios||[]).forEach(r=>{ if(r.equipoId===id){ r.equipoId=null; } });
-  _eqSaveAll(); _recSaveAll();
-  toast('🗑 Equipo eliminado','o');
-  cerrarSB();
-  if(e) setTimeout(()=>abrirEquiposClienteSB(e.clienteId),150);
-};
-
-window.subirFotoEquipo=async(id,files)=>{
-  if(!files||!files.length) return;
-  const e=(allEquipos||[]).find(x=>x.id===id);if(!e)return;
-  toast('Procesando foto...','o');
-  try{
-    const dataURL=await _comprimirImgEquipo(files[0]);
-    if(!Array.isArray(e.fotos)) e.fotos=[];
-    e.fotos.unshift(dataURL);
-    e.fotos=e.fotos.slice(0,3); // máximo 3 fotos por equipo, para no saturar el almacenamiento local
-    _eqSaveAll();
-    verEquipo(id);
-  }catch(err){ toast('No se pudo procesar la foto','e'); }
-};
-
-window._eqEliminarFoto=(id,idx)=>{
-  const e=(allEquipos||[]).find(x=>x.id===id);if(!e)return;
-  e.fotos=(e.fotos||[]).filter((_,i)=>i!==idx);
-  _eqSaveAll();
-  verEquipo(id);
-};
-
-// Guardado inline de la ficha técnica (garantía / estado / vida útil) — sin botón,
-// se guarda solo al cambiar cada campo para que sea rápido de rellenar.
-window._eqGuardarFichaTecnica=(id)=>{
-  const e=(allEquipos||[]).find(x=>x.id===id);if(!e)return;
-  e.garantiaHasta=document.getElementById('_eqGarantia')?.value||'';
-  e.estado=document.getElementById('_eqEstado')?.value||'ok';
-  const vu=document.getElementById('_eqVidaUtil')?.value;
-  e.vidaUtilAnios=vu?parseInt(vu,10):null;
-  _eqSaveAll();
-  toast('✓ Guardado','o');
-};
-
-// ─── Ficha de un equipo: datos + ficha técnica + historial de recordatorios vinculados ───
-window.verEquipo=(id)=>{
-  const e=(allEquipos||[]).find(x=>x.id===id);if(!e)return;
-  const c=allClientes.find(x=>x.id===e.clienteId);
-  const est=_eqEstadoConf[e.estado||'ok'];
-
-  // Vida útil estimada / sustitución recomendada (orientativo, calculado, no obligatorio)
-  let vidaUtilHTML='';
-  if(e.fechaInstalacion&&e.vidaUtilAnios){
-    const fIns=new Date(e.fechaInstalacion);
-    const fLim=new Date(fIns); fLim.setFullYear(fLim.getFullYear()+e.vidaUtilAnios);
-    const restante=Math.round((fLim-new Date())/(1000*60*60*24*365));
-    vidaUtilHTML=restante<=0
-      ? `<div style="font-size:11.5px;color:#ef4444;font-weight:800;margin-top:6px">⚠️ Vida útil superada — sustitución recomendada</div>`
-      : `<div style="font-size:11.5px;color:var(--tx2);margin-top:6px">Vida útil restante estimada: ~${restante} año${restante!==1?'s':''}</div>`;
-  }
-
-  // Historial: recordatorios preventivos vinculados a este equipo
-  const recEq=(allRecordatorios||[]).filter(r=>r.equipoId===id).sort((a,b)=>(a.fecha||'')<(b.fecha||'')?-1:1);
-  const recPend=recEq.filter(r=>r.estado!=='completado');
-  const recComp=recEq.filter(r=>r.estado==='completado');
-  const proximo=recPend[0];
-
-  const html=`
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
-      <button class="btn btn-s btn-sm" onclick="abrirFormEquipo('${e.clienteId}','${e.id}')">✏️ Editar datos</button>
-      <button class="btn btn-s btn-sm" style="color:#ef4444" onclick="eliminarEquipo('${e.id}')">🗑 Eliminar</button>
-    </div>
-
-    ${(e.fotos&&e.fotos.length)?`<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
-      ${e.fotos.map((f,i)=>`<div style="position:relative;aspect-ratio:1;border-radius:12px;overflow:hidden">
-        <img src="${f}" style="width:100%;height:100%;object-fit:cover">
-        <button onclick="_eqEliminarFoto('${e.id}',${i})" style="position:absolute;top:4px;right:4px;width:20px;height:20px;border-radius:50%;border:none;background:rgba(0,0,0,.55);color:#fff;font-size:11px;cursor:pointer;line-height:1">✕</button>
-      </div>`).join('')}
-    </div>`:''}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <button class="btn btn-s" onclick="document.getElementById('_eqFotoGal_${e.id}').click()" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span style="font-size:11.5px;font-weight:800">Galería</span>
-      </button>
-      <button class="btn btn-s" onclick="document.getElementById('_eqFotoCam_${e.id}').click()" style="display:flex;flex-direction:column;align-items:center;gap:4px;padding:12px 8px">
-        <span style="font-size:18px">📷</span><span style="font-size:11.5px;font-weight:800">Cámara / placa</span>
-      </button>
-      <input type="file" id="_eqFotoGal_${e.id}" accept="image/*" style="display:none" onchange="subirFotoEquipo('${e.id}',this.files)">
-      <input type="file" id="_eqFotoCam_${e.id}" accept="image/*" capture="environment" style="display:none" onchange="subirFotoEquipo('${e.id}',this.files)">
-    </div>
-
-    <div style="font-size:10px;font-weight:800;color:var(--tx2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">🔥 Datos del equipo</div>
-    <div class="card" style="margin-bottom:16px">
-      <div style="font-size:15px;font-weight:900;color:var(--tx)">${e.tipo||'Equipo'}</div>
-      <div style="font-size:12.5px;color:var(--tx2);margin-top:3px">${[e.marca,e.modelo].filter(Boolean).join(' · ')||'Sin marca/modelo'}</div>
-      <div style="font-size:12px;color:var(--tx2);margin-top:6px">${e.serie?`Nº serie: ${e.serie}`:'Sin número de serie'}${e.fechaInstalacion?` · Instalado: ${fmtFISO(e.fechaInstalacion)}`:''}</div>
-      <div style="font-size:11.5px;color:var(--tx3);margin-top:6px">Cliente: ${c?.nombre||'—'}</div>
-    </div>
-
-    <div style="font-size:10px;font-weight:800;color:var(--tx2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">🟠 Ficha técnica</div>
-    <div class="card" style="margin-bottom:16px">
-      <div class="fgrp"><label>Garantía hasta</label><input type="date" id="_eqGarantia" value="${e.garantiaHasta||''}" onchange="_eqGuardarFichaTecnica('${e.id}')"></div>
-      <div class="fgrp"><label>Estado del equipo</label>
-        <select id="_eqEstado" onchange="_eqGuardarFichaTecnica('${e.id}')">
-          <option value="ok" ${e.estado==='ok'||!e.estado?'selected':''}>OK</option>
-          <option value="revisar" ${e.estado==='revisar'?'selected':''}>Revisar</option>
-          <option value="sustituir" ${e.estado==='sustituir'?'selected':''}>Sustituir</option>
-        </select>
-      </div>
-      <div class="fgrp" style="margin-bottom:0"><label>Vida útil estimada (años)</label><input type="number" min="0" id="_eqVidaUtil" value="${e.vidaUtilAnios||''}" placeholder="Ej: 10" onchange="_eqGuardarFichaTecnica('${e.id}')"></div>
-      ${vidaUtilHTML}
-    </div>
-
-    <div style="font-size:10px;font-weight:800;color:var(--tx2);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">📋 Historial</div>
-    ${proximo?`<div style="background:rgba(255,152,0,.08);border:1px solid rgba(255,152,0,.25);border-radius:14px;padding:10px 12px;margin-bottom:10px">
-      <div style="font-size:11px;font-weight:900;color:#ff9800;text-transform:uppercase;letter-spacing:.3px">Próximo mantenimiento</div>
-      <div style="font-size:13px;font-weight:800;color:var(--tx);margin-top:3px">${proximo.titulo}</div>
-      <div style="font-size:11.5px;color:var(--tx2);margin-top:1px">${fmtFISO(proximo.fecha)}</div>
-    </div>`:''}
-    <button class="btn btn-s" style="width:100%;margin-bottom:12px" onclick="_eqNuevoRecordatorio('${e.id}','${e.clienteId}')">+ Recordatorio preventivo para este equipo</button>
-    ${recComp.length?recComp.map(r=>`<div class="card" style="margin-bottom:8px">
-      <div style="display:flex;align-items:center;gap:8px">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12.5px;font-weight:800;color:var(--tx)">${r.titulo}</div>
-          <div style="font-size:11px;color:var(--tx2)">Realizado · ${fmtFISO(r.fecha)}</div>
-        </div>
-      </div>
-    </div>`).join(''):`<div class="empty" style="padding:14px"><p style="font-size:12.5px">Sin mantenimientos realizados todavía</p></div>`}
-  `;
-  abrirSB(`🔧 ${e.tipo||'Equipo'}`,html,e.clienteId);
-};
-
-// Crea un recordatorio preventivo pre-vinculado a este equipo (y a su cliente)
-window._eqNuevoRecordatorio=(equipoId,cliId)=>{
-  abrirFormRecordatorio();
-  setTimeout(()=>{
-    _buildCliSelect('_recCli',cliId,()=>{ _recRefrescarSelectEquipo(cliId); });
-    _recRefrescarSelectEquipo(cliId,equipoId);
-  },40);
 };
 
 // ─── Ver cliente ───
@@ -6457,7 +6183,7 @@ window.verCliente=async id=>{
     })()}
 
     <!-- ── ACCIONES EN CASCADA (crear documentos encadenados) ── -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px">
       <button onclick="window._crearAvisoRapidoCli('${id}')" style="display:flex;align-items:center;gap:8px;background:rgba(171,71,188,.08);border:1px solid rgba(171,71,188,.2);border-radius:14px;padding:11px 12px;cursor:pointer;font-family:var(--font);transition:.15s" onmouseover="this.style.background='rgba(171,71,188,.14)'" onmouseout="this.style.background='rgba(171,71,188,.08)'">
         <span style="font-size:18px">💬</span>
         <div style="text-align:left"><div style="font-size:12px;font-weight:900;color:var(--tx)">Nuevo aviso</div><div style="font-size:10px;color:var(--tx2)">Cliente pre-rellenado</div></div>
@@ -6469,10 +6195,6 @@ window.verCliente=async id=>{
       <button onclick="abrirImagenesClienteDesdeCli('${id}')" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;padding:11px 12px;cursor:pointer;font-family:var(--font);transition:.15s" onmouseover="this.style.borderColor='rgba(var(--theme-rgb),.4)'" onmouseout="this.style.borderColor='var(--border)'">
         <span style="font-size:18px">📷</span>
         <div style="text-align:left"><div style="font-size:12px;font-weight:900;color:var(--tx)">Fotos</div><div style="font-size:10px;color:var(--tx2)">Instalación</div></div>
-      </button>
-      <button onclick="abrirEquiposClienteSB('${id}')" style="display:flex;align-items:center;gap:8px;background:rgba(20,184,166,.08);border:1px solid rgba(20,184,166,.22);border-radius:14px;padding:11px 12px;cursor:pointer;font-family:var(--font);transition:.15s" onmouseover="this.style.background='rgba(20,184,166,.15)'" onmouseout="this.style.background='rgba(20,184,166,.08)'">
-        <span style="font-size:18px">🔧</span>
-        <div style="text-align:left"><div style="font-size:12px;font-weight:900;color:var(--tx)">Equipos</div><div style="font-size:10px;color:var(--tx2)">${_eqDeCliente(id).length?`${_eqDeCliente(id).length} registrado${_eqDeCliente(id).length>1?'s':''}`:'Ninguno todavía'}</div></div>
       </button>
     </div>
     <div style="margin-top:18px">
