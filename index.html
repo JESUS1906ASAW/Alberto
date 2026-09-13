@@ -627,6 +627,8 @@ body.modo-claro .gtab-item.gt-presu{border-color:rgba(64,124,182,.28)}
   border:2px solid rgba(255,255,255,.45);background:rgba(0,0,0,.28);backdrop-filter:blur(4px);
   align-items:center;justify-content:center;z-index:5;transition:background .18s var(--ease-spring),border-color .18s ease,transform .22s var(--ease-spring);
 }
+/* Encabezados de bloque de la ficha del cliente */
+.ficha-sec-tit{font-size:10px;font-weight:800;color:var(--tx2);letter-spacing:2px;text-transform:uppercase;margin:0 0 10px 2px}
 .card[data-sel-id],.averia-card[data-sel-id]{position:relative}
 /* En la galeria la miniatura recorta su contenido: el check se ve igual porque
    va dentro del propio recorte, pero necesita separarse del borde. */
@@ -6708,113 +6710,8 @@ window.verCliente=async id=>{
   eventos.sort((a,b)=>b.ts-a.ts);
 
   // ─── Renderizado de cada tipo de evento ───
-  const renderEv=(ev)=>{
-    if(ev.t==='grupo_mant'){
-      // Bloque agrupado: mantenimiento realizado + parte
-      const h=ev.hist, p=ev.parte;
-      const totP=calcTotal(p);
-      return`<div class="tl-item">
-        <div class="tl-dot mant" style="background:#4caf50;width:14px;height:14px;margin-top:4px"></div>
-        <div style="flex:1;min-width:0">
-          <div style="background:rgba(76,175,80,.07);border:1px solid rgba(76,175,80,.22);border-radius:16px;overflow:hidden;margin-bottom:12px">
-            <!-- cabecera del bloque -->
-            <div style="background:rgba(76,175,80,.13);padding:10px 12px;display:flex;align-items:center;gap:8px">
-              <span style="display:flex;align-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-              <div style="flex:1;min-width:0">
-                <div style="font-size:13px;font-weight:900;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${h.nombreTrabajo}</div>
-                <div style="font-size:11px;color:#4caf50;font-weight:700">Mantenimiento realizado · ${fmtFISOorTS(h.fechaCompletado,h.creado)}${h.completadoPor?` · ${h.completadoPor}`:''}</div>
-              </div>
-              <span style="font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px;background:rgba(76,175,80,.2);color:#4caf50;white-space:nowrap">${h.frecuencia||'Único'}</span>
-            </div>
-            <!-- parte asociado -->
-            <div style="padding:10px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;border-top:1px solid rgba(76,175,80,.15)" onclick="verParteDesdeCliente('${p.id}','${id}')">
-              <span style="display:flex;align-items:center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--tx2)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
-              <div style="flex:1;min-width:0">
-                <div style="font-size:12px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.titulo}</div>
-                <div style="font-size:11px;color:var(--tx2)">${fmtF(p.creado)}${p.operario?` · ${p.operario}`:''}</div>
-              </div>
-              <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-                ${totP>0?`<span style="font-size:12px;font-weight:800;color:var(--tx)">${fmtM(totP)}</span>`:''}
-                <span style="font-size:11px;font-weight:800;padding:3px 8px;border-radius:20px;background:${p.estado==='completado'?'rgba(76,175,80,.15)':'rgba(255,152,0,.15)'};color:${p.estado==='completado'?'#4caf50':'#ff9800'}">${p.estado==='completado'?'Hecho':'Pdte'}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>`;
-    }
-    if(ev.t==='parte'){
-      const p=ev.data;
-      const tot=calcTotal(p);
-      const compl=p.estado==='completado';
-      return`<div class="tl-item">
-        <div class="tl-dot parte" style="background:${compl?'#4caf50':'#ff9800'}"></div>
-        <div class="tl-card" onclick="verParteDesdeCliente('${p.id}','${id}')">
-          <div class="tl-card-head">
-            <span style="display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></span>
-            <span class="tl-card-title">${p.titulo}</span>
-            <span class="tl-card-badge" style="background:${compl?'rgba(76,175,80,.15)':'rgba(255,152,0,.15)'};color:${compl?'#4caf50':'#ff9800'}">${compl?'Completado':'Pendiente'}</span>
-          </div>
-          <div class="tl-card-sub">${fmtF(p.creado)}${p.operario?` · ${p.operario}`:''}</div>
-          ${tot>0?`<div class="tl-card-total">${fmtM(tot)}</div>`:''}
-        </div>
-      </div>`;
-    }
-    if(ev.t==='mant'){
-      const m=ev.data;
-      const completado=m._completado||m.estado==='completado';
-      return`<div class="tl-item">
-        <div class="tl-dot mant" style="background:${completado?'#4caf50':'#ff9800'}"></div>
-        <div class="tl-card" onclick="window.verMantDesdeCliente('${m.id}','${id}')">
-          <div class="tl-card-head">
-            <span style="display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><circle cx="12" cy="12" r="7"/></svg></span>
-            <span class="tl-card-title">${m.nombreTrabajo}</span>
-            <span class="tl-card-badge" style="background:${completado?'rgba(76,175,80,.15)':'rgba(255,152,0,.12)'};color:${completado?'#4caf50':'#ff9800'}">${completado?'Completado':'Activo'}</span>
-          </div>
-          <div class="tl-card-sub">${m.frecuencia?`${m.frecuencia} · `:''}${fmtF(m.creado)}</div>
-        </div>
-      </div>`;
-    }
-    if(ev.t==='mant_hist'){
-      const h=ev.data;
-      return`<div class="tl-item">
-        <div class="tl-dot mant" style="background:#4caf50"></div>
-        <div class="tl-card" style="border-color:rgba(76,175,80,.25)">
-          <div class="tl-card-head">
-            <span style="display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
-            <span class="tl-card-title">${h.nombreTrabajo}</span>
-            <span class="tl-card-badge" style="background:rgba(76,175,80,.15);color:#4caf50">Realizado</span>
-          </div>
-          <div class="tl-card-sub">${fmtFISOorTS(h.fechaCompletado,h.creado)}${h.completadoPor?` · ${h.completadoPor}`:''}${h.frecuencia?` · ${h.frecuencia}`:''}</div>
-        </div>
-      </div>`;
-    }
-    if(ev.t==='presupuesto'){
-      const pr=ev.data;
-      const totPr=calcTotal(pr);
-      const estadoPr=pr.estado||'pendiente';
-      const colorPr=estadoPr==='aprobado'?'#4caf50':estadoPr==='rechazado'?'#e53935':'#ff9800';
-      const bgPr=estadoPr==='aprobado'?'rgba(76,175,80,.12)':estadoPr==='rechazado'?'rgba(var(--theme-rgb),.12)':'rgba(255,152,0,.12)';
-      return`<div class="tl-item">
-        <div class="tl-dot" style="background:${colorPr}"></div>
-        <div class="tl-card" onclick="verPresupuesto('${pr.id}')" style="cursor:pointer">
-          <div class="tl-card-head">
-            <span style="display:flex;align-items:center"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${colorPr}" stroke-width="2" stroke-linecap="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
-            <span class="tl-card-title">${pr.titulo||'Presupuesto'}</span>
-            <span class="tl-card-badge" style="background:${bgPr};color:${colorPr}">${estadoPr.charAt(0).toUpperCase()+estadoPr.slice(1)}</span>
-          </div>
-          <div class="tl-card-sub">${fmtF(pr.creado)}${totPr>0?' · '+fmtM(totPr):''}</div>
-        </div>
-      </div>`;
-    }
-    return '';
-  };
-
-  const tlHTML=eventos.length?`
-  <div style="font-size:10px;font-weight:800;color:var(--tx2);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px">
-    Actividad (${eventos.length} registros)
-  </div>
-  <div class="tl-wrap">${eventos.map(renderEv).join('')}</div>`
-  :`<div class="empty" style="padding:20px"><p>Sin actividad registrada</p></div>`;
+  // (La antigua línea de tiempo se construía en cada apertura de la ficha y no
+  //  llegaba a mostrarse: su contenido lo cubre "Registro completo". Eliminada.)
 
   abrirSB(c.nombre,`
     ${primeraFoto?`<div class="cli-banner-wrap" id="cliBannerWrap-${id}" style="position:relative;width:calc(100% + 40px);margin:-18px -20px 16px -20px;height:180px;overflow:hidden;flex-shrink:0">
@@ -6834,8 +6731,6 @@ window.verCliente=async id=>{
     </div>`}
 
     <!-- ── CABECERA CLIENTE ── -->
-
-    <!-- ── CABECERA CLIENTE ── -->
     <div style="background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:18px;padding:16px;margin-bottom:14px">
       <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px">
         <div style="flex:1;min-width:0">
@@ -6844,7 +6739,7 @@ window.verCliente=async id=>{
         </div>
         <button onclick="abrirFCliDesdeCli('${id}')" style="flex-shrink:0;background:rgba(255,255,255,.08);color:var(--tx2);border:1px solid var(--border);border-radius:12px;padding:8px 12px;font-size:12px;font-weight:800;font-family:var(--font);cursor:pointer;transition:.15s" onmouseover="this.style.borderColor='var(--r)'" onmouseout="this.style.borderColor='var(--border)'">✏️ Editar</button>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:${(c.telefono||c.email||c.direccion)?'12px':'0'}">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:6px;margin-bottom:${(c.telefono||c.email||c.direccion)?'12px':'0'}">
         ${c.telefono?`<div style="background:rgba(255,255,255,.04);border-radius:12px;padding:9px 11px"><div style="font-size:10px;font-weight:800;color:var(--tx2);letter-spacing:.8px;margin-bottom:2px">TELÉFONO</div><div style="font-size:13px;font-weight:700;color:var(--tx)">${c.telefono}</div></div>`:''}
         ${c.email?`<div style="background:rgba(255,255,255,.04);border-radius:12px;padding:9px 11px"><div style="font-size:10px;font-weight:800;color:var(--tx2);letter-spacing:.8px;margin-bottom:2px">EMAIL</div><div style="font-size:13px;font-weight:700;color:var(--tx);word-break:break-all">${c.email}</div></div>`:''}
         ${c.direccion?`<div style="background:rgba(255,255,255,.04);border-radius:12px;padding:9px 11px;${!c.email&&!c.telefono?'grid-column:1/-1':''}"><div style="font-size:10px;font-weight:800;color:var(--tx2);letter-spacing:.8px;margin-bottom:2px">DIRECCIÓN</div><div style="font-size:13px;font-weight:700;color:var(--tx)">${c.direccion}</div></div>`:''}
@@ -6870,10 +6765,13 @@ window.verCliente=async id=>{
       if(partePend.length) items.push(`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,152,0,.08);border-radius:12px;border:1px solid rgba(255,152,0,.2)"><span style="font-size:16px">📋</span><div style="flex:1"><div style="font-size:12px;font-weight:900;color:#ff9800">${partePend.length} parte${partePend.length>1?'s':''} pendiente${partePend.length>1?'s':''}</div><div style="font-size:11px;color:var(--tx2)">${partePend.map(p=>p.titulo||'Sin título').slice(0,2).join(', ')}${partePend.length>2?'...':''}</div></div></div>`);
       if(mantVenc.length) items.push(`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(255,152,0,.08);border-radius:12px;border:1px solid rgba(255,152,0,.2)"><span style="font-size:16px">🔧</span><div style="flex:1"><div style="font-size:12px;font-weight:900;color:#ff9800">${mantVenc.length} mantenimiento${mantVenc.length>1?'s':''} vencido${mantVenc.length>1?'s':''}</div><div style="font-size:11px;color:var(--tx2)">${mantVenc.map(m=>m.nombreTrabajo||'Sin nombre').slice(0,2).join(', ')}</div></div></div>`);
       if(presuEsp.length) items.push(`<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:rgba(66,133,244,.08);border-radius:12px;border:1px solid rgba(66,133,244,.2)"><span style="font-size:16px">💶</span><div style="flex:1"><div style="font-size:12px;font-weight:900;color:#4285f4">${presuEsp.length} presupuesto${presuEsp.length>1?'s':''} sin respuesta</div><div style="font-size:11px;color:var(--tx2)">${presuEsp.map(p=>p.titulo||'Sin título').slice(0,2).join(', ')}</div></div></div>`);
-      return items.length?`<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">${items.join('')}</div>`:'';
+      return items.length?`
+        <div class="ficha-sec-tit">Pendiente ahora</div>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:16px">${items.join('')}</div>`:'';
     })()}
 
     <!-- ── ACCIONES EN CASCADA (crear documentos encadenados) ── -->
+    <div class="ficha-sec-tit">Acciones</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
       <button onclick="window._crearAvisoRapidoCli('${id}')" style="display:flex;align-items:center;gap:8px;background:rgba(171,71,188,.08);border:1px solid rgba(171,71,188,.2);border-radius:14px;padding:11px 12px;cursor:pointer;font-family:var(--font);transition:.15s" onmouseover="this.style.background='rgba(171,71,188,.14)'" onmouseout="this.style.background='rgba(171,71,188,.08)'">
         <span style="font-size:18px">💬</span>
@@ -6892,8 +6790,8 @@ window.verCliente=async id=>{
         <div style="text-align:left"><div style="font-size:12px;font-weight:900;color:var(--tx)">Equipos</div><div style="font-size:10px;color:var(--tx2)">${_eqDeCliente(id).length?`${_eqDeCliente(id).length} registrado${_eqDeCliente(id).length>1?'s':''}`:'Ninguno todavía'}</div></div>
       </button>
     </div>
-    <div style="margin-top:18px">
-      <div style="font-size:10px;font-weight:800;color:var(--tx2);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Registro completo del cliente</div>
+    <div style="margin-top:20px">
+      <div class="ficha-sec-tit">Registro completo</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px" id="fichaHistFiltros">
         <button class="fbtn ficha-hist-fbtn active" data-t="avisos" onclick="window._fichaHistFiltro('${id}','avisos')">💬 Avisos</button>
         <button class="fbtn ficha-hist-fbtn" data-t="presupuestos" onclick="window._fichaHistFiltro('${id}','presupuestos')">💶 Presupuestos</button>
@@ -12434,8 +12332,8 @@ const _presuCard = (p, comp=false) => {
             <div style="font-size:12px;color:var(--tx2)">${c?.nombre||p.clienteNombre||'—'} · ${fmtF(p.creado)}</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-            ${telCard?`${!comp?`<button class="icon-btn wa" onclick="event.stopPropagation();_recordarPresupuesto('${p.id}','${telCard}')" title="Enviar mensaje por WhatsApp">${ICO.message(14)}</button>`:''}
-            <button class="icon-btn wa" onclick="event.stopPropagation();enviarPresupuestoWhatsAppPDF('${p.id}')" title="Compartir el presupuesto en PDF por WhatsApp">
+            ${telCard?`${!comp?`<button class="icon-btn" style="color:#25d366;border-color:rgba(37,211,102,.35)" onclick="event.stopPropagation();_recordarPresupuesto('${p.id}','${telCard}')" title="Escribir al cliente por WhatsApp (sin PDF)">${ICO.message(14)}</button>`:''}
+            <button class="icon-btn wa" onclick="event.stopPropagation();enviarPresupuestoWhatsAppPDF('${p.id}')" title="Enviar el presupuesto en PDF por WhatsApp">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.5 14.4c-.3-.1-1.7-.8-1.9-.9-.3-.1-.4-.1-.6.1-.2.3-.7.9-.8 1-.2.2-.3.2-.5.1-.3-.1-1.2-.4-2.3-1.4-.8-.7-1.4-1.7-1.6-2-.2-.3 0-.5.1-.6.1-.1.3-.3.4-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5-.1-.1-.6-1.4-.8-2-.2-.5-.4-.4-.6-.5h-.5c-.2 0-.5.1-.7.3-.3.3-1 1-1 2.4s1 2.8 1.2 3c.1.2 2 3.1 4.9 4.3.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.7-.7 1.9-1.4.2-.7.2-1.2.2-1.4-.1-.1-.3-.2-.6-.3z"/><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 20.2 12 8.2 8.2 0 0 1 12 20.2z"/></svg>
             </button>`:''}
             <span class="presu-badge ${comp?'aceptado':'espera'}">${comp?'Completado':'Pendiente'}</span>
@@ -12885,8 +12783,8 @@ const _renderVerPresupuesto=(prId,p)=>{
       </button>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
-      ${prTel?`<button class="btn btn-ok" style="flex:1;min-width:0;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.4);color:#25d366" onclick="enviarPresupuestoWhatsAppPDF('${prId}')" title="Compartir el presupuesto en PDF por WhatsApp">💬 WhatsApp</button>
-      <button class="btn btn-ok" style="flex:1;min-width:0;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.4);color:#25d366" onclick="_recordarPresupuesto('${prId}','${prTel.replace(/\s/g,'')}')" title="Enviar mensaje por WhatsApp">✉️ Mensaje</button>`:''}
+      ${prTel?`<button class="btn" style="flex:1 1 100%;min-width:0;background:#25d366;border:1px solid #25d366;color:#06331a;font-weight:900" onclick="enviarPresupuestoWhatsAppPDF('${prId}')" title="Genera el PDF del presupuesto y lo envía por WhatsApp">📄 Enviar presupuesto en PDF</button>
+      <button class="btn btn-s" style="flex:1 1 100%;min-width:0;border:1px solid rgba(37,211,102,.45);color:#25d366" onclick="_recordarPresupuesto('${prId}','${prTel.replace(/\s/g,'')}')" title="Abre WhatsApp con un mensaje escrito, sin adjuntar el PDF">💬 Escribir al cliente (sin PDF)</button>`:''}
       <button class="btn btn-s" style="flex:1;min-width:0" onclick="exportarPresupuestoPDF('${prId}')" title="Guardar presupuesto en PDF"><svg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' style='margin-right:4px'><path d='M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z'/><polyline points='14 2 14 8 20 8'/></svg>Guardar PDF</button>
     </div>
   `);
