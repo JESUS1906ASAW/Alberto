@@ -732,33 +732,34 @@ body.modo-claro #presuModalHead .pm-close{background:rgba(0,0,0,.06)}
 
 #sb{position:fixed;bottom:-100%;left:0;right:0;max-height:92vh;background:rgba(17,17,17,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:24px 24px 0 0;z-index:1190;display:flex;flex-direction:column;transition:bottom .38s cubic-bezier(.16,1,.3,1),box-shadow .38s ease;border-top:1px solid var(--border);box-shadow:none}
 #sb.open{bottom:0;box-shadow:0 -8px 48px rgba(0,0,0,.5)}
-.sb-head{position:relative;padding:16px 20px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.sb-head{position:relative;padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0;flex-shrink:0;min-height:62px}
 /* ── Acento por tipo de documento ──
-   Cada formulario de creación se tiñe con el color que ese documento ya usa
-   en el calendario, las tarjetas y el menú, para que al abrirlo sepas de un
-   vistazo qué estás creando sin tener que leer el título. */
+   Tono plano, sin degradados: el mismo lenguaje que las tarjetas de Clientes,
+   Avisos y Presupuestos de la pantalla principal. La cabecera hereda el
+   redondeo de la hoja, asi que el color nunca asoma por las esquinas. */
 .sb-head.con-acento{
-  background:linear-gradient(180deg,rgba(var(--acento),.16),rgba(var(--acento),0));
-  border-bottom-color:rgba(var(--acento),.3);
-  border-radius:24px 24px 0 0;          /* mismo redondeo que la hoja */
-}
-.sb-head.con-acento::before{
-  content:'';position:absolute;left:0;right:0;top:0;height:3px;
-  background:linear-gradient(to right,rgb(var(--acento)),rgba(var(--acento),.35));
-  border-radius:24px 24px 0 0;          /* la franja acompaña a la curva */
+  background:rgba(var(--acento),.10);
+  border-bottom:1px solid rgba(var(--acento),.22);
+  border-radius:24px 24px 0 0;
 }
 .sb-head.con-acento .sb-ico{
-  width:30px;height:30px;border-radius:10px;flex-shrink:0;margin-right:11px;
-  display:flex;align-items:center;justify-content:center;font-size:16px;
-  background:rgba(var(--acento),.18);border:1px solid rgba(var(--acento),.3);
+  width:34px;height:34px;border-radius:12px;flex-shrink:0;margin-right:12px;
+  display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1;
+  background:rgba(var(--acento),.16);
+  border:1px solid rgba(var(--acento),.3);
 }
 .sb-head .sb-ico{display:none}
-#presuModalHead{--acento:59,130,246;position:relative;background:linear-gradient(180deg,rgba(var(--acento),.16),rgba(var(--acento),0));border-bottom-color:rgba(var(--acento),.3);border-radius:22px 22px 0 0}
-#presuModalHead::before{content:'';position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(to right,rgb(var(--acento)),rgba(var(--acento),.35));border-radius:22px 22px 0 0}
+#presuModalHead{--acento:59,130,246;background:rgba(var(--acento),.10);border-bottom:1px solid rgba(var(--acento),.22);border-radius:22px 22px 0 0}
 /* Etiquetas de campo algo mas legibles dentro de los formularios */
 .fsec .fgrp label{letter-spacing:1.2px;font-size:10.5px}
-.sb-head h2{font-size:17px;font-weight:800;color:var(--tx);flex:1}
-.sb-close{width:34px;height:34px;border-radius:50%;border:none;background:rgba(255,255,255,.08);color:var(--tx2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+/* Al enfocar un campo se resalta con el color del documento que estas creando */
+#sb .fsec input:focus,#sb .fsec textarea:focus,#sb .fsec select:focus{
+  border-color:rgba(var(--acento,var(--theme-rgb)),.55);
+  box-shadow:0 0 0 3px rgba(var(--acento,var(--theme-rgb)),.12);
+}
+.fgrp label .lbl-opt{font-weight:600;font-size:10px;letter-spacing:.4px;text-transform:none;color:var(--tx3,var(--tx2));opacity:.75}
+.sb-head h2{font-size:17px;font-weight:800;color:var(--tx);flex:1;min-width:0;margin:0;line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-close{width:34px;height:34px;flex-shrink:0;margin-left:12px;display:flex;align-items:center;justify-content:center;border-radius:50%;border:none;background:rgba(255,255,255,.08);color:var(--tx2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .sb-back{height:34px;padding:0 12px 0 6px;border-radius:50px;border:none;background:rgba(255,255,255,.08);color:var(--r);font-size:22px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-right:10px;line-height:1}
 .sb-body{overflow-y:auto;padding:18px 20px 32px;flex:1}
 
@@ -2263,7 +2264,7 @@ window._buildCliSelect = (hiddenId, preCliId, onchangeCb, preNombrePersonalizado
           </div>
           <div class="cli-sel-opt-guardar-sinficha" id="${hiddenId}-guardarsinficha" data-id="__personalizado_directo__" style="display:none;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;background:rgba(76,175,80,.1);border-bottom:1px dashed rgba(76,175,80,.4);color:#4caf50;font-size:13px;font-weight:900" onmouseover="this.style.background='rgba(76,175,80,.18)'" onmouseout="this.style.background='rgba(76,175,80,.1)'">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-            <span>💾 Guardar "<span id="${hiddenId}-guardarsinficha-txt"></span>" sin ficha</span>
+            <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar "<span id="${hiddenId}-guardarsinficha-txt"></span>" sin ficha</span>
           </div>
           <div class="cli-sel-opt cli-sel-opt-sincliente ${preCliId ? '' : 'selected'}" data-id="" data-color="" style="display:flex;align-items:center;gap:8px;padding:10px 14px;cursor:pointer" onmouseover="this.style.background='rgba(128,128,128,.1)'" onmouseout="this.style.background=''">
             <span class="cli-sel-dot" style="background:rgba(255,255,255,.2)"></span>
@@ -3607,12 +3608,15 @@ window.abrirSB=(titulo,html,cliId,tipo)=>{
   const acc=tipo?_SB_ACENTOS[tipo]:null;
   if(head){
     if(acc){
-      head.style.setProperty('--acento', acc.rgb || getComputedStyle(document.body).getPropertyValue('--theme-rgb').trim());
+      const rgb = acc.rgb || getComputedStyle(document.body).getPropertyValue('--theme-rgb').trim();
+      head.style.setProperty('--acento', rgb);
+      document.getElementById('sb').style.setProperty('--acento', rgb);
       head.classList.add('con-acento');
       if(ico) ico.textContent=acc.ico;
     }else{
       head.classList.remove('con-acento');
       head.style.removeProperty('--acento');
+      document.getElementById('sb').style.removeProperty('--acento');
       if(ico) ico.textContent='';
     }
   }
@@ -5355,11 +5359,11 @@ window.abrirNuevoSimple=(tipo,editId,presetFecha,presetCliId)=>{
   abrirSB(editing?`Editar ${conf.labelSing.toLowerCase()}`:`${conf.art} ${conf.labelSing.toLowerCase()}`,`
     <div class="fsec">
       <div class="fgrp"><label>Título</label><input id="smpTitulo" placeholder="${conf.tituloPh}" value="${(editing?.titulo||'').replace(/"/g,'&quot;')}"></div>
-      ${tipo==='cobro'?`<div class="fgrp"><label>Importe (€) <span style="font-weight:400;color:var(--tx2);font-size:11px">(opcional)</span></label><input id="smpImporte" type="number" step="0.01" min="0" placeholder="0.00" value="${editing?.importe??''}"></div>`:''}
-      <div class="fgrp"><label>Cliente <span style="font-weight:400;color:var(--tx2);font-size:11px">(opcional)</span></label><div id="smpCli-wrap"></div></div>
-      <div class="fgrp"><label>Fecha <span style="font-weight:400;color:var(--tx2);font-size:11px">(opcional)</span></label><input id="smpFecha" type="date" value="${editing?.fecha||presetFecha||''}"></div>
+      ${tipo==='cobro'?`<div class="fgrp"><label>Importe (€) <span class="lbl-opt">(opcional)</span></label><input id="smpImporte" type="number" step="0.01" min="0" placeholder="0.00" value="${editing?.importe??''}"></div>`:''}
+      <div class="fgrp"><label>Cliente <span class="lbl-opt">(opcional)</span></label><div id="smpCli-wrap"></div></div>
+      <div class="fgrp"><label>Fecha <span class="lbl-opt">(opcional)</span></label><input id="smpFecha" type="date" value="${editing?.fecha||presetFecha||''}"></div>
       <div class="fgrp">
-        <label>Prioridad <span style="font-weight:400;color:var(--tx2);font-size:11px">(opcional)</span></label>
+        <label>Prioridad <span class="lbl-opt">(opcional)</span></label>
         <div id="smpPrioWrap" style="display:flex;gap:8px">
           <button type="button" onclick="_setSimplePrio('normal')" style="flex:1;padding:9px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--tx2);font-weight:800;font-size:12px;font-family:var(--font);cursor:pointer">Normal</button>
           <button type="button" onclick="_setSimplePrio('urgente')" style="flex:1;padding:9px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--tx2);font-weight:800;font-size:12px;font-family:var(--font);cursor:pointer">Urgente</button>
@@ -5367,7 +5371,7 @@ window.abrirNuevoSimple=(tipo,editId,presetFecha,presetCliId)=>{
         </div>
         <input type="hidden" id="smpPrio" value="${editing?.prioridad||'normal'}">
       </div>
-      <button class="btn btn-p" style="width:100%;margin-top:6px" onclick="_gClick(this,()=>guardarSimple('${tipo}'${editing?`,'${editId}'`:''}))">💾 Guardar</button>
+      <button class="btn btn-p" style="width:100%;margin-top:6px" onclick="_gClick(this,()=>guardarSimple('${tipo}'${editing?`,'${editId}'`:''}))"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar</button>
     </div>
   `, undefined, tipo);
   setTimeout(()=>{
@@ -5906,7 +5910,7 @@ window._renderGMantProgramarForm=(plantillaJson)=>{
       </div>
       <div class="fgrp"><label>Fecha inicio</label><input type="date" id="gMFecha" value="${new Date().toISOString().split('T')[0]}"></div>
       <div class="fgrp"><label>Notas</label><textarea id="gMNotas" placeholder="Observaciones...">${p.notas||''}</textarea></div>
-      <button class="btn btn-p" onclick="_gClick(this,()=>guardarMantInline())">💾 Programar mantenimiento</button>
+      <button class="btn btn-p" onclick="_gClick(this,()=>guardarMantInline())"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Programar mantenimiento</button>
     </div>
   `;
   setTimeout(()=>_buildCliSelect('gMCli',p.clienteId||'',id=>{
@@ -6012,7 +6016,7 @@ window._abrirMantSBFormNuevo = (plantilla) => {
       </div>
       <div class="fgrp"><label>Fecha inicio</label><input type="date" id="_mantSBFecha" value="${new Date().toISOString().split('T')[0]}"></div>
       <div class="fgrp"><label>Notas</label><textarea id="_mantSBNotas" placeholder="Observaciones...">${p.notas||''}</textarea></div>
-      <button class="btn btn-p" onclick="window.guardarMantSBNuevo()">💾 Programar mantenimiento</button>
+      <button class="btn btn-p" onclick="window.guardarMantSBNuevo()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Programar mantenimiento</button>
     </div>
   `;
   abrirSB('Nuevo mantenimiento', html, undefined, 'mantenimiento');
@@ -6512,7 +6516,7 @@ window.abrirFormRecordatorio=(id,presetCliId)=>{
       <div class="fgrp"><label>¿Qué hay que hacer? *</label><input id="_recTitulo" value="${(r?.titulo||'').replace(/"/g,'&quot;')}" placeholder="Ej: Revisión anual bomba de riego"></div>
       <div class="fgrp"><label>Fecha *</label><input type="date" id="_recFecha" value="${r?.fecha||new Date().toISOString().split('T')[0]}"></div>
       <div class="fgrp"><label>Notas</label><textarea id="_recNotas" placeholder="Detalles, referencias, lo que necesites recordar...">${r?.notas||''}</textarea></div>
-      <button class="btn btn-p" onclick="guardarRecordatorio('${id||''}')">💾 ${r?'Guardar cambios':'Crear recordatorio'}</button>
+      <button class="btn btn-p" onclick="guardarRecordatorio('${id||''}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> ${r?'Guardar cambios':'Crear recordatorio'}</button>
     </div>`;
   abrirSB(r?'Editar recordatorio':'Nuevo recordatorio preventivo', html, undefined, 'recordatorio');
   setTimeout(()=>{
@@ -6678,7 +6682,7 @@ window.abrirFormEquipo=(cliId,id)=>{
         <div class="fgrp"><label>Nº de serie</label><input id="_eqSerie" value="${(e?.serie||'').replace(/"/g,'&quot;')}" placeholder="Opcional"></div>
         <div class="fgrp"><label>Fecha instalación</label><input type="date" id="_eqFechaInst" value="${e?.fechaInstalacion||''}"></div>
       </div>
-      <button class="btn btn-p" onclick="guardarEquipo('${cliId}','${id||''}')">💾 ${e?'Guardar cambios':'Añadir equipo'}</button>
+      <button class="btn btn-p" onclick="guardarEquipo('${cliId}','${id||''}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> ${e?'Guardar cambios':'Añadir equipo'}</button>
     </div>`;
   abrirSB(e?'Editar equipo':'Nuevo equipo',html,cliId,'equipo');
 };
@@ -7366,7 +7370,7 @@ window._abrirFormMantSB=(cliId,cliNom,plantilla)=>{
           <input id="mPlantFullNomSB" class="sbox" placeholder="Nombre de la plantilla…" style="margin:0">
         </div>
       </div>
-      <button class="btn btn-p" onclick="_gClick(this,()=>guardarMantDesdeSB())">💾 Programar mantenimiento</button>
+      <button class="btn btn-p" onclick="_gClick(this,()=>guardarMantDesdeSB())"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Programar mantenimiento</button>
     </div>
   `,cliId);
 };
@@ -7444,7 +7448,7 @@ window.abrirFCli=async(id, preData)=>{
       </div>
       <input type="hidden" id="cColor" value="${c?.color||'verde'}">
     </div>
-    <button class="btn btn-p" onclick="_gClick(this,()=>guardarCli('${id||''}'))">💾 Guardar cliente</button>
+    <button class="btn btn-p" onclick="_gClick(this,()=>guardarCli('${id||''}'))"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar cliente</button>
     ${id?`<button class="btn btn-del" style="margin-top:8px" onclick="archivarCli('${id}')"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" style="margin-right:5px"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>Mover a archivos</button>`:''}
   `;
   abrirSB(id?'Editar cliente':'Nuevo cliente',html,undefined,'cliente');
@@ -7493,7 +7497,7 @@ window.abrirCliExpress=()=>{
         <div id="ceGeoInfo" style="font-size:11px;color:var(--tx2);margin-top:4px"></div>
       </div>
     </div>
-    <button class="btn btn-p" style="width:100%;margin-top:4px" id="btnGuardarCliExpress">⚡ Guardar cliente</button>
+    <button class="btn btn-p" style="width:100%;margin-top:4px" id="btnGuardarCliExpress"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar cliente</button>
     
   `, undefined, 'cliente');
   // Bind events after DOM insertion
@@ -8335,9 +8339,9 @@ window.abrirFParte=async(id,preCliId,preData)=>{
       <div class="fgrp"><label>Título *</label><input id="pTit" value="${vd.titulo||p?.titulo||''}" placeholder="Ej: Reparación bomba sumergible"></div>
       ${chipsTpl?`<div class="plantilla-chips">${chipsTpl}</div>`:''}
       <div class="fgrp"><label>Cliente</label><div id="pCli-wrap"></div></div>
-      <div class="fgrp"><label>Edificio / Comunidad <span style="font-weight:400;color:var(--tx2);font-size:11px">(opcional)</span></label><input id="pEdif" value="${edificioInicial}" placeholder="Se rellena automáticamente si el cliente lo tiene"></div>
-      <div class="fgrp"><label>Dirección <span style="font-weight:400;color:var(--tx2);font-size:11px">(opcional)</span></label><input id="pDir" value="${direccionInicial}" placeholder="Se rellena automáticamente desde la ficha del cliente"></div>
-      <div class="fgrp"><label>Teléfono <span style="font-weight:400;color:var(--tx2);font-size:11px">(opcional)</span></label><input id="pTel" value="${telefonoInicial}" placeholder="Se rellena automáticamente desde la ficha del cliente" type="tel"></div>
+      <div class="fgrp"><label>Edificio / Comunidad <span class="lbl-opt">(opcional)</span></label><input id="pEdif" value="${edificioInicial}" placeholder="Se rellena automáticamente si el cliente lo tiene"></div>
+      <div class="fgrp"><label>Dirección <span class="lbl-opt">(opcional)</span></label><input id="pDir" value="${direccionInicial}" placeholder="Se rellena automáticamente desde la ficha del cliente"></div>
+      <div class="fgrp"><label>Teléfono <span class="lbl-opt">(opcional)</span></label><input id="pTel" value="${telefonoInicial}" placeholder="Se rellena automáticamente desde la ficha del cliente" type="tel"></div>
       <div class="fgrp"><label>Fecha del parte</label><input type="date" id="pFecha" value="${(()=>{if(p?.fechaParte)return p.fechaParte;if(p?.creado?.seconds){const d=new Date(p.creado.seconds*1000);return d.toISOString().split('T')[0];}return new Date().toISOString().split('T')[0];})()}"></div>
       <div class="fgrp"><label>Operario</label><input id="pOpe" value="${vd.operario||p?.operario||CUD?.nombre||''}" placeholder="Nombre operario"></div>
       <div class="fgrp"><label>Descripción</label><textarea id="pDesc" placeholder="Descripción del trabajo...">${vd.descripcion||p?.descripcion||''}</textarea></div>
@@ -8369,7 +8373,7 @@ window.abrirFParte=async(id,preCliId,preData)=>{
     <div id="pPlantFullNom" style="display:none;margin-bottom:16px">
       <input id="pPlantFullNomVal" class="sbox" placeholder="Nombre de la plantilla completa…" style="margin:0">
     </div>
-    <button class="btn btn-p" onclick="_gClick(this,()=>guardarParte('${id||''}'))">💾 Guardar parte</button>
+    <button class="btn btn-p" onclick="_gClick(this,()=>guardarParte('${id||''}'))"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar parte</button>
   `);
   // Iniciar selector custom de cliente (se ejecuta en el siguiente tick para que el DOM exista)
   setTimeout(()=>{
@@ -8520,7 +8524,7 @@ window._abrirFirmaParteCreado = (parteId) => {
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn btn-s" onclick="cerrarSBTotal()" style="font-size:13px">Omitir firma</button>
-      <button class="btn btn-p" onclick="_guardarFirmaParteNuevo('${parteId}')">💾 Guardar firma</button>
+      <button class="btn btn-p" onclick="_guardarFirmaParteNuevo('${parteId}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar firma</button>
     </div>
   `);
   setTimeout(()=>{
@@ -8699,7 +8703,7 @@ window._abrirFParteConPlantilla=(pl,preCliId)=>{
     <div id="pPlantFullNom" style="display:none;margin-bottom:16px">
       <input id="pPlantFullNomVal" class="sbox" placeholder="Nombre de la plantilla completa…" style="margin:0" value="${pl.nombre||''}">
     </div>
-    <button class="btn btn-p" onclick="_gClick(this,()=>guardarParte(''))">💾 Guardar parte</button>
+    <button class="btn btn-p" onclick="_gClick(this,()=>guardarParte(''))"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar parte</button>
   `);
   setTimeout(()=>_buildCliSelect('pCli',cliId,id=>{
     const c=allClientes.find(x=>x.id===id);
@@ -8839,7 +8843,7 @@ window.abrirFirmaParte=async(id)=>{
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn btn-s" onclick="cerrarSB()" style="font-size:13px">Ahora no</button>
-      <button class="btn btn-p" onclick="_gClick(this,()=>guardarFirmaSinPDF('${id}'))">💾 Guardar firma</button>
+      <button class="btn btn-p" onclick="_gClick(this,()=>guardarFirmaSinPDF('${id}'))"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar firma</button>
     </div>
   `);
   setTimeout(()=>{
@@ -8889,7 +8893,7 @@ window.flujoCompletarFirmar=async(id)=>{
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn btn-s" onclick="cerrarSB()" style="font-size:13px">Ahora no</button>
-      <button class="btn btn-p" onclick="_gClick(this,()=>guardarFirmaSinPDF('${id}'))">💾 Guardar firma</button>
+      <button class="btn btn-p" onclick="_gClick(this,()=>guardarFirmaSinPDF('${id}'))"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar firma</button>
     </div>
   `);
   setTimeout(()=>{
@@ -9052,7 +9056,7 @@ window.generarPDF=id=>{
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
       <button class="btn btn-s" onclick="generarPDFConFirma('${id}',null)" style="font-size:12px">Omitir firma</button>
-      <button class="btn btn-s" id="_btnGuardarFirmaSolo" style="font-size:12px;display:none" onclick="_gClick(this,()=>guardarFirmaSinPDF('${id}'))">💾 Guardar firma</button>
+      <button class="btn btn-s" id="_btnGuardarFirmaSolo" style="font-size:12px;display:none" onclick="_gClick(this,()=>guardarFirmaSinPDF('${id}'))"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar firma</button>
       <button class="btn btn-p" style="font-size:12px" onclick="generarPDFConFirmaCapturada('${id}')">Generar PDF</button>
     </div>
   `);
@@ -9727,7 +9731,7 @@ window.abrirFormGrupo=(edit)=>{
       <div class="fondo-opts" id="gFondoGrid">${fondosHTML}</div>
       <input type="hidden" id="gFondo" value="${fondoActual}">
     </div>
-    <button class="btn btn-p" onclick="${g?`guardarGrupo('${g.id}')`:'crearGrupo()'}">💾 ${g?'Guardar cambios':'Crear grupo'}</button>
+    <button class="btn btn-p" onclick="${g?`guardarGrupo('${g.id}')`:'crearGrupo()'}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> ${g?'Guardar cambios':'Crear grupo'}</button>
   `);
 };
 
@@ -9999,7 +10003,7 @@ window.renderMantProgramarForm=(plantillaJson)=>{
           <input class="sbox" id="mPlantFullNombreInput" placeholder="Nombre de la plantilla…" style="margin:0">
         </div>
       </div>
-      <button class="btn btn-p" onclick="_gClick(this,()=>guardarMant())">💾 Programar mantenimiento</button>
+      <button class="btn btn-p" onclick="_gClick(this,()=>guardarMant())"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Programar mantenimiento</button>
       <p style="font-size:12px;color:var(--tx2);margin-top:10px;text-align:center">Aparecerá automáticamente en el Calendario</p>
     </div>
   `;
@@ -10178,7 +10182,7 @@ window.verMant=async(id,_tabFotos)=>{
         <input type="checkbox" id="eMPlant" style="width:18px;height:18px;accent-color:var(--r)">
         <label for="eMPlant" style="font-size:13px;font-weight:700;color:var(--tx2);cursor:pointer">Guardar también como plantilla</label>
       </div>
-      <button class="btn btn-p" style="margin-bottom:10px" onclick="_gClick(this,()=>guardarEditMant('${id}'))">💾 Guardar cambios</button>
+      <button class="btn btn-p" style="margin-bottom:10px" onclick="_gClick(this,()=>guardarEditMant('${id}'))"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar cambios</button>
       <button class="btn btn-del" onclick="eliminarMant('${id}')">🗑️ Eliminar mantenimiento</button>
     </div>`:`
     <div class="fsec">
@@ -10375,7 +10379,7 @@ const renderAdministracion=async()=>{
     <button class="btn btn-s" style="margin-top:12px" onclick="abrirEditarGrupo()">✏️ Editar grupo</button>
   </div>
   <div class="fsec">
-    <div class="fsec-title">💾 Copia de seguridad</div>
+    <div class="fsec-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Copia de seguridad</div>
     <div style="font-size:12px;color:var(--tx2);margin-bottom:12px;line-height:1.5">El backup genera un PDF completo del grupo y un archivo <strong>.json</strong> que puedes usar para restaurar todos los datos en caso de pérdida.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <button class="btn btn-s" style="flex:1;min-width:140px" onclick="exportarBackupZIP()">
@@ -11038,7 +11042,7 @@ window.abrirParteDesdeMantenimiento=(m,cli,fechaCompletado)=>{
     <div id="pPlantFullNom" style="display:none;margin-bottom:16px">
       <input id="pPlantFullNomVal" class="sbox" placeholder="Nombre de la plantilla completa…" style="margin:0">
     </div>
-    <button class="btn btn-p" onclick="_gClick(this,()=>guardarParte(''))">💾 Guardar parte</button>
+    <button class="btn btn-p" onclick="_gClick(this,()=>guardarParte(''))"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar parte</button>
   `);
   setTimeout(()=>_buildCliSelect('pCli',cliId,id=>{
     const c=allClientes.find(x=>x.id===id);
@@ -12307,7 +12311,7 @@ window.editarAveria=async(avId)=>{
       <div class="fgrp"><label>Teléfono</label><input id="avTel" value="${(a.clienteTelefono||'').replace(/"/g,'&quot;')}" placeholder="Teléfono de contacto" type="tel"></div>
       <div class="fgrp"><label>Prioridad</label><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px" id="avPrioWrap"><button type="button" onclick="_setAverPrio('normal')" style="padding:9px 4px;border-radius:12px;border:2px solid var(--border);background:transparent;color:var(--tx2);font-size:11px;font-weight:800;font-family:var(--font);cursor:pointer">🟢 Normal</button><button type="button" onclick="_setAverPrio('urgente')" style="padding:9px 4px;border-radius:12px;border:2px solid var(--border);background:transparent;color:var(--tx2);font-size:11px;font-weight:800;font-family:var(--font);cursor:pointer">🟠 Urgente</button><button type="button" onclick="_setAverPrio('critica')" style="padding:9px 4px;border-radius:12px;border:2px solid var(--border);background:transparent;color:var(--tx2);font-size:11px;font-weight:800;font-family:var(--font);cursor:pointer">🔴 Crítica</button></div><input type="hidden" id="avPrio" value="${a.prioridad||'normal'}"></div>
       <div class="fgrp"><label>Descripción (opcional)</label><textarea id="avDesc" rows="3" placeholder="Detalla el problema...">${(a.descripcion||'')}</textarea></div>
-      <button class="btn btn-p" style="width:100%" onclick="_gClick(this,()=>guardarAveria('${avId}'))">💾 Guardar cambios</button>
+      <button class="btn btn-p" style="width:100%" onclick="_gClick(this,()=>guardarAveria('${avId}'))"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar cambios</button>
     </div>
   `);
   setTimeout(()=>{
@@ -12508,7 +12512,7 @@ window.crearPresupuestoDesdeParteId=async(parteId)=>{
       </div>
     </div>
     <div style="display:flex;gap:8px">
-      <button class="btn btn-p" style="flex:1" onclick="_gClick(this,()=>guardarPresupuesto())">💾 Guardar presupuesto</button>
+      <button class="btn btn-p" style="flex:1" onclick="_gClick(this,()=>guardarPresupuesto())"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar presupuesto</button>
     </div>
   `);
   _prIVA = p.aplicarIVAMateriales||false;
@@ -12654,7 +12658,7 @@ window.usarPresupuesto = (id) => {
       <div class="card" style="padding:10px 14px;display:flex;align-items:center;justify-content:space-between;margin-top:6px"><span style="font-size:13px;font-weight:700;color:var(--tx2)">TOTAL</span><span style="font-size:20px;font-weight:900;color:var(--r)" id="prTotal">—</span></div>
     </div>
     <div class="fgrp"><label>Notas</label><textarea id="prNotas" rows="2">${(p.notas||'').replace(/</g,'&lt;')}</textarea></div>
-    <button class="btn btn-p" style="width:100%;margin-top:8px" onclick="_gClick(this,()=>guardarPresupuesto())">💾 Guardar presupuesto</button>
+    <button class="btn btn-p" style="width:100%;margin-top:8px" onclick="_gClick(this,()=>guardarPresupuesto())"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar presupuesto</button>
   `);
   _prIVA = p.aplicarIVA||false;
   calcPresuTotal();
@@ -12771,7 +12775,7 @@ window.abrirNuevoPresupuesto=(presuId)=>{
     </div>
     <div class="fgrp"><label>Notas adicionales</label><textarea id="prNotas" rows="2" placeholder="Observaciones para el cliente..."></textarea></div>
     <div style="display:flex;gap:8px;margin-top:4px">
-      <button class="btn btn-p" style="flex:1" onclick="_gClick(this,()=>guardarPresupuesto())">💾 Guardar</button>
+      <button class="btn btn-p" style="flex:1" onclick="_gClick(this,()=>guardarPresupuesto())"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar</button>
     </div>
   `);
   setTimeout(()=>_buildCliSelect('prCli','',id=>{
@@ -12841,7 +12845,7 @@ window.editarPresupuesto=async(prId)=>{
     </div>
     <div class="fgrp"><label>Notas adicionales</label><textarea id="prNotas" rows="2" placeholder="Observaciones para el cliente...">${(p.notas||'').replace(/</g,'&lt;')}</textarea></div>
     <div style="display:flex;gap:8px;margin-top:4px">
-      <button class="btn btn-p" style="flex:1" onclick="_gClick(this,()=>guardarPresupuesto('${prId}'))">💾 Guardar cambios</button>
+      <button class="btn btn-p" style="flex:1" onclick="_gClick(this,()=>guardarPresupuesto('${prId}'))"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar cambios</button>
     </div>
   `);
   _prIVA=p.aplicarIVA||false;
@@ -13075,7 +13079,7 @@ window.editarFirmaPresupuesto=async(prId,ocultarUsarFirma)=>{
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn btn-s" onclick="verPresupuesto('${prId}')">Cancelar</button>
-      <button class="btn btn-ok" style="background:linear-gradient(135deg,#1fae54,#25d366);color:#fff" onclick="_guardarFirmaPresupuestoEditada('${prId}')">💾 Guardar firma</button>
+      <button class="btn btn-ok" style="background:linear-gradient(135deg,#1fae54,#25d366);color:#fff" onclick="_guardarFirmaPresupuestoEditada('${prId}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar firma</button>
     </div>
   `);
   setTimeout(()=>{
@@ -14380,7 +14384,7 @@ const renderPerfil=()=>{
   const _opfsSupported='storage' in navigator;
   html+=`
   <div class="fsec" style="margin-top:8px">
-    <div class="fsec-title">💾 Copia de seguridad automática</div>
+    <div class="fsec-title"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Copia de seguridad automática</div>
     <div style="font-size:11px;color:var(--tx2);margin-bottom:6px;font-weight:800;letter-spacing:.3px">👑 Solo visible para el admin del grupo</div>
     <div style="font-size:12px;color:var(--tx2);margin-bottom:14px;line-height:1.6">
       El backup se guarda automáticamente <strong style="color:var(--tx)">dentro de la app</strong> (sin permisos, sin diálogos) y también en la <strong style="color:var(--tx)">carpeta que elijas</strong> si hay permiso activo.
@@ -14396,7 +14400,7 @@ const renderPerfil=()=>{
     ${_autoBackupActive?`
     <div style="margin-top:6px;padding:10px 14px;background:rgba(76,175,80,.07);border:1px solid rgba(76,175,80,.2);border-radius:12px;font-size:11px;color:#4caf50;font-weight:700;line-height:1.8">
       ✅ Backup activo — se guarda automáticamente cada día sin ningún diálogo.<br>
-      <span style="color:var(--tx2);font-weight:600">💾 Almacenamiento interno: <strong style="color:var(--tx)">siempre disponible</strong></span><br>
+      <span style="color:var(--tx2);font-weight:600"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Almacenamiento interno: <strong style="color:var(--tx)">siempre disponible</strong></span><br>
       ${_autoBackupDirName?`<span style="color:var(--tx2);font-weight:600">📂 Copia en carpeta: <strong style="color:var(--tx)">${_autoBackupDirName}</strong></span>`:'<span style="color:var(--tx2);font-weight:600">📂 Sin carpeta configurada — elige una abajo para tener copia extra</span>'}
     </div>
     <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
@@ -14462,7 +14466,7 @@ window.editarFirmaPerfil=()=>{
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
       <button class="btn btn-s" onclick="renderPerfil()">Cancelar</button>
-      <button class="btn btn-ok" style="background:linear-gradient(135deg,#1fae54,#25d366);color:#fff" onclick="_guardarFirmaPerfil()">💾 Guardar firma</button>
+      <button class="btn btn-ok" style="background:linear-gradient(135deg,#1fae54,#25d366);color:#fff" onclick="_guardarFirmaPerfil()"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Guardar firma</button>
     </div>
   `);
   setTimeout(()=>{
@@ -14806,7 +14810,7 @@ window.abrirNuevoAviso=(presetFecha,presetCliId)=>{
         <textarea id="avisDescInput" rows="4" placeholder="Describe el aviso que quieres dejar reflejado…"></textarea>
       </div>
       <div class="fgrp">
-        <label>Cliente vinculado <span style="font-weight:400;color:var(--tx2);font-size:11px">(opcional)</span></label>
+        <label>Cliente vinculado <span class="lbl-opt">(opcional)</span></label>
         <div id="avisCli-wrap"></div>
       </div>
       <div class="fgrp">
@@ -14829,7 +14833,7 @@ window.abrirNuevoAviso=(presetFecha,presetCliId)=>{
        </div>
        <div class="fgrp">
          <label>📅 Alerta
-        <label>📅 Alerta programada <span style="font-weight:400;color:var(--tx2);font-size:11px">(opcional — salta en esta fecha)</span></label>
+        <label>Alerta programada <span class="lbl-opt">(opcional — salta en esta fecha)</span></label>
         <input type="date" id="avisFechaAlerta" min="${hoy}" value="${presetFecha||''}" style="background:var(--card2);border:1px solid var(--border);border-radius:12px;color:var(--tx);font-size:14px;font-family:var(--font);padding:10px 12px;width:100%;box-sizing:border-box;outline:none">
       </div>
       <button class="btn btn-p" style="width:100%" onclick="_gClick(this,()=>guardarNuevoAviso())">
@@ -14854,7 +14858,7 @@ window.editarAviso=(id)=>{
         <textarea id="avisDescInput" rows="4">${a.descripcion||''}</textarea>
       </div>
       <div class="fgrp">
-        <label>Cliente vinculado <span style="font-weight:400;color:var(--tx2);font-size:11px">(opcional)</span></label>
+        <label>Cliente vinculado <span class="lbl-opt">(opcional)</span></label>
         <div id="avisCli-wrap"></div>
       </div>
       <div class="fgrp">
@@ -14876,8 +14880,7 @@ window.editarAviso=(id)=>{
          <input type="hidden" id="avisPrio" value="${a.prioridad||'baja'}">
        </div>
        <div class="fgrp">
-         <label>📅 Alerta programada
-        <label>📅 Alerta programada <span style="font-weight:400;color:var(--tx2);font-size:11px">(opcional)</span></label>
+        <label>Alerta programada <span class="lbl-opt">(opcional)</span></label>
         <input type="date" id="avisFechaAlerta" min="${hoy}" value="${a.fechaAlerta||''}" style="background:var(--card2);border:1px solid var(--border);border-radius:12px;color:var(--tx);font-size:14px;font-family:var(--font);padding:10px 12px;width:100%;box-sizing:border-box;outline:none">
       </div>
       <button class="btn btn-p" style="width:100%" onclick="actualizarAviso('${id}')">
