@@ -642,6 +642,50 @@ body.modo-claro .gtab-item.gt-presu{border-color:rgba(64,124,182,.28)}
 .btn>svg{flex-shrink:0;vertical-align:middle!important;margin-right:0!important}
 .btn-sm>svg{margin-right:0!important}
 
+/* ══ ASISTENTE DE VOZ ══ */
+#btnVoz{margin-right:6px}
+#btnVoz.grabando{background:rgba(239,68,68,.16);color:#ef4444;animation:vzLatido 1.3s ease-in-out infinite}
+@keyframes vzLatido{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.45)}50%{box-shadow:0 0 0 7px rgba(239,68,68,0)}}
+
+#vzPanel{position:fixed;left:14px;right:14px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:1400;
+  background:var(--glass-bg2);border:1px solid rgba(239,68,68,.35);border-radius:20px;padding:16px 18px;
+  box-shadow:0 18px 50px -12px rgba(0,0,0,.6);display:flex;flex-direction:column;align-items:center;gap:10px;
+  opacity:0;transform:translateY(14px);transition:opacity .22s ease,transform .22s var(--ease-spring)}
+#vzPanel.open{opacity:1;transform:translateY(0)}
+#vzPanel.procesando{border-color:rgba(var(--theme-rgb),.4)}
+.vz-ondas{display:flex;align-items:center;gap:4px;height:26px}
+.vz-ondas span{width:4px;border-radius:3px;background:#ef4444;animation:vzOnda 1s ease-in-out infinite}
+.vz-ondas span:nth-child(1){height:10px;animation-delay:0s}
+.vz-ondas span:nth-child(2){height:20px;animation-delay:.12s}
+.vz-ondas span:nth-child(3){height:26px;animation-delay:.24s}
+.vz-ondas span:nth-child(4){height:18px;animation-delay:.36s}
+.vz-ondas span:nth-child(5){height:11px;animation-delay:.48s}
+@keyframes vzOnda{0%,100%{transform:scaleY(.4)}50%{transform:scaleY(1)}}
+#vzPanel.procesando .vz-ondas span{background:var(--r);animation-duration:.5s}
+.vz-txt{font-size:14px;font-weight:700;color:var(--tx);text-align:center;line-height:1.4;min-height:20px}
+.vz-stop{background:rgba(255,255,255,.08);border:1px solid var(--border);border-radius:14px;padding:8px 22px;
+  font-size:13px;font-weight:800;color:var(--tx2);font-family:var(--font);cursor:pointer}
+body.modo-claro .vz-stop{background:rgba(0,0,0,.05)}
+
+#vzToast{position:fixed;left:14px;right:14px;bottom:calc(20px + env(safe-area-inset-bottom,0px));z-index:1400;
+  background:var(--glass-bg2);border:1px solid rgba(76,175,80,.4);border-radius:18px;padding:14px 16px;
+  box-shadow:0 18px 50px -12px rgba(0,0,0,.6);display:flex;align-items:center;gap:12px;
+  opacity:0;transform:translateY(14px);transition:opacity .22s ease,transform .22s var(--ease-spring)}
+#vzToast.open{opacity:1;transform:translateY(0)}
+.vz-toast-txt{flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--tx);line-height:1.45}
+.vz-toast-txt strong{font-weight:900;color:var(--r)}
+.vz-toast-undo{flex-shrink:0;background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.35);border-radius:12px;
+  padding:9px 14px;font-size:12.5px;font-weight:800;color:#ef4444;font-family:var(--font);cursor:pointer}
+
+#vzAsk{position:fixed;inset:0;z-index:1450;display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;transition:opacity .2s ease}
+#vzAsk.open{opacity:1}
+.vz-ask-ov{position:absolute;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.vz-ask-box{position:relative;z-index:1;width:100%;background:var(--card);border-radius:24px 24px 0 0;
+  padding:20px 18px calc(20px + env(safe-area-inset-bottom,0px));max-height:80vh;overflow-y:auto;
+  box-shadow:0 -8px 48px rgba(0,0,0,.5)}
+.vz-ask-tit{font-size:16px;font-weight:900;color:var(--tx);margin-bottom:14px;line-height:1.3}
+
 /* Encabezados de bloque de la ficha del cliente */
 .ficha-sec-tit{display:flex;align-items:center;gap:10px;font-size:11.5px;font-weight:900;color:var(--r);letter-spacing:1.6px;text-transform:uppercase;margin:20px 0 10px}
 .ficha-sec-tit::after{content:'';flex:1;height:1px;background:linear-gradient(to right,rgba(var(--theme-rgb),.35),transparent)}
@@ -1641,6 +1685,7 @@ body.is-scrolling .presu-card{
   <!-- TOPBAR -->
   <div id="topbar">
     <span class="logo logo-brand" onclick="goScreen('inicio')" style="cursor:pointer" title="Inicio"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAlRUlEQVR42u19ebRdRZnvr2pPZ7onCWaAxMQIAjIEFMgj8ngyuJBA6D8ICDIEbTAJ4mvRJyoKNupCRGX1E5bNE5sgQkIra0mIiC5EwaU2IjjEgIKkw70EMnATLje50zln713f+6Nq17D3PufeID2t5qxVdzhn732qvvH3ffVVFQNAeOP1H/bib5DgvzgDGGNgjP23I9zrNW72WkwQYwxEb1iu14GUr/Eu9YqiCiqVKqIoQhCE4Jw7T2YoSgjpjxkIBBCQCRKVXMgYYPOarKuY9VOPhKl/spuY+0zKXwpzT/Y/UdZ/82Aic4cQKTpxB+3WBCYmJhDH7X8/tnHO0WxOR7M5DWEUSaKTRRyyiM/yX2WNsFR9LbIoAuY7RxZj5IeGWhkJyWKzO0hy2aa4SzntdriEkm4zpgUoTVO0JsaxZ88QRkf37jNZ94kBfc1peNN+MxGGEYgEhBAWYQmkugVI+5i9g7zEOTxgmmRlEkhkkdThGwPluq6JV6Jvrgwwp9dlGgL1LD0GrTbMIRoDA1OaPz4+it27dqLdnnh9NYAxhtmz90dz2nSQEBCCcuNimlCu9Nv2g2ky2xJJZAasfYttPhzKq3s198g1OzmG68/LzKL6LiIBIgbOmaVhmRC5pDL8Y655Utdz7kGIFLsGt2Pv3uHXhwGce9j/gLmo1xtI0zRnLbLRG1XWxAQDGNP3aP+QqTzLGCcMYZkl/pkQCsVULZGSAS4jVH84A2dSGIiEQimsIN7MEogMTBhE09s0cqbYzJglYK5J5Zxj166dGH5196Qk7vkp5xz77z8PtVpdEpK5fDfOtMy0ZxIl9Pucc5Agabo4A2fcMj8sZzLIegaBsQx9yWeCYCGxTGK5pXQCIAbGbc2CYWaODEQEEgJgmTawLkTKNM12RMzxPwwM3POwc+eLGJlEE3oyYNasOZg2bQaSJLEoS9oWup6RbOHVKiw/ykwKV+/ZzlYoG5rHJuZ7jJTaqMQybDZMciAVKaZYz8jut81R3tZbGuiIG7nIi0AOM5ll2rI4YdtL/Wi1JrqSuisD6vUGZs/eX9p7m/iOmpImIoxcqI5wR3uNbbUlO5NGVwf0oLSDcL+z0GmiHPJx0U9e4jMClUOcEjQEtz8GiTGHgraPABG456HdbmHbS/1d4ya/m+mZPmM/CEqVtHEXzWRSTEL6gRxfiJg7IGWGlP4rhuWdXgpiTDoCYjlURWDwAAZptlj2taT7K4ggUgFBBMbIQVPQIMEwQxMkD79K4Fhmwkql1bKCxBxpQ5qmiKIqms0Z2LNnqFTeSxnQaPQh8H1l9wEGAQLXfRMkCghD8iMbPNN2Udtj5WWlU7V1JVNZsrB/ZpKEQUosBWccIyN70Wq3wZm070IIpEkK3/dRbzQQhiHSNLakwY3aXUEg/WZmMkjfI5SJZyAIW/IsTeAoRjqkZY8AiDRFszkDIyPDCrZPogGMMdTrDQghTJwj4z9tQOwv0Xwg5CQaGlJmA6OsA2SJD8ueZ5kY7SdIm4s0FRge3oPjj1+MpaefjgUL5qOvrw97hvfgxZdexKZNT+EXv/wVXtm9GzP2m6H7z/J+JZNCMhDSoCKjfTnRLjpihQJZiZaZsQMpEvi+j1qtoQI190kFBoRhBM8PkApy7KjuaAYNwaS652AbOYPMNJKQ89AGQ5ENP6GRk236hSAkSYyvffXLWLVqZdck2MDAC7jhhi/jn//5e5g2fToghOl7zo9lyAqOUJHrTAUDY0L5M4JIjaYwZS6J2Q7fjdYzyC2IUKtnDKDeTnjatBloNqchTVPlZCwoaBFQWAMwqMjNmRSNrIJwWtXdeM1IvskVeZ6H4eFhLDtzKb773XuQJInpW+4rwjAEAKxe/WHcvXYd3rTfm5CkSS4eKEKJfCrDxvVMISkDuzNLwa2wjxWJryONjH4pdmzf6sZSZeloPwi0+pKlSlnUKITQPkBiZ1IBjTBYW96g7jGSlV0jhMLcICsYIqMpCtVkn0k72pTfnQr4vg/P8wotjjtI0xQ3fe2rWLjwLRgdG5GeRAi3L6S7KN+DPUbS/gzqb3M/U3afQZCQWQF1j1DjsqVCKKCQBYVBEPWeD2CMwfc8QxBBmvC6g9rj2sS3mvIPpEeZASGhGVD8nQ1CDQhyQPL7JdM9zmU0zbqnejj3kCQJ+pp9uHz1aoyMjGiT6X6XMA2wGGMExxqm5a4IBKHoodBZlqsSQgV/ljCCwCz6+UFQ0D2HAdzzwDi3JFs+MJN6oR8OiLxvUwFXFlES5RljSZytQRZBGJEJrITQhEiSGAcddKALH7tkDTwlQO9//3mYN3cuJiYmACbHQHbTQiRMvyV5HX9AWhCl2c20QmoDLAGU9BGa0dD2P4sNPO4hn3jnhXST+iKJWqwHWh0nq5NG6qXKmXyNgdUmbUBO8k5nOtXfgnL3gZAmKSqVCo5fsiSXsynRBPV5HMeYPXs2li07E3v37NE4Xkq80WLhCEkqTYhKlUiCCiM8sIlvrIMQltnSAmYzLjNjpLOmPX2AS2yhH1J2jZSqjAkC0J0WlpQLRyp09pDMAGxmCjIGmgGYaI3joIMOxLHHHKNNUaEvXbIpF15wAcIwQJok+tn29xhTK/QYtHgpIttaLZRACpE3o9C5c0MLFahqgabSpEMpAwzhjAbYDtN2Po40UJHrRouMA86kRjMhNTYVlj9gjGFsdAxnnHEGavUakjgxEU4GGnwfvu8XzFCapnjXCe/C4sX/A3v37tUISwuHZQaF5XjJ8QMuiLBU0zBJBaZm3JaW2PMN5fQvm5Q3NttOVGn6CGGpmiU1dppH66MwaQPL9sNgHI1FM62AFREnaYK+vgYuuOD9rvlRjpVzjk1/3IT+5/tlptXS1DRJ4HkeLr74QnQ6LS1UWliQ0wItICKH1kyiUTgMsaGUsBwvLCGynHsXLS0wwJZQG7a5aisMs4TRAtNBWKrsINOclFiCobVJvu9xjpG9I3j3u/8XFi06EkmSgHvc6qeMBf7x1lvx9ZtvVtFyqsfJlTM+e/lyzF/wFoyPT1jTpqrfQpRCUtLjNeZT5ACDIPs6O6thGMSsoK9bMo6XezRyMJg2Q7ozBtMbGGfQhChBOJRDF0AO+2fpCg31JAEuu+wyMCZzPvbEgx8EmJiYwCOPPIr16+/H6OgowjC0JvqlM541cyaWLz8b42Mj4Oo5wu5r1rccDNXJRhgEhRKz60JYg4qMIIuiKevOAIvTNp7PYfQipqYCnqZSSAoXOQiy5hIMARjjGBkdwTvf8Q6cfvp7kaapBeGANBXgnOPHP/4xtmzZgh07tuPRRx81jGLuJOIHP/ABVKs1xHGspV9Y36udqiX9JkbIxxGwNNwIpgBBwAYteZQ0VQ2w0rSGgChIiKsk5E4P2AxgsGxg5myFC1+FCeqyFEdrYgKXr16FKIqQJKlJ8xPp6c3b/+l2+L6HJEnx0EM/KeQCuMeRJAne8Y534NRTT8XI6IiMc2C0uRiQCYNsLOiqoTSZQIy0hCtWW76hkJjrgtV4nvaSCLbZMCk2xzmDcmYkiwRdRIMsWhYmOLE1ywk1VQpmbHQMhx9xON533vsk9PTM5I4QAn7g47e//S0e/fnPUW804PsBnnzySaSpTEvbIxWp9FcrP/QhN5axMXtJ2gSWP4Ml7Wayv/xa93m2oGXQfDINyLCvQDFlYEm3IDd/kjklYQcqFuNshmXEJitlLVTKgTOO8fFRfPjyy9FoNJDEsYN+Mvty663/D63WBDjjiKIQAwMvYMf2HeCeZ6JPBUlFKnD60tOxaNEijI2NKiRromFmTWFq3F5KXCsTADd7W8T6VAAWoCnEAdqBQujwW9gT4LncjYPnnWgzo7BwiG3bSBeCApwzjI+P4dBD344VKy6WDPE8C/lI6d+yZQvWr1+PRqOJNE3gBz6Gh1/FwAsDmiB2uiJJElQqFXzwA5cgSSRDdZCVGy+p/E3elGZUzCNEIYTl01SyMgtSc2CDpuIDbG6DuqGD/Ps2zix5Fop42IGhihCMS+m/4ooPo9lsIral35rL/eY3b8Pw8KsIwhCCZBKu0+ngxRdfLKSEQdIXEBEuvOhizJmzPyYmJqz0hJs8M+ZWOOkT65PybG8+9+XkhfYBBcFCAOZrDVRzwyhypR0mI4hc9CwvYZbZEQ7c5YxhbHQUhxxyKD74wQ9I5GNJPwlC4AfYsWMn1q5di1qtAZGmTpZ/8OXBkuSQgaT77z8Hy5cvR6fdAuesmDAUVMznENx4yPGF5M7+FcysyyA2NQ3IgAo5QYarFchFUcg5ITfAMgGQyCXpDFMZZ2i1xnHllVei2WwiSRJH+lORgnGGO+64Azt37kAURWpewhB8z549XUurMju/8kOXIYwixHECciQe1vRocY7ACeIsUwzKmZmcgbCqHKeiATllU5LK9NyqbTOVf8gCFSu5YPLiOVuaQVEnYpYgbnxsDIcddjguuWSFRDN6XkLeHwQBhoeHcfua2xFFVR31yj5Kkrfa7dKC3iwyTpIY7zzmGLzn1PdgfHxMxhaErnkfE9G6ES6omAm2EZOLEIVJOE6WjLO5ZKcSCqkJWPbcypXACrSE3Sknj240KUMinDO0WhP4+Mc/LpGPKgTLNECowOs73/kOBvr7Ua1WFdIpzvN204AszQIAq1atdPI/tiksg6Iih+8pZ3qoJHnnzrwJk/boqQEFU5P74lyWwoHwNiLKDwgoySYq5MMYRkdHcdRRR+Piiy4q2H4QwfM9jIyM4B9vvRVhGCEVoiAkABCoGSfqogZZlnTp0qU44sgjMT4+7tScikKw6cYo9t8Onew5j9x9lHPfUzRBJT4BxYcyIqfANYeCcxMZ7jyvXdsZx2188pNXoVqrFm2/Ysjateuw+bnnUK3WTHlLrk612ezrOVsGJrOklUoFl/7tpRAi1c4YZBPKFjrLIjgIUTgwVs5NkjOZRGXMmQwFFWGT3RkrRM9XjgNySpHyU2IOeJNoQD2Xc4axsREcd9xinHfeeUiSBH4m/arTnh9gbGwMt9xyC4IgLBQ32VBx1qzZPU1QNm9MRLjwwgsxa9YstFott3jXmvnKUuPGvtu+MHM9LoLS9wsU55unhIKAQvIMztQhualbK++hO6WbqjvJQkGhi9W0pCRJgs9+5jMIQ0VcqyZTpDINsW7dOjz77DOo1moqe+nOmMvrfMxfML/7tGWmBJwh7khIet555yNJYoRhAN9X1RVc/paV22aVCIOLCrPcjwRiZaZGmHxTjwpopy6Ic44oqnS/sgCxmV0kloERq2RdqgcjclaUgAEe9zA6KvP9j/zsET0Dlg+6WhMtHLf4OPzrli2oVKpqgsRdbCGEQBD4ePLJJ3DwwQcjjmN3vVreGacyon7qqadw9NFHd1mU4iEIAgRBIIsVGNMzgcgt1GC5kuF8HW1W6NXptNGaGJ+8NrR0cUIZC+1iVGYvcnOLRskudmWmXpMx4Nprr5VZy04iYSEzaYcwDHH32rvx7LPPotmcjsQJvKS8ccbR6XQwf/6bMXfuvPLK5wIk5RBCYNGiRbjxxhsxMPACwjDExMQ4RkZG8MrQEF5+eRCDg4N4ZfduxHFH3RegWq3I/JIwRWjC+ik13M4TmfIsNhUNCMOosEaN5a7sOkCr4NVd6qOdBBgYPM/DyMheLFt2Fn74wweMxFqljIwxjI9P4Nhjj0V/fz+iSlUl65hdiAfP97B3zzDOOONM/OhHD04q/WXIqOwVxzGGhoawdetWPPXUU3j88d/g1489hmf/8hckSQzPD1Gv1WSeQJSs3LSr29V44rij1gr00ACy1mcxK33ArPJEKpgksmxltriBrGVMtg8iJEmKMAzx93//ucJ3ZiYijELceee3sXnzc2j0NZEmqbPQwlZ5z/Ow6MgjdQEYGO/tia1Xu90u5Go45/B9H3PmzMGcOXOwePFiXHrppRgbG8Pvf/97/OAHD2DDhg3YvPk5gHE0+5omGWn1LqMfnHVrk2hAEIR2uWTBebOSpZ32KkTWczEO4PvS9l9wwYW455516HRik+/Xtl+Wob/zne/ESy9tRxiFzncyVYvJPQ8MDHv3DmPdunW48MIL0Wm34fm9LauZfJe1p36X64UQug41fw0R4d5778U//MP/xRNP/AaeH6JRryPJ1X5m69wY40iSGK3WVH0AlXOMiIpLifSHUm0ov6ow0wgwJEmMWq2Ga6/5rNIoKjjIMPJx2223YWBgAH2NphyUEhXGGTzPR9zpYGxsFEEY4qyz/gYnn3xyIX3tVqSTDuCyIt7stWPHTjz77DN45plnsGXLFmzd+iKGhoYwNjaGTqeDKIrQ12hg+n4z8JYFC3DwwYfg6KOPwvvOfR/OP/98bNiwAZ/61Kfx3HN/QaPRdBaH6ICddcdCGqZzzimKKhTqFunfUfZ/qFp2TWhfX6EoqlBUqVClUqVItYpqjUYfAaDLV19ORETtdpuSJNEt7nQoTVMaHBykuXPnUhBEVKs1qFqtU73eoL6+aRRFVQJAzeY0uuyyD9Hjjz9O2SuJ1bPihJI4ls+MY2q1WpQkib5uZGSEfvLQT+ijH72SjjxyEYVhVJLK1BMWpe97nk8LFryFzjvvfLr//vtp83Ob6aMf/Sj5fkDVWp3qjT6q1/uoplq90aQoqhSe45ggWcEb9lqlWVhwXb4Q2pgq+38hBKrVKjZu/APesmABkjR1HGaaSt/wmc98Fjfe+GU14ZLC8z3EnRjt9gRmzpyJFStWYNWq1Xj72w/VDjO/eUZWVR1GpiL5sccew9133417770XQ0NDmD59Ok455VS8//3no7+/H5+95ho06g2kyjwxe3mHs8ZYmqd2u400iQEACxcuxIoVKzA4OIi16+6x7lf4nMka10671V0DGGNGwnULKQxC+bvwWdYquRYVtKJerxMAuuqqT0rpb7UtaU2o0+mQEIL6+/tp+vTpFIYRNRp9VKnWCADNmDGDPvGJT1B/f7+W5Ha7TZ1Ox9WiOKZ2q6Wv2bNnD61Zs4aOOeZYJXGczj33XNqwYQON7B3R142NjdNb33og+b5P1WqdokqNKlXZ5N91qlZrVKnUqFqty/9rDWr0NanR1yTP8wkAzZs3n2bM2I8q1TrV6n1UrTWoVmtQvd4o1YACA4KehHZbFHVjRmamJCMqlSr5QUAzZ86i7du3U5qmBcK1220iIlq5ciUBoGnTphMAisKIVq5aRc8995wmVqvVKtyfPUOkgoiIhoaG6KabbqJ5895MAGju3Ll0/fVfooGBAbJf7XabxsbGiIjoK1/5CgFQxKpaZrSmW6Vao6pqlWqdKrU6Vat1qikTGYQVqlZrVKvVqVaTTKrWGlSrNyiMoskZEIYhRaVMCPedIUoDajUp/Z///Oc1AQuEE4I2btxI9XqdOPcIAC1dupR+85snDLFabYo7cYHwnU6H4jhWkjxGX//6zXTAAQcQADr44EPoW9/6J9q7d69D9Ha7TbHlJ9I0pZ07d9Ls2bPJ931JfOXPoqgqGRLVHM2o6t913Wq1hiJ8vfB+F19T1ICyFr5GzahUquR5Ps2bO49e2f0KpWrAeQISEZ1zzjkEgA488CC66667epoabW6U5hARffe736NDDz2UANCCBQvottu+RRMTE/JD0V1zkiShdks+59OfvpoAUK1WN4BEAY0MUDgaoRmiiF2rO1pStd6fGgOCsLwVGJJpRdiTAbWatOE33XSTkuJWqen54Q8fIAD0kY98hAYHdxERUafToU4OKeXvIyJ68skn6fTTT5cmK4rohhu+THuG9xARUZqm1Gq1CkzXiMkSAiEEPf/889RsNsn3A6kBTqsqpkiNMIyQjMmIXdHN1pYpMsD3ffL9gAI/oCAIDAPy/+eYU8aMaqVKnufRQQceRHv37tVSawYu/261WrRq1Wr6/ve/79j5MsLHcUwdRfyhoSG66qqrdP9XrVpNL7/8spJ4UU74Hk37oQ9JP1St1igMIwoi48+0NkRVzQgJsy2NUM32G5VqjYIwnIIGZMTXBA/I92UzDFB/++VaohmgEMxt3/xmV6KmaUrtdptaCrnYtrmX1N+/fj0ddNBBBICOOupoevjhh+mpTU/R1Vdf3fMZvVqmBZs2baIoiigIAsmAIKIgjCgIK6pZgCNSsY7WChP3ZIzJzFQQTIEBfhAUmy9/B04rN1WZJlQqVeKc0xGHH0ETExOUxEr6YwM9M1OQpqlmRJmZiDvG1m/bto0uueQS3eevffVrGpre8KUbCGA0NjpGQoipM8EyR5229EfLly8nAFSpVNXYMiZEigGWfwgts6RNk2FCpBhRxgDePSrI7a1B5cVUWTjnTEWSCVauueYaVCoVpNl6Xebsp6Gzn0JQITPJmAzO/MBHGIa49957sXjxYtx111048cQTsWnTU2hOa+KSSy6BEALHHXccPI9j2/Zt+7axICtOyV75sY+Bc45UpM6Kz/ySWoJbpEBWgZpTftNjzyBXAzzfNN/XPqFnC0KnVSoVYozR4sWLNUTs5QBLP7MCql27dtFll12m+3njl2+kbdu20UUXX0wAaP6b51Or1aIXXniBfN+nRx99tDTVMdUWd2ISQtBJJ52kHHtFWQCp5dk4jbmtFFM0hfRMdYoawOxpHFuky3iG/Np8Z+ry2muvRRAEELkMYc9UMTMLo8Mowk9/+lOccMIJWLNmDQ477DD84Q8bsfSMpTjxxBOxbu1a1OsN7H5lNzZv3oz58+dj3rx56H++H13zv1N4ZatvPvaxj1n7PjCnoMCuJoc15cKICvvW7UNpoj3XxDK1KNnhsGR+R3XSV3vknHTSSTjrrLOQJImbHp6EKGmS6mnAL37xizjttNOwefNmrF69Gps2bcLTTz+NY445Fv0DA2g0+gAwTExM4Je//BUA4Pjjj8fz/f1WUf2+vzxP7hSzbNkyHHXUUYjjjtxFi5jObLJcKQ+ssjNTw5hliFnXSfmCCfJ8nzzPk799nzzPN3/7gdPypijwJWrgnNMjjzyyb2ZAZS2JiAYGBmjp0qUEgKZPn0H3rLuHiIg+9alPSZNQqVKtJtMFtVqDANBpp72XiIge/OGD9OEPX9H1u9MpOOIMGhMR3XbbbQSAwijS4/SCwDFJrpO2UZI0T4EyUb4fTI6CPM8vb37ub9WRjDm+H1BUkcmms846SwZS7c6U4V8WDT/wwAM0d+5cAkAnnngibfnXLUREdPbZZ+sItVqtWanuGkVRharVKj399J8oTmJ6+OGHJyXwZJ9n6YlXX32V5s6dp4NUxyeWoUEHKblx0T4ywLN+e9b/JYzxfQ1Tfd+nJ554YsrSb2P7L3zhC7ovH//4/9EO+Pjjj3eSZBnezlq9LucZVq9aXZwb+CtaBgI+97nPaWfseYoBngtAXE0IXSYoeO77/lQY4OUY4Je8l2OI7+tU60UXXTRl4mdq/vLLL9PysyXunj5tOq1bt46IiP785z/T2972NkX8Pp2PcVMDUgvCsEL1eoOe+fMzlCqtmqq0TxaY9ff3qyQhlyZIo0RlkhQjCubIyRRE+8IAr4fkewWGyE74VK3W6Nln/0JCiJ7mx06iPfbrX+sE2rHHHksbN24kIqJHHnmEZs+eLc1OvaGDHdlyEC+qUr0ufcG555xbFIC/Qhuyfq5YsUL7gkzoXHOUaULgmqMg0gHq5AwAJFG5R57HifPsb8963y8wKAql9P/d//67SaU/k0wiottvv50qym9ceullNDw8TERE3/vevVSr1YkxrvIxFXcK1G5WsqxalWnv+9ffX5r4+2sY8C+/+peij1S+UDIhzJmjyGFAMDUTBPI8bohd0rjnEfd84p5HHlfSzz2aMWMGbXtpW+lkS34wcRzTlVdeqeahPbr55pu17f7GN76hkoKBDN/tsD+yZtzCCoVhVb+XMcD3A1qwYAENDg5Smqal8wf7HJjFMaVJSu9617sIAAVBqJkgid9bEzKmZLNmPU2QJLAl/ZYGcM0AT3+epVivu+66nlKX2ftt27bRaae9lwDQwoUL6Wc/+5km/jXXXCPVPJRFAFKKKroVpjzV/4HFoMwUnbP8HKONcfy6OOM71txRYECGALPfJiMQFKLnfWCAaZk2GMJL5nDuke/7xDmXky2vvKLD+G6THY8//ji99a0HEgA644wzaOsLW4mIaGJiQqcaokpVEtVSYxtPG5xdzoAoqlBNMeFLX7qhZ2p7nzQgFfTqq6/SAQccoDXU1gLP0YRQJzFNNjkkz/N6MwCMKQJzR9K15HPPfM49nd++5ZZbukp/Znbuu+8+3YHPX/d5jfsHBwd10CXnjsMSaGc7NVsjygoCpFPOUuFr10pE1Zpo/ZVaIMeRmc4wjBx/YAJSX/uDfDp/cgaAEVMEZpwT457+XzNCMcH3A2KM0dvedjCNjY2VTLaY1O4dd0jVPeSQQ+knD/1Em5yn//QnWrRokSG+BeckE6JCos9ohq0JdsQpW6VaU2YspB/84AHDhNeIiLKx/O53v1PmmBN3HHJZktIwIAimxABYEp5vLgOCQEZ137nzO6Vqns1a/eIXv6Rms0lXX321RjlERA8++CDNnDlTEj+q5jofmhbkW4YsMm0omqnMFGWTINVKlTZs2KD7Gb9GnxDHMkv67ne/W/sCaaYD2fwSeOrvkwaAOJdmiDFGjHHizGKA+jtQIfURRxyhnFxR+rNQfmBggLZs2aIJL0jQjTfeqL6Da1zt+5Yt9ex8U2jZ1SjHFIsZJUwILSYEQUDf/va3JQrrxL0DtUkCxzvvvJMAkO8HEox4vmKCxQDPz41jigyQhGeaAYwx4owbZjCu89qZ7S+dalS/7df27dt1TkdDMyuX5Pv5VEeeEWGJdkSGETlt0ExQkTIAuvbaayedd+4awCkNGBoaojkqSPR8BcnzqRmrZXkzXsIA3mtyiIEKCyKyErtqtYozzzxTpm952Z4fJJebqtd9992HJUuWYP369Qijit61MDehlOuLWXNGzpxbrjQ+J0r540uEEGCcoVKt4frrr8eyZcswMDCAKIpAggq72Xadt2AMSRxjxowZOOU9p8qxM24Xd7p7aJO7OnRqK+VLZydJMyOb6ps5cybmzJ4tt4PJStZJDibbzTyKIvT392PFihU455xzsHXrVoRhhCRJzNpbZu06zgrkd4hpljpTaa+psBrW3jhWlqTXaw386Ec/wpIlS3D77bfr6U4SUmDc1T3dS9uPOvIos0yJWSuGGHNXdNn7SE9t076SfZXNkgO1Golj9+7d2LV7N7gnzxbgXNbZh2GIMAqxY/t2XHfddTju2OOwdu1a+H4A3w+QpElxdzTktpfussOzuy8U5YhE7vE91tY5zsqXJEGtVsfu3a9g5cqVOPnkU/DQQw/BD6TA+L4PIYTco1qkzu4naZoiThJ5RszuXbnlQ3nbYa0R03Nak5SnZz4AygfkbT9njLiqHQJAp55yCv1h40YaGxuj1kSLduzYQQ899BBdccUVNGvWbP3MIAgVevJVGsO3gj3fhXP5uQfbwWm0Ebg5mAJiClTuXvkHu5IhixVUIVXWx5NPPpnuvPNO2rFjB032+uMf/0izZs1WwWgg+68nqkz/fWssWdDaszy9uP7LPjaEOZKXlZt7noeFCxfC933s2rULQ0ND+u5sXW/P6oT8GSy9JotZcbt390wX51wd52Ars2LR9WrZ7opttXZrzpw5WLJkCU444X/i8MMPwwEHHIBqtYZOu4XtO3bg5z//OdasWYOhoSH4fqC3WLPpw8g974FZc935dc6lp3KUnTKkL7SOLJFL/92tuHzfl+UcqdiH8yYZpnYuJivdGT9/pKFz2h5KPoc548NmBAPQarVBlDrzw0Eg54jjOFbP5dpUORyHtftWfhpYldjkHUE5A6xVftmyIGbv8eAQLmv2jiKsi1tnPTWBodciENu+knXIDsv5ADbJ2hGzKIqxEkYyBs653lVLIiSzeI9zjiRNzHplwNmkj7HcWRUW3UQJ2urCAHuVnitKzkEOLvMLB2B2/Zr8MVjdJLywvtA+FpEVF5A7C8Wp/BqY46nKzpfUK9xYCTOdva+LpCutwrC27xclm/b1PEeMsR7EUgvyHNli5WRnXZY7dZNzZ6lR2Zpl9DpWi5VrRe50DpfXrEAE+1jQAnuovHfdGAN0jzX8yRbJkwNm7bWrVCAs5QhBcLZ+sGwwwT2DD1bNTTeUn39yGVfdVenOjm/ECmVMzlZauX/tYxXNtgtl30o9t8hBl52ypqQBmMJtRVXtccRFruvmEB37fBrWRX2Kx+GybqDa4mc5ynLPMraPK7KPlctfwxwjBZRztMiJrpE2/qoDnUt37yh3hN2cMCsOIn/gTvfHlG+OYYAnc46ocledM5fPJXbOOZvY8qrukYdUQm/XKQqR/ltoQK9HMOswt5zqsxLRZiicK8a032FTWSNbEk+4JzflT0Aq29uiq/ay3ImKU9rcBFMi/uvEgFIQm9+/Rh8F6C4mRg/IaktiLqKZsmaY2kzKY/UykJwraWdWmqQ7kCgz/lMj/r8RA0okjOV9XbdNJVi5mLP8gXEspxikz78pbO1iBXrUJSyxj8Mss6yOv8ufm5lH4/b+ea/BfrzeHMjBQyqB7WySQI3KY4X8IXDOMbW9IK67D0Y+xVJOICpPhRTOnN+X6P/fhQFdvk5t2sR6H15dQDW5g6thn8TNyjTIMluEqdlxlyDkgmVWRvT8wRT4z8yA19oN1p1LbF8c5Gt7UTlge11I95+EAf99X/wNErzBgDcY8MbrP+71/wFWV0h1tZ0r3QAAAABJRU5ErkJggg==" alt="Alberto" class="logo-ico">Alberto</span>
+    <button class="tb-btn" id="btnVoz" onclick="window._vzToggle()" aria-label="Dictar" title="Dictar un aviso, cobro o recordatorio"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg></button>
     <button class="tb-btn" onclick="abrirDrawer()" aria-label="Menú"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   </div>
 
@@ -16012,6 +16057,715 @@ window._calgNavegar=(tipo,id,cliId)=>{
 };
 
 
+
+// ══════════════════════════════════════════════════════════════
+// ASISTENTE DE VOZ
+// Pulsas el micro de la barra superior, dictas y el documento se crea solo.
+// No abre formularios ni pide confirmación: si lo tiene claro, guarda y te
+// dice en voz escrita lo que ha entendido, con un botón de deshacer.
+// Solo interrumpe en tres casos: cliente ambiguo, cobro sin importe y
+// recordatorio sin fecha.
+// Usa el reconocimiento del navegador (Web Speech API): necesita conexión.
+// ══════════════════════════════════════════════════════════════
+
+// ── Normalizar texto: sin tildes, sin signos, en minúsculas ──
+const _vzNorm = (t) => (t||'')
+  .toLowerCase()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  .replace(/[^a-z0-9ñ\s.,]/g,' ')
+  .replace(/\s+/g,' ')
+  .trim();
+
+// ── Distancia de edición, para tolerar transcripciones aproximadas ──
+const _vzDist = (a,b) => {
+  if(a===b) return 0;
+  if(!a.length) return b.length;
+  if(!b.length) return a.length;
+  let prev = Array.from({length:b.length+1},(_,i)=>i);
+  for(let i=1;i<=a.length;i++){
+    const fila=[i];
+    for(let j=1;j<=b.length;j++){
+      fila[j]=Math.min(prev[j]+1, fila[j-1]+1, prev[j-1]+(a[i-1]===b[j-1]?0:1));
+    }
+    prev=fila;
+  }
+  return prev[b.length];
+};
+const _vzParecido = (a,b) => {
+  const max=Math.max(a.length,b.length);
+  if(!max) return 0;
+  return 1 - _vzDist(a,b)/max;
+};
+
+// ══════════════════════════════════════════════════════════════
+// DICCIONARIOS DE REFERENCIA (para puntuar candidatas y corregir)
+// ══════════════════════════════════════════════════════════════
+
+// ── Diccionario técnico multi-oficio: electricidad, fontanería/bombas,
+// carpintería y mantenimiento general. Piezas, averías y verbos de acción
+// habituales en los partes de trabajo. Se usa como lista de referencia
+// para puntuar transcripciones y corregir palabra a palabra.
+const _VZ_LEXICO = [
+  // Electricidad
+  'cuadro electrico','diferencial','magnetotermico','automatico','fusible','enchufe','interruptor',
+  'conmutador','cableado','cable','manguera electrica','toma de tierra','neutro','fase','cortocircuito',
+  'sobretension','bombilla','fluorescente','led','regleta','clema','empalme','contador','potencia',
+  'derivacion','saltar el diferencial','sin corriente','sin luz','chispazo','recalentar',
+  'motor quemado','condensador','rele','termostato','sonda','resistencia','calefactor','radiador electrico',
+  'instalar','desinstalar','cablear','conectar','desconectar','revisar','reparar','sustituir','cambiar',
+
+  // Fontanería / bombas (electrobombas)
+  'electrobomba','bomba','bomba de agua','bomba sumergible','bomba de superficie','bomba de achique',
+  'grupo de presion','presostato','manometro','valvula','valvula antirretorno','valvula de bola',
+  'valvula de compuerta','llave de paso','grifo','griferia','junta','junta toldal','goma','arandela',
+  'racor','manguito','tuberia','tuberia de cobre','tuberia de pvc','codo','reduccion','filtro',
+  'filtro de agua','deposito','deposito hidroneumatico','aljibe','pozo','sondeo','aspiracion',
+  'impulsion','caudal','caudalimetro','sifon','desague','atasco','fuga','gotea','goteo','fuga de agua',
+  'perdida de presion','cebar la bomba','descebada','rodete','eje','cojinete','rodamiento','reten',
+  'estopa','carcasa','motor de la bomba','condensador de arranque','termico de la bomba',
+  'presion','sobrepresion','baja presion','no coge agua','no arranca','se para sola','hace ruido',
+  'vibra','pierde agua','purgar','purgar el aire','airear','vaciar el circuito',
+
+  // Carpintería
+  'puerta','ventana','marco','contramarco','bisagra','cerradura','pomo','tirador','cerrojo',
+  'persiana','caja de persiana','cinta de persiana','mosquitera','armario','estanteria','balda',
+  'tornillo','taco','clavo','pegamento','cola blanca','barniz','lija','lijar','atornillar','encolar',
+  'puerta descuadrada','madera','tablero','melamina','contrachapado',
+
+  // Mantenimiento general
+  'averia','reparacion','mantenimiento','mantenimiento preventivo','revision','inspeccion',
+  'presupuesto','pieza de recambio','recambio','repuesto','garantia','instalacion','desmontaje',
+  'montaje','limpieza','limpiar','engrasar','lubricar','apretar','aflojar','soldar','soldadura',
+  'sellar','sellado','silicona','aislante','aislamiento','termico','electrico','hidraulico','mecanico',
+  'comunidad de vecinos','local','nave','vivienda','garaje','trastero','azotea','cuarto de bombas',
+  'sala de maquinas'
+].map(_vzNorm);
+
+// Palabras sueltas del léxico técnico (las locuciones se descomponen para
+// poder comparar palabra a palabra sin perder esas expresiones como bloque).
+const _VZ_LEXICO_PALABRAS = new Set(_VZ_LEXICO.flatMap(e=>e.split(' ')).filter(p=>p.length>2));
+
+// ── Vocabulario español base: conectores, verbos habituales, días, meses,
+// números... para distinguir "esto es español normal" de "ruido del micro".
+const _VZ_BASE = [
+  'el','la','los','las','un','una','unos','unas','de','del','a','al','en','con','por','para','y','o',
+  'que','se','no','si','esta','estan','ha','han','hay','muy','mas','pero','como','cuando','donde',
+  'porque','tambien','ya','todo','todos','nada','algo','alguien','cada','otro','otra','este','ese',
+  'esa','aquel','mi','tu','su','nuestro','yo','el','ella','nosotros','ellos',
+  'hoy','manana','ayer','ahora','luego','despues','antes','pronto','tarde',
+  'lunes','martes','miercoles','jueves','viernes','sabado','domingo',
+  'enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre',
+  'uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez',
+  'hacer','tener','poder','decir','ir','ver','dar','saber','querer','llegar','pasar','deber','poner',
+  'parecer','quedar','creer','hablar','llevar','dejar','seguir','encontrar','llamar','venir','pensar',
+  'salir','volver','tomar','conocer','vivir','sentir','tratar','mirar','contar','empezar','esperar',
+  'buscar','existir','entrar','trabajar','escribir','perder','producir','ocurrir','entender','pedir',
+  'recibir','recordar','terminar','permitir','aparecer','conseguir','comenzar','servir','sacar',
+  'necesitar','mantener','resultar','leer','caer','cambiar','presentar','crear','abrir','considerar',
+  'oir','acabar','convertir','ganar','formar','traer','partir','morir','aceptar','realizar','suponer',
+  'comprender','lograr','explicar','preguntar','tocar','reconocer','estudiar','alcanzar','nacer',
+  'dirigir','correr','utilizar','pagar','ayudar','gustar','jugar','escuchar','cumplir','ofrecer',
+  'descubrir','levantar','intentar','usar','decidir','repetir','olvidar','anadir','continuar',
+  'senalar','indicar','cerrar','soltar','provocar','faltar','apoyar','confirmar'
+].map(_vzNorm);
+const _VZ_BASE_SET = new Set(_VZ_BASE);
+
+// ── Puntuar una transcripción candidata: cuánto encaja con clientes
+// conocidos + léxico técnico + español base. Cuanto más alto, mejor.
+const _vzPuntuarCandidata = (texto) => {
+  const norm=_vzNorm(texto);
+  const palabras=norm.split(' ').filter(p=>p.length>1);
+  if(!palabras.length) return 0;
+  const nombresClientes=(allClientes||[]).filter(c=>!c.archivado)
+    .flatMap(c=>_vzNorm(c.nombre||'').split(' ')).filter(p=>p.length>2);
+  let total=0;
+  for(const p of palabras){
+    if(_VZ_BASE_SET.has(p) || _VZ_LEXICO_PALABRAS.has(p) || nombresClientes.includes(p)){ total+=1; continue; }
+    let mejor=0;
+    for(const ref of nombresClientes) mejor=Math.max(mejor,_vzParecido(ref,p));
+    for(const ref of _VZ_LEXICO_PALABRAS) mejor=Math.max(mejor,_vzParecido(ref,p));
+    total+=mejor;
+  }
+  return total/palabras.length;
+};
+
+// Busca en el diccionario (léxico técnico + español base) la palabra más
+// parecida a la dada. Devuelve {palabra,score} o null si no hay ninguna cerca.
+const _vzMejorParecida = (palabra) => {
+  if(palabra.length<3) return null;
+  let mejor=null, mejorScore=0;
+  const revisar=(dicc)=>{
+    for(const p of dicc){
+      if(Math.abs(p.length-palabra.length)>2) continue; // descarta comparaciones inútiles
+      const s=_vzParecido(p,palabra);
+      if(s>mejorScore){ mejorScore=s; mejor=p; }
+    }
+  };
+  revisar(_VZ_LEXICO_PALABRAS);
+  revisar(_VZ_BASE_SET);
+  return mejor ? {palabra:mejor, score:mejorScore} : null;
+};
+
+// ── Corrector palabra a palabra ──
+// Misma lógica de distancia de edición que usamos para clientes, aplicada a
+// cada palabra del texto dictado. Compara contra diccionario técnico +
+// español base. Respeta nombres propios probables: una palabra en mitad de
+// frase que empieza en mayúscula (marca, nombre de cliente...) no se toca.
+window._vzCorregirCuerpo = (texto) => {
+  if(!texto) return texto;
+  const tokens=texto.split(/(\s+)/); // conserva los espacios originales
+  let esInicioFrase=true;
+  const salida=tokens.map(tok=>{
+    if(/^\s+$/.test(tok)) return tok;
+    const m=tok.match(/^([a-zA-ZñÑáéíóúÁÉÍÓÚ]+)([.,;:!?]*)$/);
+    if(!m){ esInicioFrase=false; return tok; }
+    const [,palabra,signo]=m;
+    const esMayuscula=/^[A-ZÑÁÉÍÓÚ]/.test(palabra);
+    const propioProbable=esMayuscula && !esInicioFrase;
+    esInicioFrase=/[.!?]/.test(signo);
+    if(propioProbable) return tok; // nombre propio o marca: se respeta
+
+    const norm=_vzNorm(palabra);
+    if(_VZ_BASE_SET.has(norm) || _VZ_LEXICO_PALABRAS.has(norm)) return tok; // ya está bien
+
+    const mejor=_vzMejorParecida(norm);
+    if(mejor && mejor.score>=.78 && mejor.palabra!==norm){
+      let corregida=mejor.palabra;
+      if(esMayuscula) corregida=corregida.charAt(0).toUpperCase()+corregida.slice(1);
+      return corregida+signo;
+    }
+    return tok;
+  });
+  return salida.join('');
+};
+
+// ── Números dichos con palabras ──
+const _VZ_NUM = {
+  cero:0, un:1, uno:1, una:1, dos:2, tres:3, cuatro:4, cinco:5, seis:6, siete:7,
+  ocho:8, nueve:9, diez:10, once:11, doce:12, trece:13, catorce:14, quince:15,
+  dieciseis:16, diecisiete:17, dieciocho:18, diecinueve:19, veinte:20,
+  veintiuno:21, veintidos:22, veintitres:23, veinticuatro:24, veinticinco:25,
+  veintiseis:26, veintisiete:27, veintiocho:28, veintinueve:29, treinta:30,
+  cuarenta:40, cincuenta:50, sesenta:60, setenta:70, ochenta:80, noventa:90,
+  cien:100, ciento:100, doscientos:200, trescientos:300, cuatrocientos:400,
+  quinientos:500, seiscientos:600, setecientos:700, ochocientos:800, novecientos:900,
+  mil:1000
+};
+
+// Convierte "trescientos cuarenta" -> 340. Devuelve null si no hay número.
+const _vzNumeroEnPalabras = (txt) => {
+  const palabras = _vzNorm(txt).split(' ');
+  let total=0, parcial=0, visto=false;
+  for(const p of palabras){
+    if(p==='y') continue;
+    const n=_VZ_NUM[p];
+    if(n===undefined){ if(visto) break; else { total=0; parcial=0; continue; } }
+    visto=true;
+    if(n===1000){ parcial=(parcial||1)*1000; total+=parcial; parcial=0; }
+    else if(n>=100){ parcial+=n; }
+    else { parcial+=n; }
+  }
+  total+=parcial;
+  return visto&&total>0 ? total : null;
+};
+
+const _VZ_MESES = {enero:0,febrero:1,marzo:2,abril:3,mayo:4,junio:5,julio:6,
+  agosto:7,septiembre:8,setiembre:8,octubre:9,noviembre:10,diciembre:11};
+const _VZ_DIAS = {domingo:0,lunes:1,martes:2,miercoles:3,jueves:4,viernes:5,sabado:6};
+
+const _vzISO = (d) => {
+  const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);
+  return z.toISOString().split('T')[0];
+};
+
+// ── Fecha dicha en lenguaje natural ──
+// Devuelve {fecha:'YYYY-MM-DD', txt:'el lunes'} o null.
+const _vzFecha = (txtNorm) => {
+  const hoy=new Date(); hoy.setHours(12,0,0,0);
+  const dias=(n)=>{ const d=new Date(hoy); d.setDate(d.getDate()+n); return d; };
+
+  if(/\bpasado manana\b/.test(txtNorm))  return {fecha:_vzISO(dias(2)), txt:'pasado manana'};
+  if(/\bmanana\b/.test(txtNorm))         return {fecha:_vzISO(dias(1)), txt:'manana'};
+  if(/\bhoy\b/.test(txtNorm))            return {fecha:_vzISO(hoy),     txt:'hoy'};
+
+  // "en dos semanas", "dentro de un mes", "dentro de un año"
+  let m = txtNorm.match(/\b(?:en|dentro de)\s+([\w]+)\s+(dias?|semanas?|meses|mes|anos?|ano)\b/);
+  if(m){
+    const n = parseInt(m[1],10) || _VZ_NUM[m[1]] || 1;
+    const u = m[2];
+    const d = new Date(hoy);
+    if(/^dia/.test(u))        d.setDate(d.getDate()+n);
+    else if(/^semana/.test(u))d.setDate(d.getDate()+n*7);
+    else if(/^mes/.test(u))   d.setMonth(d.getMonth()+n);
+    else                      d.setFullYear(d.getFullYear()+n);
+    return {fecha:_vzISO(d), txt:m[0]};
+  }
+
+  // "el 20 de marzo" / "el 20 de marzo de 2027"
+  m = txtNorm.match(/\b(\d{1,2})\s+de\s+([a-z]+)(?:\s+de\s+(\d{4}))?/);
+  if(m && _VZ_MESES[m[2]]!==undefined){
+    const dia=parseInt(m[1],10), mes=_VZ_MESES[m[2]];
+    const anio = m[3] ? parseInt(m[3],10) : hoy.getFullYear();
+    let d=new Date(anio,mes,dia,12,0,0);
+    if(!m[3] && d<hoy) d=new Date(anio+1,mes,dia,12,0,0);
+    return {fecha:_vzISO(d), txt:m[0]};
+  }
+
+  // "en marzo" (día 1 de ese mes)
+  m = txtNorm.match(/\b(?:en|para)\s+(enero|febrero|marzo|abril|mayo|junio|julio|agosto|septiembre|setiembre|octubre|noviembre|diciembre)\b/);
+  if(m){
+    const mes=_VZ_MESES[m[1]];
+    let d=new Date(hoy.getFullYear(),mes,1,12,0,0);
+    if(d<hoy) d=new Date(hoy.getFullYear()+1,mes,1,12,0,0);
+    return {fecha:_vzISO(d), txt:m[0]};
+  }
+
+  // "el lunes" / "el lunes que viene"
+  m = txtNorm.match(/\b(?:el\s+)?(lunes|martes|miercoles|jueves|viernes|sabado|domingo)(\s+que\s+viene)?\b/);
+  if(m){
+    const objetivo=_VZ_DIAS[m[1]];
+    let delta=(objetivo-hoy.getDay()+7)%7;
+    if(delta===0) delta=7;                 // "el lunes" nunca es hoy
+    if(m[2]) delta+=7;                     // "que viene" suma otra semana
+    return {fecha:_vzISO(dias(delta)), txt:m[0].trim()};
+  }
+
+  // "el día 20"
+  m = txtNorm.match(/\bel\s+dia\s+(\d{1,2})\b/);
+  if(m){
+    const dia=parseInt(m[1],10);
+    let d=new Date(hoy.getFullYear(),hoy.getMonth(),dia,12,0,0);
+    if(d<hoy) d=new Date(hoy.getFullYear(),hoy.getMonth()+1,dia,12,0,0);
+    return {fecha:_vzISO(d), txt:m[0]};
+  }
+  return null;
+};
+
+// ── Importe ──
+const _vzImporte = (txtNorm) => {
+  // "340 euros", "45,50 euros", "45 con 50"
+  let m = txtNorm.match(/(\d+(?:[.,]\d{1,2})?)\s*(?:con\s+(\d{1,2})\s*)?(?:euros?|eur|e)\b/);
+  if(m){
+    let v=parseFloat(m[1].replace(',','.'));
+    if(m[2]) v=Math.floor(v)+parseInt(m[2],10)/100;
+    return {importe:v, txt:m[0]};
+  }
+  // Sin la palabra "euros": "45 con 50", "340". Solo si se pidio un cobro.
+  if(_vzEsperaImporte){
+    m = txtNorm.match(/\b(\d+(?:[.,]\d{1,2})?)\s*(?:con\s+(\d{1,2}))?\b/);
+    if(m && m[1]){
+      let v=parseFloat(m[1].replace(',','.'));
+      if(m[2]) v=Math.floor(v)+parseInt(m[2],10)/100;
+      return {importe:v, txt:m[0]};
+    }
+  }
+  // en palabras: "trescientos cuarenta euros"
+  const mp = txtNorm.match(/((?:\b(?:cero|un|uno|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|dieciseis|diecisiete|dieciocho|diecinueve|veinte|veintiuno|veintidos|veintitres|veinticuatro|veinticinco|veintiseis|veintisiete|veintiocho|veintinueve|treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa|cien|ciento|doscientos|trescientos|cuatrocientos|quinientos|seiscientos|setecientos|ochocientos|novecientos|mil|y)\b\s*)+)euros?\b/);
+  if(mp){
+    const v=_vzNumeroEnPalabras(mp[1]);
+    if(v) return {importe:v, txt:mp[0]};
+  }
+  return null;
+};
+let _vzEsperaImporte=false;
+
+// ── Prioridad ──
+const _vzPrioridad = (txtNorm) => {
+  if(/\b(urgente|urgencia|corre prisa|prisa|importante|prioridad alta|muy grave)\b/.test(txtNorm)) return {prio:'alta', txt:RegExp.lastMatch};
+  if(/\b(prioridad media|normal)\b/.test(txtNorm)) return {prio:'media', txt:RegExp.lastMatch};
+  if(/\b(prioridad baja|sin prisa|cuando pueda)\b/.test(txtNorm)) return {prio:'baja', txt:RegExp.lastMatch};
+  return null;
+};
+
+// ── Tipo de documento ──
+const _VZ_ARRANQUES = /^(?:por favor\s+)?(?:creame|crea me|crea|creas|anade|anadir|añade|haz me|hazme|haz|apunta|apuntame|pon|ponme|mete|meteme|nuevo|nueva|guarda|registra|abre)\s+(?:un|una|el|la|me\s+un|me\s+una)?\s*/;
+
+const _vzTipo = (txtNorm) => {
+  const limpio = txtNorm.replace(_VZ_ARRANQUES,'');
+  let m = limpio.match(/^(aviso|recordatorio(?:\s+preventivo)?|cobro|factura|pago)\b/);
+  if(m){
+    const t=m[1];
+    const tipo = t.startsWith('aviso') ? 'aviso' : t.startsWith('recordatorio') ? 'recordatorio' : 'cobro';
+    return {tipo, resto:limpio.slice(m[0].length).trim(), explicito:true};
+  }
+  // sin palabra clave: se deduce
+  return {tipo:null, resto:limpio, explicito:false};
+};
+
+// ── Cliente: busca en las fichas y decide si hay duda ──
+// Devuelve {estado:'unico'|'ambiguo'|'nuevo', cliente, candidatos, nombre, resto}
+const _vzCliente = (resto) => {
+  const activos = (allClientes||[]).filter(c=>!c.archivado);
+  // El nombre suele ir tras "para/de/a/al/en" y termina en coma o en un verbo
+  let nombre='', rest=resto;
+  // El nombre va SIEMPRE al principio, nunca en mitad de la frase: si no,
+  // "revisar la bomba del garaje" daba a "garaje" por cliente.
+  // 1) "aviso, Comunidad Los Olivos, revisar..." -> primer trozo entre comas
+  let m = resto.match(/^\s*,\s*([a-z0-9ñ\s.]{2,40}?)\s*,\s*(.*)$/);
+  if(m){ nombre=m[1].trim(); rest=m[2].trim(); }
+  if(!nombre){
+    // 2) "para Pura Martinez, ..." / "de Antonio Ruiz de 340 euros"
+    m = resto.match(/^\s*,?\s*(?:para|de|del|a|al|con)\s+([a-z0-9ñ\s.]+?)(?:\s*,|\s+(?:que|hay|tiene|se|esta|no|por|urgente|manana|hoy|revisar|revision|cambiar|arreglar|reparar|mirar|limpiar|instalar|montar|de)\b|$)/);
+    if(m){ nombre=m[1].trim(); rest=resto.slice(m.index+m[0].length).trim(); if(resto[m.index+m[0].length-1]===',') rest=resto.slice(m.index+m[0].length).trim(); }
+  }
+  if(!nombre){
+    // 3) sin preposicion: "Pura Martinez, se ha roto el grifo"
+    const trozos=resto.split(/\s*,\s*/);
+    if(trozos.length>1 && trozos[0].split(' ').length<=4){ nombre=trozos[0].trim(); rest=trozos.slice(1).join(', ').trim(); }
+  }
+  if(!nombre) return {estado:'sin_nombre', resto:resto};
+
+  const nNorm=_vzNorm(nombre);
+  const puntuar=(c)=>{
+    const cn=_vzNorm(c.nombre||'');
+    if(!cn) return 0;
+    if(cn===nNorm) return 1;
+    if(cn.startsWith(nNorm)||cn.includes(nNorm)) return .95;
+    // por partes: nombre suelto o apellido suelto
+    const partes=cn.split(' ');
+    if(partes.some(p=>p===nNorm)) return .9;
+    return _vzParecido(cn,nNorm);
+  };
+  const puntuados = activos.map(c=>({c, p:puntuar(c)})).sort((a,b)=>b.p-a.p);
+  const buenos = puntuados.filter(x=>x.p>=.82);
+
+  if(buenos.length===1) return {estado:'unico', cliente:buenos[0].c, nombre, resto:rest};
+  if(buenos.length>1){
+    // si uno es exacto y el resto no, no hay duda
+    const exactos=buenos.filter(x=>x.p===1);
+    if(exactos.length===1) return {estado:'unico', cliente:exactos[0].c, nombre, resto:rest};
+    return {estado:'ambiguo', candidatos:buenos.map(x=>x.c), nombre, resto:rest};
+  }
+  // ninguno bueno, pero alguno se parece bastante: preguntar antes de crear un duplicado
+  const cercanos = puntuados.filter(x=>x.p>=.62);
+  if(cercanos.length) return {estado:'parecido', candidatos:cercanos.slice(0,4).map(x=>x.c), nombre, resto:rest};
+  return {estado:'nuevo', nombre, resto:rest};
+};
+
+// ── Analizar la frase completa ──
+window._vzAnalizar = (texto) => {
+  const norm=_vzNorm(texto);
+  const {tipo, resto, explicito} = _vzTipo(norm);
+
+  // Importe, fecha y prioridad se sacan ANTES del cliente: si no, un "de
+  // trescientos cuarenta euros" se confundia con el nombre del cliente.
+  _vzEsperaImporte = (tipo==='cobro');
+  let trabajo = resto;
+  const imp = _vzImporte(trabajo);
+  if(imp) trabajo = trabajo.replace(imp.txt,' ');
+  const fecha = _vzFecha(trabajo);
+  if(fecha) trabajo = trabajo.replace(fecha.txt,' ');
+  const prio = _vzPrioridad(trabajo);
+  if(prio) trabajo = trabajo.replace(prio.txt,' ');
+  trabajo = trabajo.replace(/\s+/g,' ').replace(/\s+,/g,',').trim();
+
+  const cli = _vzCliente(trabajo);
+  let cuerpo = (cli.resto!==undefined?cli.resto:trabajo);
+
+  // Limpiar restos de puntuación y conectores sueltos
+  cuerpo = cuerpo.replace(/^[\s,.;]+/,'').replace(/[\s,.;]+$/,'')
+                 .replace(/^(?:de|del|por|que|y)\s+/,'')
+                 .replace(/\s+/g,' ').trim();
+
+  // Deducción del tipo cuando no se ha dicho la palabra
+  let tipoFinal = tipo;
+  if(!tipoFinal){
+    if(imp) tipoFinal='cobro';
+    else if(fecha && /\b(revisar|revision|mantenimiento|cambiar|anual|cada)\b/.test(norm)) tipoFinal='recordatorio';
+    else tipoFinal='aviso';
+  }
+  return {
+    tipo:tipoFinal, explicito,
+    cliente:cli,
+    texto:cuerpo ? cuerpo.charAt(0).toUpperCase()+cuerpo.slice(1) : '',
+    fecha:fecha?fecha.fecha:null, fechaTxt:fecha?fecha.txt:'',
+    importe:imp?imp.importe:null,
+    prioridad:prio?prio.prio:'baja',
+    original:texto
+  };
+};
+
+// ══════════════════════════════════════════════════════════════
+// GUARDADO Y DESHACER
+// ══════════════════════════════════════════════════════════════
+let _vzUltimo = null;   // {tipo, ref} para poder deshacer
+
+window._vzDeshacer = async () => {
+  const u=_vzUltimo; _vzUltimo=null;
+  if(!u) return;
+  try{
+    if(u.tipo==='recordatorio'){
+      allRecordatorios=(allRecordatorios||[]).filter(r=>r.id!==u.id);
+      _recSaveAll();
+      if(document.querySelector('#screenRecordatorios.active')) renderRecordatorios();
+    } else {
+      await deleteDoc(doc(db,'grupos',CGID,u.col,u.id));
+    }
+    toast('Deshecho','i');
+  }catch(e){ toast('No se pudo deshacer','e'); }
+};
+
+// Aviso en pantalla con lo que ha entendido y botón de deshacer 8 segundos
+const _vzAvisoCreado = (resumen) => {
+  const prev=document.getElementById('vzToast'); if(prev) prev.remove();
+  const el=document.createElement('div');
+  el.id='vzToast';
+  el.innerHTML=`<div class="vz-toast-txt">${resumen}</div>
+    <button class="vz-toast-undo" onclick="document.getElementById('vzToast')?.remove();window._vzDeshacer()">Deshacer</button>`;
+  document.body.appendChild(el);
+  requestAnimationFrame(()=>el.classList.add('open'));
+  setTimeout(()=>{ el.classList.remove('open'); setTimeout(()=>el.remove(),300); _vzUltimo=null; }, 8000);
+};
+
+const _vzNombreCliente = (cli) => cli.cliente ? (cli.cliente.nombre||'') : (cli.nombre||'');
+
+window._vzGuardar = async (r) => {
+  if(!CGID){ toast('Abre un grupo primero','e'); return; }
+  const cliId  = r.cliente.cliente ? r.cliente.cliente.id : null;
+  const cliNom = _vzNombreCliente(r.cliente);
+  const marca  = {creadoPorVoz:true, dictado:r.original};
+
+  try{
+    if(r.tipo==='aviso'){
+      const ref=await addDoc(collection(db,'grupos',CGID,'avisos'),{
+        descripcion:r.texto, clienteId:cliId, clienteNombre:cliNom||null,
+        prioridad:r.prioridad, fechaAlerta:r.fecha||null,
+        creadoPor:CU.uid, creadoPorNombre:CUD?.nombre||CU.email||'Técnico',
+        creado:serverTimestamp(), estado:'pendiente', resueltaEn:null, ...marca
+      });
+      _vzUltimo={tipo:'aviso', col:'avisos', id:ref.id};
+      _vzAvisoCreado(`<strong>Aviso</strong> para ${cliNom||'sin cliente'}: ${r.texto}${r.prioridad==='alta'?' · urgente':''}`);
+    }
+    else if(r.tipo==='cobro'){
+      const ref=await addDoc(collection(db,'grupos',CGID,'cobros'),{
+        titulo:r.texto||'Cobro', clienteId:cliId||'', clienteNombre:cliNom||'',
+        fecha:r.fecha||'', prioridad:'normal', importe:r.importe,
+        estado:'pendiente', creado:serverTimestamp(), ...marca
+      });
+      _vzUltimo={tipo:'cobro', col:'cobros', id:ref.id};
+      _vzAvisoCreado(`<strong>Cobro</strong> de ${cliNom||'sin cliente'}: ${r.importe.toFixed(2)} € · ${r.texto||'sin concepto'}`);
+    }
+    else {
+      _asegurarLocalesCargados();
+      const id='rec_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
+      allRecordatorios.push({
+        id, clienteId:cliId, clienteNombre:cliNom||'', equipoId:null, equipoNombre:'',
+        titulo:r.texto||'Recordatorio', fecha:r.fecha, notas:'',
+        estado:'pendiente', creadoEn:Date.now(), ...marca
+      });
+      _recSaveAll();
+      if(document.querySelector('#screenRecordatorios.active')) renderRecordatorios();
+      _vzUltimo={tipo:'recordatorio', id};
+      _vzAvisoCreado(`<strong>Recordatorio</strong> para ${cliNom||'sin cliente'}: ${r.texto} · ${fmtFISO?fmtFISO(r.fecha):r.fecha}`);
+    }
+  }catch(e){ toast('No se pudo guardar: '+e.message,'e'); }
+};
+
+// ══════════════════════════════════════════════════════════════
+// LAS TRES PREGUNTAS (cliente ambiguo, importe, fecha)
+// Son lo único que interrumpe. Todo lo demás se guarda directo.
+// ══════════════════════════════════════════════════════════════
+const _vzPreguntar = (titulo, cuerpo) => {
+  const prev=document.getElementById('vzAsk'); if(prev) prev.remove();
+  const el=document.createElement('div');
+  el.id='vzAsk';
+  el.innerHTML=`<div class="vz-ask-ov" onclick="window._vzCancelar()"></div>
+    <div class="vz-ask-box">
+      <div class="vz-ask-tit">${titulo}</div>
+      ${cuerpo}
+      <button class="btn btn-s" style="width:100%;margin-top:10px" onclick="window._vzCancelar()">Cancelar</button>
+    </div>`;
+  document.body.appendChild(el);
+  requestAnimationFrame(()=>el.classList.add('open'));
+};
+window._vzCancelar = () => { document.getElementById('vzAsk')?.remove(); window._vzPend=null; };
+
+// Continúa el guardado resolviendo lo que falte, en cadena
+window._vzContinuar = (r) => {
+  window._vzPend = r;
+
+  // 1) Cliente con duda
+  const c=r.cliente;
+  if((c.estado==='ambiguo'||c.estado==='parecido') && !c.resuelto){
+    const lista=c.candidatos.map((x,i)=>
+      `<button class="btn btn-s" style="width:100%;margin-bottom:6px;justify-content:flex-start" onclick="window._vzElegirCliente(${i})">${x.nombre}${x.direccion?` <span style="opacity:.6;font-weight:600">· ${x.direccion}</span>`:''}</button>`).join('');
+    const nuevo=`<button class="btn btn-s" style="width:100%;margin-bottom:6px;justify-content:flex-start;opacity:.8" onclick="window._vzElegirCliente(-1)">Ninguno — usar "${c.nombre}" sin ficha</button>`;
+    _vzPreguntar(c.estado==='ambiguo'
+      ? `Tienes varios clientes que encajan con "${c.nombre}"`
+      : `¿Te refieres a alguno de estos?`, lista+nuevo);
+    return;
+  }
+
+  // 2) Cobro sin importe
+  if(r.tipo==='cobro' && (r.importe===null||isNaN(r.importe))){
+    _vzPreguntar('¿De cuánto es el cobro?',
+      `<input id="vzImp" type="number" inputmode="decimal" step="0.01" placeholder="0.00" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:14px;color:var(--tx);font-size:17px;font-weight:800;padding:13px;font-family:var(--font)">
+       <button class="btn btn-p" style="width:100%;margin-top:10px" onclick="window._vzPonerImporte()">Guardar cobro</button>`);
+    setTimeout(()=>document.getElementById('vzImp')?.focus(),120);
+    return;
+  }
+
+  // 3) Recordatorio sin fecha
+  if(r.tipo==='recordatorio' && !r.fecha){
+    _vzPreguntar('¿Para cuándo es el recordatorio?',
+      `<input id="vzFec" type="date" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:14px;color:var(--tx);font-size:15px;font-weight:700;padding:13px;font-family:var(--font)">
+       <button class="btn btn-p" style="width:100%;margin-top:10px" onclick="window._vzPonerFecha()">Guardar recordatorio</button>`);
+    return;
+  }
+
+  document.getElementById('vzAsk')?.remove();
+  window._vzPend=null;
+  _vzGuardar(r);
+};
+
+window._vzElegirCliente = (i) => {
+  const r=window._vzPend; if(!r) return;
+  if(i>=0) r.cliente={estado:'unico', cliente:r.cliente.candidatos[i], nombre:r.cliente.nombre, resuelto:true};
+  else      r.cliente={estado:'nuevo', nombre:r.cliente.nombre, resuelto:true};
+  document.getElementById('vzAsk')?.remove();
+  window._vzContinuar(r);
+};
+window._vzPonerImporte = () => {
+  const r=window._vzPend; if(!r) return;
+  const v=parseFloat((document.getElementById('vzImp')?.value||'').replace(',','.'));
+  if(isNaN(v)){ toast('Escribe el importe','e'); return; }
+  r.importe=v;
+  document.getElementById('vzAsk')?.remove();
+  window._vzContinuar(r);
+};
+window._vzPonerFecha = () => {
+  const r=window._vzPend; if(!r) return;
+  const v=document.getElementById('vzFec')?.value;
+  if(!v){ toast('Elige una fecha','e'); return; }
+  r.fecha=v;
+  document.getElementById('vzAsk')?.remove();
+  window._vzContinuar(r);
+};
+
+// ══════════════════════════════════════════════════════════════
+// ESCUCHA
+// ══════════════════════════════════════════════════════════════
+const _VZ_SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let _vzRec=null, _vzEscuchando=false;
+
+const _vzPanel = (estado, texto) => {
+  let el=document.getElementById('vzPanel');
+  if(!el){
+    el=document.createElement('div'); el.id='vzPanel';
+    el.innerHTML=`<div class="vz-ondas"><span></span><span></span><span></span><span></span><span></span></div>
+                  <div class="vz-txt" id="vzTxt"></div>
+                  <button class="vz-stop" onclick="window._vzParar()">Parar</button>`;
+    document.body.appendChild(el);
+    requestAnimationFrame(()=>el.classList.add('open'));
+  }
+  el.classList.toggle('procesando', estado==='procesando');
+  const t=document.getElementById('vzTxt');
+  if(t) t.textContent = texto || (estado==='procesando' ? 'Un momento…' : 'Escuchando…');
+};
+const _vzCerrarPanel = () => {
+  const el=document.getElementById('vzPanel');
+  if(!el) return;
+  el.classList.remove('open');
+  setTimeout(()=>el.remove(),250);
+};
+
+window._vzParar = () => { try{ _vzRec?.stop(); }catch(e){} };
+
+window._vzToggle = () => {
+  if(_vzEscuchando){ window._vzParar(); return; }
+  if(!_VZ_SR){ toast('Este navegador no reconoce voz. Prueba con Chrome.','e'); return; }
+  if(!CGID){ toast('Abre un grupo primero','e'); return; }
+  if(navigator.onLine===false){ toast('El dictado necesita conexión','e'); return; }
+
+  _vzRec=new _VZ_SR();
+  _vzRec.lang='es-ES';
+  _vzRec.continuous=false;
+  _vzRec.interimResults=true;
+  _vzRec.maxAlternatives=3;
+
+  let segmentos=[]; // por cada tramo final: sus hasta 3 alternativas {transcript,confidence}
+  let confianza=1;
+  _vzEscuchando=true;
+  _vzPanel('escuchando');
+  document.getElementById('btnVoz')?.classList.add('grabando');
+
+  _vzRec.onresult=(ev)=>{
+    let parcial='';
+    for(let i=ev.resultIndex;i<ev.results.length;i++){
+      const res=ev.results[i];
+      if(res.isFinal){
+        const alternativas=[];
+        for(let a=0;a<res.length;a++) alternativas.push({transcript:res[a].transcript, confidence:res[a].confidence||0});
+        segmentos.push(alternativas);
+      } else parcial+=res[0].transcript;
+    }
+    const vistaPrevia = segmentos.map(s=>s[0].transcript).join('') + parcial;
+    _vzPanel('escuchando', vistaPrevia.trim() || 'Escuchando…');
+  };
+
+  _vzRec.onerror=(ev)=>{
+    _vzEscuchando=false;
+    document.getElementById('btnVoz')?.classList.remove('grabando');
+    _vzCerrarPanel();
+    if(ev.error==='not-allowed')      toast('Da permiso al micrófono para dictar','e');
+    else if(ev.error==='no-speech')   toast('No te he oído','i');
+    else if(ev.error==='network')     toast('El dictado necesita conexión','e');
+    else                              toast('No se pudo escuchar','e');
+  };
+
+  _vzRec.onend=()=>{
+    _vzEscuchando=false;
+    document.getElementById('btnVoz')?.classList.remove('grabando');
+
+    // Selector de mejor alternativa: de las hasta 3 transcripciones que ya
+    // pide el reconocedor para cada tramo, puntuamos cada una contra
+    // clientes + léxico técnico + español base y nos quedamos con la que
+    // mejor encaje, en vez de coger la primera (res[0]) a ciegas.
+    let final='';
+    for(const alternativas of segmentos){
+      let mejor=alternativas[0], mejorScore=-1;
+      for(const alt of alternativas){
+        const score=_vzPuntuarCandidata(alt.transcript) + (alt.confidence||0)*0.15;
+        if(score>mejorScore){ mejorScore=score; mejor=alt; }
+      }
+      final+=mejor.transcript;
+      confianza=mejor.confidence||confianza;
+    }
+
+    let dicho=final.trim();
+    if(!dicho){ _vzCerrarPanel(); return; }
+
+    // Corrector palabra a palabra: misma distancia de edición que para
+    // clientes, aplicada al texto dictado contra el diccionario técnico y
+    // el español base, respetando probables nombres propios/marcas.
+    dicho=window._vzCorregirCuerpo(dicho);
+
+    _vzPanel('procesando', dicho);
+    setTimeout(()=>{
+      _vzCerrarPanel();
+      const r=_vzAnalizar(dicho);
+
+      // Nada aprovechable
+      if(!r.texto && r.importe===null){
+        toast('No he entendido qué crear. Prueba: "aviso para Pura, gotea el termo"','e');
+        return;
+      }
+      // Transcripción dudosa: no guardar a ciegas
+      if(confianza && confianza<0.55){
+        r.cliente.resuelto=true;
+        _vzPreguntar('No te he oído bien. ¿Es esto?',
+          `<div style="font-size:13.5px;color:var(--tx2);line-height:1.5;margin-bottom:4px">"${dicho}"</div>
+           <button class="btn btn-p" style="width:100%;margin-top:10px" onclick="document.getElementById('vzAsk')?.remove();window._vzContinuar(window._vzPend)">Sí, créalo</button>`);
+        window._vzPend=r;
+        return;
+      }
+      window._vzContinuar(r);
+    }, 150);
+  };
+
+  try{ _vzRec.start(); }
+  catch(e){ _vzEscuchando=false; _vzCerrarPanel(); toast('No se pudo iniciar el micrófono','e'); }
+};
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // ACCESIBILIDAD
