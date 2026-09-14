@@ -727,19 +727,6 @@ body.sel-mode .scroll-pad{padding-bottom:140px}
 
 /* ── SLIDE-OVER (SB) ── */
 #sbOverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1180;display:none;backdrop-filter:blur(3px)}
-/* ── PRESUPUESTO MODAL ── */
-#presuModal{position:fixed;inset:0;z-index:1195;display:none;align-items:flex-end;justify-content:center;padding:0;overscroll-behavior:none}
-#presuModal.open{display:flex}
-#presuModalOverlay{position:absolute;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-#presuModalBox{--acento:63,111,163;--theme-rgb:63,111,163;--r:#3f6fa3;--r2:#31567f;--r3:#8fb3d6;--r4:#274563;position:relative;z-index:1;background:rgba(17,17,17,.98);border-radius:24px 24px 0 0;border:none;width:100%;max-width:100%;max-height:86vh;display:flex;flex-direction:column;box-shadow:0 -8px 48px rgba(0,0,0,.5);animation:presuModalIn .34s cubic-bezier(.16,1,.3,1)}
-@keyframes presuModalIn{from{transform:translateY(100%)}to{transform:translateY(0)}}
-#presuModalHead{display:flex;align-items:center;padding:14px 18px;border-bottom:1px solid var(--border);flex-shrink:0;min-height:62px}
-#presuModalHead h2{flex:1;font-size:16px;font-weight:900;color:var(--tx);margin:0}
-#presuModalHead .pm-close{flex-shrink:0;margin-left:12px;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.08);border:none;border-radius:50%;width:34px;height:34px;cursor:pointer;color:var(--tx2);font-size:18px;font-family:var(--font)}
-#presuModalBody{overflow-y:auto;overflow-x:hidden;padding:18px 20px 32px;flex:1;min-height:0;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;touch-action:pan-y}
-body.modo-claro #presuModalBox{background:var(--card)}
-body.modo-claro #presuModalHead body.modo-claro .pm-close{background:rgba(0,0,0,.06)}
-
 #sb{position:fixed;bottom:-100%;left:0;right:0;max-height:92vh;background:rgba(17,17,17,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:24px 24px 0 0;z-index:1190;display:flex;flex-direction:column;transition:bottom .38s cubic-bezier(.16,1,.3,1),box-shadow .38s ease;border-top:1px solid var(--border);box-shadow:none}
 #sb.open{bottom:0;box-shadow:0 -8px 48px rgba(0,0,0,.5)}
 .sb-head{position:relative;padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0;flex-shrink:0;min-height:62px}
@@ -760,10 +747,10 @@ body.modo-claro .sb-head.con-acento{background:rgba(var(--acento),.14)}
   border:1px solid rgba(var(--acento),.38);
 }
 .sb-head .sb-ico{display:none}
-#presuModalHead{--acento:63,111,163;background:rgba(var(--acento),.16);border-bottom:1px solid rgba(var(--acento),.3);border-radius:24px 24px 0 0}
-body.modo-claro #presuModalHead{background:rgba(var(--acento),.14)}
-#presuModalHead .sb-ico{width:34px;height:34px;border-radius:12px;flex-shrink:0;margin-right:12px;display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1;background:rgba(var(--acento),.22);border:1px solid rgba(var(--acento),.38)}
-#presuModalHead #presuModalTitle{flex:1;min-width:0;margin:0;font-size:17px;font-weight:800;color:var(--tx);line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+body.modo-claro 
+
+
 /* Etiquetas de campo algo mas legibles dentro de los formularios */
 .fsec .fgrp label{letter-spacing:1.2px;font-size:10.5px}
 /* Al enfocar un campo se resalta con el color del documento que estas creando */
@@ -1685,16 +1672,6 @@ body.is-scrolling .presu-card{
   </div>
 
   <!-- PRESUPUESTO MODAL -->
-  <div id="presuModal">
-    <div id="presuModalOverlay" onclick="cerrarPresuModal()"></div>
-    <div id="presuModalBox">
-      <div id="presuModalHead">
-        <span class="sb-ico">💶</span>
-        <h2 id="presuModalTitle">Nuevo presupuesto</h2>
-        <button class="pm-close" onclick="cerrarPresuModal()">✕</button>
-      </div>
-      <div class="sb-body" id="presuModalBody"></div>
-    </div>
   </div>
 
   <!-- TOAST -->
@@ -3670,7 +3647,7 @@ window.sbVolverCliente=()=>{
   _sbReturnCli=null;
   $('sb').classList.remove('open');
   $('sbOverlay').style.display='none';
-  if(!document.getElementById('presuModal')?.classList.contains('open')) document.body.classList.remove('hoja-abierta');
+  document.body.classList.remove('hoja-abierta');
   $('sbBack').style.display='none';
   setTimeout(()=>verCliente(id),120);
 };
@@ -3680,7 +3657,7 @@ window.cerrarSBTotal=()=>{
   _sbReturnCli=null;
   $('sb').classList.remove('open');
   $('sbOverlay').style.display='none';
-  if(!document.getElementById('presuModal')?.classList.contains('open')) document.body.classList.remove('hoja-abierta');
+  document.body.classList.remove('hoja-abierta');
   $('sbBack').style.display='none';
   if(typeof _currentScreenId==='function' && _currentScreenId()==='calendario' && typeof renderCalendarioGlobal==='function'){
     setTimeout(()=>renderCalendarioGlobal(),150);
@@ -3691,7 +3668,7 @@ window.cerrarSBTotal=()=>{
 window.cerrarSB=()=>{
   $('sb').classList.remove('open');
   $('sbOverlay').style.display='none';
-  if(!document.getElementById('presuModal')?.classList.contains('open')) document.body.classList.remove('hoja-abierta');
+  document.body.classList.remove('hoja-abierta');
   if(_sbReturnCli){
     const id=_sbReturnCli;
     _sbReturnCli=null;
@@ -7447,7 +7424,7 @@ window.guardarMantDesdeSB=async()=>{
   _sbReturnCli=null;
   $('sb').classList.remove('open');
   $('sbOverlay').style.display='none';
-  if(!document.getElementById('presuModal')?.classList.contains('open')) document.body.classList.remove('hoja-abierta');
+  document.body.classList.remove('hoja-abierta');
   if(cliRetorno)setTimeout(()=>verCliente(cliRetorno),150);
 };
 // ─── Formulario cliente ───
@@ -12796,33 +12773,17 @@ const renderPresupuestos = () => {
 
 let _partidasPresupuesto=[];
 
-window.cerrarPresuModal=()=>{
-  const m=document.getElementById('presuModal');
-  const box=document.getElementById('presuModalBox');
-  if(!m)return;
-  if(box){box.style.animation='presuModalOut .2s cubic-bezier(.4,0,.2,1) forwards';}
-  setTimeout(()=>{m.classList.remove('open');if(box)box.style.animation='';
-    if(!document.getElementById('sb')?.classList.contains('open')) document.body.classList.remove('hoja-abierta');
-  },200);
-};
-
-// Add close animation keyframes dynamically once
-(()=>{
-  if(!document.getElementById('presuModalOutKF')){
-    const s=document.createElement('style');s.id='presuModalOutKF';
-    s.textContent='@keyframes presuModalOut{from{transform:translateY(0)}to{transform:translateY(100%)}}';
-    document.head.appendChild(s);
-  }
-})();
+// El formulario de presupuestos vivia en su propia ventana, copiada a mano de
+// la hoja de la app. De ahi venian todas sus diferencias: otra forma, otra
+// animacion y, sobre todo, el gesto de "tirar para actualizar" que en las demas
+// no pasaba. Ahora usa la hoja de verdad, la misma que el resto.
+window.cerrarPresuModal=()=>{ if(typeof cerrarSB==='function') cerrarSB(); };
 
 window.abrirNuevoPresupuesto=(presuId)=>{
   _partidasPresupuesto=[];
   const cliOpts=allClientes.filter(c=>!c.archivado).map(c=>`<option value="${c.id}" data-dir="${(c.direccion||'').replace(/"/g,'&quot;')}" data-edif="${(c.edificio||'').replace(/"/g,'&quot;')}" data-tel="${(c.telefono||'').replace(/"/g,'&quot;')}">${c.nombre}</option>`).join('');
   const _openPresuModal = (html) => {
-    document.getElementById('presuModalTitle').textContent = presuId ? 'Editar presupuesto' : 'Nuevo presupuesto';
-    document.getElementById('presuModalBody').innerHTML = html;
-    document.getElementById('presuModal').classList.add('open');
-    document.body.classList.add('hoja-abierta');
+    abrirSB(presuId ? 'Editar presupuesto' : 'Nuevo presupuesto', html, undefined, 'presupuesto');
     _prIVA=false;
     calcPresuTotal();
   };
@@ -16074,7 +16035,6 @@ window._calgNavegar=(tipo,id,cliId)=>{
     return null;
   };
   const hayHoja = () =>
-    document.getElementById('presuModal')?.classList.contains('open') ||
     document.getElementById('sb')?.classList.contains('open');
 
   document.addEventListener('touchstart', e => {
