@@ -14370,6 +14370,19 @@ const renderPerfil=()=>{
 
   <!-- ── ACCIÓN RÁPIDA (FAB) ── -->
   <div class="fsec">
+    <div class="fsec-title">🎤 Asistente de voz</div>
+    <div class="fsec" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13.5px;font-weight:800;color:var(--tx)">Que me conteste en voz alta</div>
+          <div style="font-size:11.5px;color:var(--tx2);margin-top:2px">Te dice lo que ha creado sin mirar la pantalla</div>
+        </div>
+        <label class="toggle-sw"><input type="checkbox" id="togVozHablar" onchange="window._vzToggleVoz()" ${localStorage.getItem('alberto_voz_hablar')!=='0'?'checked':''}><span></span></label>
+      </div>
+      <button class="btn btn-s" style="width:100%" onclick="window._vzVerLog()">Ver mis últimos dictados</button>
+      <div style="font-size:11px;color:var(--tx2);margin-top:8px;line-height:1.5">Ahí verás qué oyó el móvil y qué entendió la app. Sirve para afinar el reconocimiento cuando falla.</div>
+    </div>
+
     <div class="fsec-title">⚡ Acción rápida</div>
     <div style="font-size:12px;color:var(--tx2);margin-bottom:10px;line-height:1.5">Mantén pulsado el botón flotante <strong style="color:var(--tx)">+</strong> para abrir directamente esta opción, sin pasar por el menú.</div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
@@ -16076,6 +16089,23 @@ const _vzNorm = (t) => (t||'')
   .replace(/\s+/g,' ')
   .trim();
 
+// ── Clave fonética del español ──
+// El reconocedor confunde lo que suena igual: b/v, ll/y, s/z/c, g/j, h muda,
+// qu/k. Reduciendo el nombre a como SUENA, "Vermúdez" y "Bermúdez" o
+// "Sánchez" y "Zánchez" pasan a ser la misma palabra.
+const _vzFonetica = (t) => _vzNorm(t)
+  .replace(/h/g,'')
+  .replace(/ll/g,'y')
+  .replace(/v/g,'b')
+  .replace(/z|ce|ci/g, m => m==='z'?'s':'s'+m[1])
+  .replace(/c/g,'k')
+  .replace(/qu/g,'k')
+  .replace(/gu([ei])/g,'g$1')
+  .replace(/j|ge|gi/g, m => m==='j'?'x':'x'+m[1])
+  .replace(/(.)\1+/g,'$1')
+  .replace(/\s+/g,' ')
+  .trim();
+
 // ── Distancia de edición, para tolerar transcripciones aproximadas ──
 const _vzDist = (a,b) => {
   if(a===b) return 0;
@@ -16095,148 +16125,6 @@ const _vzParecido = (a,b) => {
   const max=Math.max(a.length,b.length);
   if(!max) return 0;
   return 1 - _vzDist(a,b)/max;
-};
-
-// ══════════════════════════════════════════════════════════════
-// DICCIONARIOS DE REFERENCIA (para puntuar candidatas y corregir)
-// ══════════════════════════════════════════════════════════════
-
-// ── Diccionario técnico multi-oficio: electricidad, fontanería/bombas,
-// carpintería y mantenimiento general. Piezas, averías y verbos de acción
-// habituales en los partes de trabajo. Se usa como lista de referencia
-// para puntuar transcripciones y corregir palabra a palabra.
-const _VZ_LEXICO = [
-  // Electricidad
-  'cuadro electrico','diferencial','magnetotermico','automatico','fusible','enchufe','interruptor',
-  'conmutador','cableado','cable','manguera electrica','toma de tierra','neutro','fase','cortocircuito',
-  'sobretension','bombilla','fluorescente','led','regleta','clema','empalme','contador','potencia',
-  'derivacion','saltar el diferencial','sin corriente','sin luz','chispazo','recalentar',
-  'motor quemado','condensador','rele','termostato','sonda','resistencia','calefactor','radiador electrico',
-  'instalar','desinstalar','cablear','conectar','desconectar','revisar','reparar','sustituir','cambiar',
-
-  // Fontanería / bombas (electrobombas)
-  'electrobomba','bomba','bomba de agua','bomba sumergible','bomba de superficie','bomba de achique',
-  'grupo de presion','presostato','manometro','valvula','valvula antirretorno','valvula de bola',
-  'valvula de compuerta','llave de paso','grifo','griferia','junta','junta toldal','goma','arandela',
-  'racor','manguito','tuberia','tuberia de cobre','tuberia de pvc','codo','reduccion','filtro',
-  'filtro de agua','deposito','deposito hidroneumatico','aljibe','pozo','sondeo','aspiracion',
-  'impulsion','caudal','caudalimetro','sifon','desague','atasco','fuga','gotea','goteo','fuga de agua',
-  'perdida de presion','cebar la bomba','descebada','rodete','eje','cojinete','rodamiento','reten',
-  'estopa','carcasa','motor de la bomba','condensador de arranque','termico de la bomba',
-  'presion','sobrepresion','baja presion','no coge agua','no arranca','se para sola','hace ruido',
-  'vibra','pierde agua','purgar','purgar el aire','airear','vaciar el circuito',
-
-  // Carpintería
-  'puerta','ventana','marco','contramarco','bisagra','cerradura','pomo','tirador','cerrojo',
-  'persiana','caja de persiana','cinta de persiana','mosquitera','armario','estanteria','balda',
-  'tornillo','taco','clavo','pegamento','cola blanca','barniz','lija','lijar','atornillar','encolar',
-  'puerta descuadrada','madera','tablero','melamina','contrachapado',
-
-  // Mantenimiento general
-  'averia','reparacion','mantenimiento','mantenimiento preventivo','revision','inspeccion',
-  'presupuesto','pieza de recambio','recambio','repuesto','garantia','instalacion','desmontaje',
-  'montaje','limpieza','limpiar','engrasar','lubricar','apretar','aflojar','soldar','soldadura',
-  'sellar','sellado','silicona','aislante','aislamiento','termico','electrico','hidraulico','mecanico',
-  'comunidad de vecinos','local','nave','vivienda','garaje','trastero','azotea','cuarto de bombas',
-  'sala de maquinas'
-].map(_vzNorm);
-
-// Palabras sueltas del léxico técnico (las locuciones se descomponen para
-// poder comparar palabra a palabra sin perder esas expresiones como bloque).
-const _VZ_LEXICO_PALABRAS = new Set(_VZ_LEXICO.flatMap(e=>e.split(' ')).filter(p=>p.length>2));
-
-// ── Vocabulario español base: conectores, verbos habituales, días, meses,
-// números... para distinguir "esto es español normal" de "ruido del micro".
-const _VZ_BASE = [
-  'el','la','los','las','un','una','unos','unas','de','del','a','al','en','con','por','para','y','o',
-  'que','se','no','si','esta','estan','ha','han','hay','muy','mas','pero','como','cuando','donde',
-  'porque','tambien','ya','todo','todos','nada','algo','alguien','cada','otro','otra','este','ese',
-  'esa','aquel','mi','tu','su','nuestro','yo','el','ella','nosotros','ellos',
-  'hoy','manana','ayer','ahora','luego','despues','antes','pronto','tarde',
-  'lunes','martes','miercoles','jueves','viernes','sabado','domingo',
-  'enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre',
-  'uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez',
-  'hacer','tener','poder','decir','ir','ver','dar','saber','querer','llegar','pasar','deber','poner',
-  'parecer','quedar','creer','hablar','llevar','dejar','seguir','encontrar','llamar','venir','pensar',
-  'salir','volver','tomar','conocer','vivir','sentir','tratar','mirar','contar','empezar','esperar',
-  'buscar','existir','entrar','trabajar','escribir','perder','producir','ocurrir','entender','pedir',
-  'recibir','recordar','terminar','permitir','aparecer','conseguir','comenzar','servir','sacar',
-  'necesitar','mantener','resultar','leer','caer','cambiar','presentar','crear','abrir','considerar',
-  'oir','acabar','convertir','ganar','formar','traer','partir','morir','aceptar','realizar','suponer',
-  'comprender','lograr','explicar','preguntar','tocar','reconocer','estudiar','alcanzar','nacer',
-  'dirigir','correr','utilizar','pagar','ayudar','gustar','jugar','escuchar','cumplir','ofrecer',
-  'descubrir','levantar','intentar','usar','decidir','repetir','olvidar','anadir','continuar',
-  'senalar','indicar','cerrar','soltar','provocar','faltar','apoyar','confirmar'
-].map(_vzNorm);
-const _VZ_BASE_SET = new Set(_VZ_BASE);
-
-// ── Puntuar una transcripción candidata: cuánto encaja con clientes
-// conocidos + léxico técnico + español base. Cuanto más alto, mejor.
-const _vzPuntuarCandidata = (texto) => {
-  const norm=_vzNorm(texto);
-  const palabras=norm.split(' ').filter(p=>p.length>1);
-  if(!palabras.length) return 0;
-  const nombresClientes=(allClientes||[]).filter(c=>!c.archivado)
-    .flatMap(c=>_vzNorm(c.nombre||'').split(' ')).filter(p=>p.length>2);
-  let total=0;
-  for(const p of palabras){
-    if(_VZ_BASE_SET.has(p) || _VZ_LEXICO_PALABRAS.has(p) || nombresClientes.includes(p)){ total+=1; continue; }
-    let mejor=0;
-    for(const ref of nombresClientes) mejor=Math.max(mejor,_vzParecido(ref,p));
-    for(const ref of _VZ_LEXICO_PALABRAS) mejor=Math.max(mejor,_vzParecido(ref,p));
-    total+=mejor;
-  }
-  return total/palabras.length;
-};
-
-// Busca en el diccionario (léxico técnico + español base) la palabra más
-// parecida a la dada. Devuelve {palabra,score} o null si no hay ninguna cerca.
-const _vzMejorParecida = (palabra) => {
-  if(palabra.length<3) return null;
-  let mejor=null, mejorScore=0;
-  const revisar=(dicc)=>{
-    for(const p of dicc){
-      if(Math.abs(p.length-palabra.length)>2) continue; // descarta comparaciones inútiles
-      const s=_vzParecido(p,palabra);
-      if(s>mejorScore){ mejorScore=s; mejor=p; }
-    }
-  };
-  revisar(_VZ_LEXICO_PALABRAS);
-  revisar(_VZ_BASE_SET);
-  return mejor ? {palabra:mejor, score:mejorScore} : null;
-};
-
-// ── Corrector palabra a palabra ──
-// Misma lógica de distancia de edición que usamos para clientes, aplicada a
-// cada palabra del texto dictado. Compara contra diccionario técnico +
-// español base. Respeta nombres propios probables: una palabra en mitad de
-// frase que empieza en mayúscula (marca, nombre de cliente...) no se toca.
-window._vzCorregirCuerpo = (texto) => {
-  if(!texto) return texto;
-  const tokens=texto.split(/(\s+)/); // conserva los espacios originales
-  let esInicioFrase=true;
-  const salida=tokens.map(tok=>{
-    if(/^\s+$/.test(tok)) return tok;
-    const m=tok.match(/^([a-zA-ZñÑáéíóúÁÉÍÓÚ]+)([.,;:!?]*)$/);
-    if(!m){ esInicioFrase=false; return tok; }
-    const [,palabra,signo]=m;
-    const esMayuscula=/^[A-ZÑÁÉÍÓÚ]/.test(palabra);
-    const propioProbable=esMayuscula && !esInicioFrase;
-    esInicioFrase=/[.!?]/.test(signo);
-    if(propioProbable) return tok; // nombre propio o marca: se respeta
-
-    const norm=_vzNorm(palabra);
-    if(_VZ_BASE_SET.has(norm) || _VZ_LEXICO_PALABRAS.has(norm)) return tok; // ya está bien
-
-    const mejor=_vzMejorParecida(norm);
-    if(mejor && mejor.score>=.78 && mejor.palabra!==norm){
-      let corregida=mejor.palabra;
-      if(esMayuscula) corregida=corregida.charAt(0).toUpperCase()+corregida.slice(1);
-      return corregida+signo;
-    }
-    return tok;
-  });
-  return salida.join('');
 };
 
 // ── Números dichos con palabras ──
@@ -16392,6 +16280,29 @@ const _vzTipo = (txtNorm) => {
   return {tipo:null, resto:limpio, explicito:false};
 };
 
+// ── Memoria: lo que corriges una vez no vuelve a preguntarse ──
+// Si dictas "pura" y eliges a Pura Martínez, la próxima vez va directo.
+const _VZ_MEM='alberto_voz_nombres';
+const _vzMemoria=()=>{ try{ return JSON.parse(localStorage.getItem(_VZ_MEM)||'{}'); }catch(e){ return {}; } };
+const _vzRecordado=(nombreNorm)=>{ const m=_vzMemoria(); return (m[CGID]||{})[nombreNorm]||null; };
+const _vzAprender=(nombreNorm, cliId)=>{
+  if(!nombreNorm||!cliId||!CGID) return;
+  try{ const m=_vzMemoria(); m[CGID]=m[CGID]||{}; m[CGID][nombreNorm]=cliId;
+       localStorage.setItem(_VZ_MEM, JSON.stringify(m)); }catch(e){}
+};
+
+// Cuándo usaste por última vez a cada cliente: sirve para desempatar
+const _vzUltimoUso=(cliId)=>{
+  let t=0;
+  const mirar=(arr,campo)=>{ (arr||[]).forEach(x=>{ if(x.clienteId===cliId){
+    const v=x[campo]; const n=typeof v==='number'?v:(v?.seconds?v.seconds*1000:0); if(n>t) t=n; }}); };
+  mirar(_avisosPend,'creado'); mirar(_avisosRes,'creado');
+  mirar(_presusPend,'creado'); mirar(_presusComp,'creado');
+  mirar(_simplePend?.cobro,'creado'); mirar(_simpleComp?.cobro,'creado');
+  mirar(allRecordatorios,'creadoEn');
+  return t;
+};
+
 // ── Cliente: busca en las fichas y decide si hay duda ──
 // Devuelve {estado:'unico'|'ambiguo'|'nuevo', cliente, candidatos, nombre, resto}
 const _vzCliente = (resto) => {
@@ -16416,15 +16327,28 @@ const _vzCliente = (resto) => {
   if(!nombre) return {estado:'sin_nombre', resto:resto};
 
   const nNorm=_vzNorm(nombre);
+  const nFon=_vzFonetica(nombre);
+
+  // Memoria: si ya corregiste antes este nombre, va directo
+  const aprendido=_vzRecordado(nNorm);
+  if(aprendido){
+    const c=activos.find(x=>x.id===aprendido);
+    if(c) return {estado:'unico', cliente:c, nombre, resto:rest};
+  }
+
   const puntuar=(c)=>{
     const cn=_vzNorm(c.nombre||'');
     if(!cn) return 0;
     if(cn===nNorm) return 1;
+    const cf=_vzFonetica(c.nombre||'');
+    if(cf===nFon) return .99;                        // suena idéntico
     if(cn.startsWith(nNorm)||cn.includes(nNorm)) return .95;
-    // por partes: nombre suelto o apellido suelto
-    const partes=cn.split(' ');
-    if(partes.some(p=>p===nNorm)) return .9;
-    return _vzParecido(cn,nNorm);
+    if(cf.startsWith(nFon)||cf.includes(nFon)) return .93;
+    const partes=cn.split(' '), partesF=cf.split(' ');
+    if(partes.some(p=>p===nNorm)) return .9;         // solo nombre o solo apellido
+    if(partesF.some(p=>p===nFon)) return .88;
+    // lo mejor entre comparar la escritura y comparar el sonido
+    return Math.max(_vzParecido(cn,nNorm), _vzParecido(cf,nFon)*.97);
   };
   const puntuados = activos.map(c=>({c, p:puntuar(c)})).sort((a,b)=>b.p-a.p);
   const buenos = puntuados.filter(x=>x.p>=.82);
@@ -16434,7 +16358,11 @@ const _vzCliente = (resto) => {
     // si uno es exacto y el resto no, no hay duda
     const exactos=buenos.filter(x=>x.p===1);
     if(exactos.length===1) return {estado:'unico', cliente:exactos[0].c, nombre, resto:rest};
-    return {estado:'ambiguo', candidatos:buenos.map(x=>x.c), nombre, resto:rest};
+    // si uno destaca claramente sobre el segundo, tampoco hay por qué preguntar
+    if(buenos[0].p - buenos[1].p >= .12) return {estado:'unico', cliente:buenos[0].c, nombre, resto:rest};
+    // empate real: el que hayas usado hace menos tiempo va primero en la lista
+    const orden=buenos.map(x=>x.c).sort((a,b)=>_vzUltimoUso(b.id)-_vzUltimoUso(a.id));
+    return {estado:'ambiguo', candidatos:orden, nombre, resto:rest};
   }
   // ninguno bueno, pero alguno se parece bastante: preguntar antes de crear un duplicado
   const cercanos = puntuados.filter(x=>x.p>=.62);
@@ -16442,9 +16370,34 @@ const _vzCliente = (resto) => {
   return {estado:'nuevo', nombre, resto:rest};
 };
 
+// ── Vocabulario del oficio ──
+// El reconocedor no conoce las palabras de fontanería y calefacción, y las
+// sustituye por otras parecidas. Se corrigen antes de analizar la frase.
+const _VZ_CORRECCIONES = [
+  // Solo se corrige lo que el reconocedor OYE MAL. Nunca se cambian singulares
+  // por plurales ni se reescriben palabras que ya estan bien: lo que dictas es
+  // lo que queda escrito.
+  [/\bgalera(s?)\b|\bcaldeira(s?)\b/g,'caldera$1'],
+  [/\bturmo(s?)\b/g,'termo$1'],
+  [/\bhan hodo\b|\ba nodo\b|\banodo\b/g,'ánodo'],
+  [/\bsi fon\b|\bcifon\b/g,'sifon'],
+  [/\bmagneto termico\b/g,'magnetotermico'],
+  [/\byave de paso\b/g,'llave de paso'],
+  [/\bdes ague\b/g,'desague'],
+  [/\bva so de expansion\b/g,'vaso de expansion'],
+  [/\bdes calcificador\b/g,'descalcificador'],
+  [/\baberia(s?)\b/g,'averia$1'],
+  [/\bcuadro elektrico\b/g,'cuadro electrico'],
+  // "340€" -> "340 euros", para que se lea como importe
+  [/(\d)\s*€/g,'$1 euros'],
+  // muletillas del principio, que despistan al detectar el tipo
+  [/^(?:eh|em|mmm|pues|vale|oye|a ver|mira)\s+/,''],
+];
+const _vzCorregir = (t) => { let x=t; _VZ_CORRECCIONES.forEach(([re,por])=>{ x=x.replace(re,por); }); return x; };
+
 // ── Analizar la frase completa ──
 window._vzAnalizar = (texto) => {
-  const norm=_vzNorm(texto);
+  const norm=_vzCorregir(_vzNorm(texto));
   const {tipo, resto, explicito} = _vzTipo(norm);
 
   // Importe, fecha y prioridad se sacan ANTES del cliente: si no, un "de
@@ -16491,6 +16444,7 @@ window._vzAnalizar = (texto) => {
 let _vzUltimo = null;   // {tipo, ref} para poder deshacer
 
 window._vzDeshacer = async () => {
+  if(window.speechSynthesis) try{ speechSynthesis.cancel(); }catch(e){}
   const u=_vzUltimo; _vzUltimo=null;
   if(!u) return;
   try{
@@ -16503,6 +16457,70 @@ window._vzDeshacer = async () => {
     }
     toast('Deshecho','i');
   }catch(e){ toast('No se pudo deshacer','e'); }
+};
+
+// ── Respuesta hablada ──
+// Con las manos ocupadas no puedes mirar la pantalla: te lo dice en voz alta.
+let _vzVozActiva = (localStorage.getItem('alberto_voz_hablar')!=='0');
+window._vzHablar = (txt) => {
+  if(!_vzVozActiva || !window.speechSynthesis || !txt) return;
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(txt);
+    u.lang='es-ES'; u.rate=1.05; u.pitch=1;
+    const v=speechSynthesis.getVoices().find(x=>x.lang&&x.lang.startsWith('es'));
+    if(v) u.voice=v;
+    speechSynthesis.speak(u);
+  }catch(e){}
+};
+window._vzToggleVoz = () => {
+  _vzVozActiva=!_vzVozActiva;
+  localStorage.setItem('alberto_voz_hablar', _vzVozActiva?'1':'0');
+  toast(_vzVozActiva?'El asistente hablará':'El asistente no hablará','i');
+  return _vzVozActiva;
+};
+
+// ── Registro de dictados, para poder afinar el reconocimiento ──
+// Guarda los últimos 15: lo que oyó y lo que entendió. Se consulta desde
+// Perfil y sirve para ver por qué ha fallado.
+const _vzApuntar = (oido, r, resultado) => {
+  try{
+    const log=JSON.parse(localStorage.getItem('alberto_voz_log')||'[]');
+    log.unshift({t:Date.now(), oido,
+      tipo:r?.tipo||null,
+      cliente:r?.cliente?.cliente?.nombre || r?.cliente?.nombre || null,
+      estadoCli:r?.cliente?.estado||null,
+      texto:r?.texto||null, importe:r?.importe??null, fecha:r?.fecha||null,
+      prio:r?.prioridad||null, resultado});
+    localStorage.setItem('alberto_voz_log', JSON.stringify(log.slice(0,15)));
+  }catch(e){}
+};
+window._vzVerLog = () => {
+  let log=[]; try{ log=JSON.parse(localStorage.getItem('alberto_voz_log')||'[]'); }catch(e){}
+  if(!log.length){ toast('Aún no has dictado nada','i'); return; }
+  const filas=log.map(l=>`
+    <div class="card" style="margin-bottom:8px;padding:12px 14px">
+      <div style="font-size:10px;font-weight:800;color:var(--tx2);letter-spacing:1px;margin-bottom:5px">${new Date(l.t).toLocaleString('es-ES')} · ${l.resultado}</div>
+      <div style="font-size:13.5px;font-weight:700;color:var(--tx);margin-bottom:7px">"${l.oido}"</div>
+      <div style="font-size:11.5px;color:var(--tx2);line-height:1.6">
+        tipo: <strong>${l.tipo||'—'}</strong> · cliente: <strong>${l.cliente||'—'}</strong> (${l.estadoCli||'—'})<br>
+        texto: <strong>${l.texto||'—'}</strong><br>
+        importe: ${l.importe??'—'} · fecha: ${l.fecha||'—'} · prioridad: ${l.prio||'—'}
+      </div>
+    </div>`).join('');
+  abrirSB('Últimos dictados', `
+    <div style="font-size:12px;color:var(--tx2);line-height:1.5;margin-bottom:14px">
+      Lo que ha oído el móvil y lo que ha entendido la app. Copia los que hayan salido mal y mándalos para afinar el reconocimiento.
+    </div>
+    <button class="btn btn-s" style="width:100%;margin-bottom:14px" onclick="window._vzCopiarLog()">Copiar todo</button>
+    ${filas}`, undefined);
+};
+window._vzCopiarLog = async () => {
+  try{
+    const log=localStorage.getItem('alberto_voz_log')||'[]';
+    await navigator.clipboard.writeText(log);
+    toast('Copiado','o');
+  }catch(e){ toast('No se pudo copiar','e'); }
 };
 
 // Aviso en pantalla con lo que ha entendido y botón de deshacer 8 segundos
@@ -16535,6 +16553,8 @@ window._vzGuardar = async (r) => {
       });
       _vzUltimo={tipo:'aviso', col:'avisos', id:ref.id};
       _vzAvisoCreado(`<strong>Aviso</strong> para ${cliNom||'sin cliente'}: ${r.texto}${r.prioridad==='alta'?' · urgente':''}`);
+      _vzHablar(`Aviso creado para ${cliNom||'cliente sin ficha'}. ${r.texto}`);
+      _vzApuntar(r.original, r, 'aviso creado');
     }
     else if(r.tipo==='cobro'){
       const ref=await addDoc(collection(db,'grupos',CGID,'cobros'),{
@@ -16544,6 +16564,8 @@ window._vzGuardar = async (r) => {
       });
       _vzUltimo={tipo:'cobro', col:'cobros', id:ref.id};
       _vzAvisoCreado(`<strong>Cobro</strong> de ${cliNom||'sin cliente'}: ${r.importe.toFixed(2)} € · ${r.texto||'sin concepto'}`);
+      _vzHablar(`Cobro de ${r.importe.toFixed(2)} euros creado para ${cliNom||'cliente sin ficha'}.`);
+      _vzApuntar(r.original, r, 'cobro creado');
     }
     else {
       _asegurarLocalesCargados();
@@ -16557,6 +16579,8 @@ window._vzGuardar = async (r) => {
       if(document.querySelector('#screenRecordatorios.active')) renderRecordatorios();
       _vzUltimo={tipo:'recordatorio', id};
       _vzAvisoCreado(`<strong>Recordatorio</strong> para ${cliNom||'sin cliente'}: ${r.texto} · ${fmtFISO?fmtFISO(r.fecha):r.fecha}`);
+      _vzHablar(`Recordatorio creado para ${cliNom||'cliente sin ficha'}. ${r.texto}`);
+      _vzApuntar(r.original, r, 'recordatorio creado');
     }
   }catch(e){ toast('No se pudo guardar: '+e.message,'e'); }
 };
@@ -16566,6 +16590,7 @@ window._vzGuardar = async (r) => {
 // Son lo único que interrumpe. Todo lo demás se guarda directo.
 // ══════════════════════════════════════════════════════════════
 const _vzPreguntar = (titulo, cuerpo) => {
+  if(typeof window._vzHablar==='function') window._vzHablar(titulo.replace(/<[^>]+>/g,''));
   const prev=document.getElementById('vzAsk'); if(prev) prev.remove();
   const el=document.createElement('div');
   el.id='vzAsk';
@@ -16620,8 +16645,11 @@ window._vzContinuar = (r) => {
 
 window._vzElegirCliente = (i) => {
   const r=window._vzPend; if(!r) return;
-  if(i>=0) r.cliente={estado:'unico', cliente:r.cliente.candidatos[i], nombre:r.cliente.nombre, resuelto:true};
-  else      r.cliente={estado:'nuevo', nombre:r.cliente.nombre, resuelto:true};
+  if(i>=0){
+    _vzAprender(_vzNorm(r.cliente.nombre), r.cliente.candidatos[i].id);
+    r.cliente={estado:'unico', cliente:r.cliente.candidatos[i], nombre:r.cliente.nombre, resuelto:true};
+  }
+  else r.cliente={estado:'nuevo', nombre:r.cliente.nombre, resuelto:true};
   document.getElementById('vzAsk')?.remove();
   window._vzContinuar(r);
 };
@@ -16679,31 +16707,41 @@ window._vzToggle = () => {
 
   _vzRec=new _VZ_SR();
   _vzRec.lang='es-ES';
-  _vzRec.continuous=false;
+  _vzRec.continuous=true;          // no cortar al primer silencio
   _vzRec.interimResults=true;
-  _vzRec.maxAlternatives=3;
+  _vzRec.maxAlternatives=5;        // mas interpretaciones entre las que elegir
 
-  let segmentos=[]; // por cada tramo final: sus hasta 3 alternativas {transcript,confidence}
-  let confianza=1;
+  let final='', confianza=1, alternativas=[];
   _vzEscuchando=true;
   _vzPanel('escuchando');
   document.getElementById('btnVoz')?.classList.add('grabando');
 
+  let silencio=null;
+  const reiniciarSilencio=()=>{
+    clearTimeout(silencio);
+    // 1,8 s sin decir nada = ha terminado. Da margen para pensar a mitad de frase.
+    silencio=setTimeout(()=>{ try{_vzRec.stop();}catch(e){} }, 1800);
+  };
+  reiniciarSilencio();
+
   _vzRec.onresult=(ev)=>{
+    reiniciarSilencio();
     let parcial='';
     for(let i=ev.resultIndex;i<ev.results.length;i++){
       const res=ev.results[i];
       if(res.isFinal){
-        const alternativas=[];
-        for(let a=0;a<res.length;a++) alternativas.push({transcript:res[a].transcript, confidence:res[a].confidence||0});
-        segmentos.push(alternativas);
-      } else parcial+=res[0].transcript;
+        final+=res[0].transcript;
+        confianza=res[0].confidence||confianza;
+        // Guardamos también las otras interpretaciones: a veces la buena es la 2ª
+        for(let k=0;k<res.length;k++) alternativas.push(res[k].transcript);
+      }
+      else parcial+=res[0].transcript;
     }
-    const vistaPrevia = segmentos.map(s=>s[0].transcript).join('') + parcial;
-    _vzPanel('escuchando', vistaPrevia.trim() || 'Escuchando…');
+    _vzPanel('escuchando', (final+parcial).trim() || 'Escuchando…');
   };
 
   _vzRec.onerror=(ev)=>{
+    clearTimeout(silencio);
     _vzEscuchando=false;
     document.getElementById('btnVoz')?.classList.remove('grabando');
     _vzCerrarPanel();
@@ -16714,40 +16752,32 @@ window._vzToggle = () => {
   };
 
   _vzRec.onend=()=>{
+    clearTimeout(silencio);
     _vzEscuchando=false;
     document.getElementById('btnVoz')?.classList.remove('grabando');
-
-    // Selector de mejor alternativa: de las hasta 3 transcripciones que ya
-    // pide el reconocedor para cada tramo, puntuamos cada una contra
-    // clientes + léxico técnico + español base y nos quedamos con la que
-    // mejor encaje, en vez de coger la primera (res[0]) a ciegas.
-    let final='';
-    for(const alternativas of segmentos){
-      let mejor=alternativas[0], mejorScore=-1;
-      for(const alt of alternativas){
-        const score=_vzPuntuarCandidata(alt.transcript) + (alt.confidence||0)*0.15;
-        if(score>mejorScore){ mejorScore=score; mejor=alt; }
-      }
-      final+=mejor.transcript;
-      confianza=mejor.confidence||confianza;
-    }
-
-    let dicho=final.trim();
+    const dicho=final.trim();
     if(!dicho){ _vzCerrarPanel(); return; }
-
-    // Corrector palabra a palabra: misma distancia de edición que para
-    // clientes, aplicada al texto dictado contra el diccionario técnico y
-    // el español base, respetando probables nombres propios/marcas.
-    dicho=window._vzCorregirCuerpo(dicho);
 
     _vzPanel('procesando', dicho);
     setTimeout(()=>{
       _vzCerrarPanel();
-      const r=_vzAnalizar(dicho);
+      // De todas las interpretaciones que ha oído el móvil, nos quedamos con
+      // la que reconoce a un cliente tuyo. Suele arreglar los nombres propios,
+      // que es donde más se equivoca.
+      let r=_vzAnalizar(dicho);
+      if(r.cliente.estado!=='unico'){
+        for(const alt of alternativas){
+          if(_vzNorm(alt)===_vzNorm(dicho)) continue;
+          const r2=_vzAnalizar(alt);
+          if(r2.cliente.estado==='unico' && r2.texto){ r=r2; break; }
+        }
+      }
 
       // Nada aprovechable
       if(!r.texto && r.importe===null){
         toast('No he entendido qué crear. Prueba: "aviso para Pura, gotea el termo"','e');
+        _vzHablar('No te he entendido. Prueba diciendo: aviso para, el nombre del cliente, y qué pasa.');
+        _vzApuntar(dicho, r, 'no entendido');
         return;
       }
       // Transcripción dudosa: no guardar a ciegas
