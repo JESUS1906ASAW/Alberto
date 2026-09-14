@@ -16266,7 +16266,7 @@ const _vzPrioridad = (txtNorm) => {
 };
 
 // ── Tipo de documento ──
-const _VZ_ARRANQUES = /^(?:por favor\s+)?(?:creame|crea me|crea|creas|anade|anadir|añade|haz me|hazme|haz|apunta|apuntame|pon|ponme|mete|meteme|nuevo|nueva|guarda|registra|abre)\s+(?:un|una|el|la|me\s+un|me\s+una)?\s*/;
+const _VZ_ARRANQUES = /^(?:por favor\s+)?(?:creame|crea me|crea|creas|crear|anade|anadir|añade|haz me|hazme|haz|hazlo|apunta|apuntame|pon|ponme|mete|meteme|guarda|guardame|registra|abre|quiero|necesito)?\s*(?:me\s+)?(?:un|una|el|la|unos|unas)?\s*(?:nuevo|nueva)?\s*/;
 
 const _vzTipo = (txtNorm) => {
   const limpio = txtNorm.replace(_VZ_ARRANQUES,'');
@@ -16316,7 +16316,9 @@ const _vzCliente = (resto) => {
   if(m){ nombre=m[1].trim(); rest=m[2].trim(); }
   if(!nombre){
     // 2) "para Pura Martinez, ..." / "de Antonio Ruiz de 340 euros"
-    m = resto.match(/^\s*,?\s*(?:para|de|del|a|al|con)\s+([a-z0-9ñ\s.]+?)(?:\s*,|\s+(?:que|hay|tiene|se|esta|no|por|urgente|manana|hoy|revisar|revision|cambiar|arreglar|reparar|mirar|limpiar|instalar|montar|de)\b|$)/);
+    // Se admiten las formas largas: "a la clienta X", "al cliente X",
+    // "para el cliente X", ademas de las cortas "para X" / "de X".
+    m = resto.match(/^\s*,?\s*(?:para|de|del|a|al|con|en)\s+(?:(?:el|la|los|las)\s+)?(?:client[ae]s?|senor|senora|sr|sra|comunidad de)?\s*([a-z0-9ñ\s.]+?)(?:\s*,|\s+(?:que|hay|tiene|se|esta|no|por|urgente|manana|hoy|revisar|revision|cambiar|arreglar|reparar|mirar|limpiar|instalar|montar|de)\b|$)/);
     if(m){ nombre=m[1].trim(); rest=resto.slice(m.index+m[0].length).trim(); if(resto[m.index+m[0].length-1]===',') rest=resto.slice(m.index+m[0].length).trim(); }
   }
   if(!nombre){
@@ -16325,6 +16327,29 @@ const _vzCliente = (resto) => {
     if(trozos.length>1 && trozos[0].split(' ').length<=4){ nombre=trozos[0].trim(); rest=trozos.slice(1).join(', ').trim(); }
   }
   if(!nombre) return {estado:'sin_nombre', resto:resto};
+
+  // Recorte progresivo: "pura y dice" -> "pura y" -> "pura" (encaja)
+  const palabrasNom = nombre.split(' ').filter(Boolean);
+  if(palabrasNom.length>1){
+    const encaja=(txt)=>{
+      const n=_vzNorm(txt), f=_vzFonetica(txt);
+      return activos.some(c=>{
+        const cn=_vzNorm(c.nombre||''), cf=_vzFonetica(c.nombre||'');
+        return cn===n || cf===f || cn.startsWith(n) || cf.startsWith(f) ||
+               cn.split(' ').includes(n) || cf.split(' ').includes(f);
+      });
+    };
+    if(!encaja(nombre)){
+      for(let k=palabrasNom.length-1;k>=1;k--){
+        const corto=palabrasNom.slice(0,k).join(' ');
+        if(encaja(corto)){
+          rest=(palabrasNom.slice(k).join(' ')+' '+rest).trim();
+          nombre=corto;
+          break;
+        }
+      }
+    }
+  }
 
   const nNorm=_vzNorm(nombre);
   const nFon=_vzFonetica(nombre);
@@ -16621,7 +16646,16 @@ window._vzContinuar = (r) => {
     return;
   }
 
-  // 2) Cobro sin importe
+  // 2) Aviso o recordatorio sin causa: es el otro dato imprescindible
+  if(r.tipo!=='cobro' && !r.texto){
+    _vzPreguntar(`¿Qué pasa en ${r.cliente.cliente?r.cliente.cliente.nombre:(r.cliente.nombre||'ese cliente')}?`,
+      `<input id="vzTexto" type="text" placeholder="Describe el ${r.tipo}" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:14px;color:var(--tx);font-size:15px;font-weight:600;padding:13px;font-family:var(--font)">
+       <button class="btn btn-p" style="width:100%;margin-top:10px" onclick="window._vzPonerTexto()">Continuar</button>`);
+    setTimeout(()=>document.getElementById('vzTexto')?.focus(),120);
+    return;
+  }
+
+  // 3) Cobro sin importe
   if(r.tipo==='cobro' && (r.importe===null||isNaN(r.importe))){
     _vzPreguntar('¿De cuánto es el cobro?',
       `<input id="vzImp" type="number" inputmode="decimal" step="0.01" placeholder="0.00" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:14px;color:var(--tx);font-size:17px;font-weight:800;padding:13px;font-family:var(--font)">
@@ -16630,7 +16664,7 @@ window._vzContinuar = (r) => {
     return;
   }
 
-  // 3) Recordatorio sin fecha
+  // 4) Recordatorio sin fecha
   if(r.tipo==='recordatorio' && !r.fecha){
     _vzPreguntar('¿Para cuándo es el recordatorio?',
       `<input id="vzFec" type="date" style="width:100%;background:var(--card2);border:1px solid var(--border);border-radius:14px;color:var(--tx);font-size:15px;font-weight:700;padding:13px;font-family:var(--font)">
@@ -16650,6 +16684,14 @@ window._vzElegirCliente = (i) => {
     r.cliente={estado:'unico', cliente:r.cliente.candidatos[i], nombre:r.cliente.nombre, resuelto:true};
   }
   else r.cliente={estado:'nuevo', nombre:r.cliente.nombre, resuelto:true};
+  document.getElementById('vzAsk')?.remove();
+  window._vzContinuar(r);
+};
+window._vzPonerTexto = () => {
+  const r=window._vzPend; if(!r) return;
+  const v=(document.getElementById('vzTexto')?.value||'').trim();
+  if(!v){ toast('Escribe qué pasa','e'); return; }
+  r.texto=v.charAt(0).toUpperCase()+v.slice(1);
   document.getElementById('vzAsk')?.remove();
   window._vzContinuar(r);
 };
@@ -16697,7 +16739,8 @@ const _vzCerrarPanel = () => {
   setTimeout(()=>el.remove(),250);
 };
 
-window._vzParar = () => { try{ _vzRec?.stop(); }catch(e){} };
+let _vzParadoPorUsuario=false;
+window._vzParar = () => { _vzParadoPorUsuario=true; try{ _vzRec?.stop(); }catch(e){} };
 
 window._vzToggle = () => {
   if(_vzEscuchando){ window._vzParar(); return; }
@@ -16712,32 +16755,41 @@ window._vzToggle = () => {
   _vzRec.maxAlternatives=5;        // mas interpretaciones entre las que elegir
 
   let final='', confianza=1, alternativas=[];
+  _vzParadoPorUsuario=false;
   _vzEscuchando=true;
   _vzPanel('escuchando');
   document.getElementById('btnVoz')?.classList.add('grabando');
 
-  let silencio=null;
+  let silencio=null, hablando=false;
   const reiniciarSilencio=()=>{
     clearTimeout(silencio);
-    // 1,8 s sin decir nada = ha terminado. Da margen para pensar a mitad de frase.
-    silencio=setTimeout(()=>{ try{_vzRec.stop();}catch(e){} }, 1800);
+    // Antes de empezar a hablar esperamos 8 s (te da tiempo a colocarte).
+    // Una vez has empezado, 2,2 s de silencio significan que has terminado.
+    silencio=setTimeout(()=>{ try{_vzRec.stop();}catch(e){} }, hablando ? 2200 : 8000);
   };
   reiniciarSilencio();
+  _vzRec.onspeechstart=()=>{ hablando=true; reiniciarSilencio(); };
+  _vzRec.onaudiostart =()=>{ reiniciarSilencio(); };
 
   _vzRec.onresult=(ev)=>{
+    hablando=true;
     reiniciarSilencio();
-    let parcial='';
-    for(let i=ev.resultIndex;i<ev.results.length;i++){
+    let fin='', parcial='';
+    const alts=[];
+    for(let i=0;i<ev.results.length;i++){
       const res=ev.results[i];
       if(res.isFinal){
-        final+=res[0].transcript;
-        confianza=res[0].confidence||confianza;
-        // Guardamos también las otras interpretaciones: a veces la buena es la 2ª
-        for(let k=0;k<res.length;k++) alternativas.push(res[k].transcript);
+        fin += res[0].transcript + ' ';
+        if(res[0].confidence) confianza=res[0].confidence;
+        // Las otras interpretaciones: a veces la buena es la segunda
+        for(let k=0;k<res.length;k++) alts.push(res[k].transcript);
+      } else {
+        parcial += res[0].transcript + ' ';
       }
-      else parcial+=res[0].transcript;
     }
-    _vzPanel('escuchando', (final+parcial).trim() || 'Escuchando…');
+    final = fin.replace(/\s+/g,' ').trim();
+    alternativas = alts;
+    _vzPanel('escuchando', (final+' '+parcial).replace(/\s+/g,' ').trim() || 'Escuchando…');
   };
 
   _vzRec.onerror=(ev)=>{
@@ -16752,6 +16804,11 @@ window._vzToggle = () => {
   };
 
   _vzRec.onend=()=>{
+    // El navegador corta solo a veces. Si no has pulsado Parar y no ha habido
+    // silencio suficiente, se reanuda para no cortarte a mitad de frase.
+    if(_vzEscuchando && !_vzParadoPorUsuario && hablando===false){
+      try{ _vzRec.start(); return; }catch(e){}
+    }
     clearTimeout(silencio);
     _vzEscuchando=false;
     document.getElementById('btnVoz')?.classList.remove('grabando');
@@ -16774,7 +16831,10 @@ window._vzToggle = () => {
       }
 
       // Nada aprovechable
-      if(!r.texto && r.importe===null){
+      // Solo se rechaza si no hay nada aprovechable: ni cliente, ni causa, ni importe.
+      // Si falta un dato pero hay cliente, se pregunta en vez de descartar.
+      const hayCliente = r.cliente.estado!=='sin_nombre' && (r.cliente.cliente || r.cliente.nombre);
+      if(!r.texto && r.importe===null && !hayCliente){
         toast('No he entendido qué crear. Prueba: "aviso para Pura, gotea el termo"','e');
         _vzHablar('No te he entendido. Prueba diciendo: aviso para, el nombre del cliente, y qué pasa.');
         _vzApuntar(dicho, r, 'no entendido');
