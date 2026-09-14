@@ -1,5 +1,5 @@
-const CN       = 'alberto-v3';       // caché de datos/red
-const SHELL_CN = 'alberto-shell-v3'; // caché del app shell
+const CN       = 'alberto-v4';       // caché de datos/red
+const SHELL_CN = 'alberto-shell-v4'; // caché del app shell
 
 // Assets del app shell que se pre-cachean en el install
 const SHELL_ASSETS = [
