@@ -1,5 +1,11 @@
-const CN       = 'alberto-v4';       // caché de datos/red
-const SHELL_CN = 'alberto-shell-v4'; // caché del app shell
+const CN       = 'alberto-v5';       // caché de datos/red
+const SHELL_CN = 'alberto-shell-v5'; // caché del app shell
+// IMPORTANTE: sube este número (v5, v6, v7...) en cada despliegue que
+// incluya cambios de verdad. El navegador solo se entera de que hay un
+// sw.js nuevo si el ARCHIVO cambia byte a byte; si solo tocas index.html
+// y dejas este número igual, el navegador ve el mismo sw.js de siempre y
+// nunca llega a instalar ni a avisar de la actualización, por más que el
+// index.html en el servidor sea otro.
 
 // Assets del app shell que se pre-cachean en el install
 const SHELL_ASSETS = [
@@ -38,7 +44,15 @@ self.addEventListener('install', e => {
         .then(res => { if (res.ok) return externos.put(url, res); })
         .catch(() => {})
     ));
-    await self.skipWaiting();
+    // OJO: sin self.skipWaiting() aquí a propósito. Si esta es una
+    // actualización (ya había una versión anterior activa), este SW se
+    // queda "esperando" hasta que la app mande el mensaje SKIP_WAITING —
+    // eso es lo que hace _applyUpdate() cuando el usuario pulsa
+    // "Actualizar ahora" en el aviso. Si se llamara aquí siempre, la
+    // actualización se aplicaría sola nada más instalarse, sin esperar
+    // a que el usuario decida, y el botón del aviso no serviría de nada.
+    // En una instalación totalmente nueva (sin versión anterior) esto no
+    // hace falta: el navegador la activa solo, sin esperar a nadie.
   })());
 });
 
