@@ -674,6 +674,8 @@ body.modo-claro .vz-stop{background:rgba(0,0,0,.05)}
 #vzToast.open{opacity:1;transform:translateY(0)}
 .vz-toast-txt{flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--tx);line-height:1.45}
 .vz-toast-txt strong{font-weight:900;color:var(--r)}
+.vz-toast-btns{flex-shrink:0;display:flex;flex-direction:column;gap:6px}
+.vz-toast-fix{background:rgba(var(--theme-rgb),.14);border:1px solid rgba(var(--theme-rgb),.35);border-radius:12px;padding:9px 14px;font-size:12.5px;font-weight:800;color:var(--r);font-family:var(--font);cursor:pointer}
 .vz-toast-undo{flex-shrink:0;background:rgba(239,68,68,.14);border:1px solid rgba(239,68,68,.35);border-radius:12px;
   padding:9px 14px;font-size:12.5px;font-weight:800;color:#ef4444;font-family:var(--font);cursor:pointer}
 
@@ -5299,6 +5301,7 @@ const _simpleCardHtml=(tipo,item,completado)=>{
   const fechaTxt=_fmtFechaSimple(item.fecha);
   const fecha=completado?(item.completadoEn||item.creado):item.creado;
   const importeTxt=(tipo==='cobro'&&item.importe)?`<span style="font-size:11px;font-weight:900;color:var(--r);margin-left:6px">${fmtM(item.importe)}</span>`:'';
+  const marcaVoz = item.creadoPorVoz?`<span title="Creado dictando" style="font-size:11px;opacity:.55;margin-right:5px">🎤</span>`:'';
   return `<div class="averia-card ${completado?'resuelta':''}" data-sel-id="${item.id}" data-sel-type="${tipo}" style="cursor:pointer;border-left:${borderLeft}" onclick="verSimple('${tipo}','${item.id}')">
     <div class="sel-check"></div>
     <div class="averia-header">
@@ -14377,14 +14380,12 @@ const renderPerfil=()=>{
           <div style="font-size:13.5px;font-weight:800;color:var(--tx)">Que me conteste en voz alta</div>
           <div style="font-size:11.5px;color:var(--tx2);margin-top:2px">Te dice lo que ha creado sin mirar la pantalla</div>
         </div>
-        <label class="toggle-sw"><input type="checkbox" id="togVozHablar" onchange="window._vzToggleVoz()" ${localStorage.getItem('alberto_voz_hablar')!=='0'?'checked':''}><span></span></label>
+        <label class="toggle-sw"><input type="checkbox" id="togVozHablar" onchange="window._vzToggleVoz()" ${localStorage.getItem('alberto_voz_hablar')!=='0'?'checked':''}><span class="toggle-track"></span></label>
       </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
-        <div style="flex:1;min-width:0">
-          <div style="font-size:13.5px;font-weight:800;color:var(--tx)">Activarlo diciendo «oye Alberto»</div>
-          <div style="font-size:11.5px;color:var(--tx2);margin-top:2px">Con la app abierta y un grupo abierto, lo llamas por voz sin tocar la pantalla. Gasta algo más de batería y datos mientras está encendido.</div>
-        </div>
-        <label class="toggle-sw"><input type="checkbox" id="togVozActivacion" onchange="window._vzToggleActivacion()" ${localStorage.getItem('alberto_voz_activacion')==='1'?'checked':''}><span></span></label>
+      <div style="font-size:12px;font-weight:800;color:var(--tx2);margin:14px 0 8px">Cuánto espero cuando te callas</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:12px">
+        ${[['Rápido',3000],['Normal',5000],['Pausado',8000]].map(([et,ms])=>
+          `<button class="btn btn-s" style="padding:9px 4px;font-size:12px" onclick="window._vzSetPausa(${ms})">${et}</button>`).join('')}
       </div>
       <button class="btn btn-s" style="width:100%" onclick="window._vzVerLog()">Ver mis últimos dictados</button>
       <div style="font-size:11px;color:var(--tx2);margin-top:8px;line-height:1.5">Ahí verás qué oyó el móvil y qué entendió la app. Sirve para afinar el reconocimiento cuando falla.</div>
@@ -14887,7 +14888,7 @@ const _htmlListaAvisos=(listaBase,qL,esResueltos)=>{
           </div>
           <div class="averia-title" style="white-space:normal;line-height:1.4">${a.descripcion||'Sin descripción'}</div>
           <div class="averia-sub" style="margin-top:4px">
-${(()=>{
+${a.creadoPorVoz?`<span title="Creado dictando" style="font-size:11px;opacity:.55;margin-right:5px">🎤</span>`:''}${(()=>{
               // El cliente puede no tener ficha: en ese caso vale el nombre que
               // se escribio al crear el aviso, que antes no se mostraba.
               const nom = cli?.nombre || a.clienteNombre || '';
@@ -16197,6 +16198,139 @@ const _vzUltimaCoincidencia = (txtNorm, reGlobal) => {
   return ultimo;
 };
 
+// ══════════════════════════════════════════════════════════════
+// FASE 1 — LIMPIEZA ANTES DE GUARDAR
+// ══════════════════════════════════════════════════════════════
+
+// ── Repeticiones por cortes de sesión ──
+// Cuando Android cierra y reabre el micrófono, el trozo repetido a veces se
+// pega otra vez: "sustituir el sustituir el filtro sustituir el filtro...".
+// Aquí se detecta cualquier grupo de palabras que aparece tres veces o más y
+// se deja una sola vez, conservando el orden.
+const _vzQuitarRepeticiones = (texto) => {
+  if(!texto) return texto;
+  const pal = texto.split(/\s+/).filter(Boolean);
+  if(pal.length < 6) return texto;
+
+  // Se prueban grupos de 5 palabras hacia abajo: los largos primero, porque
+  // un grupo largo repetido incluye a los cortos.
+  let out = pal.slice();
+  for(let n=Math.min(6, Math.floor(out.length/3)); n>=2; n--){
+    let cambiado=true;
+    while(cambiado){
+      cambiado=false;
+      for(let i=0; i+n*2<=out.length; i++){
+        const grupo = out.slice(i,i+n).join(' ').toLowerCase();
+        let veces=1, j=i+n;
+        while(j+n<=out.length && out.slice(j,j+n).join(' ').toLowerCase()===grupo){ veces++; j+=n; }
+        if(veces>=2){
+          out = [...out.slice(0,i+n), ...out.slice(j)];   // deja una sola copia
+          cambiado=true; break;
+        }
+      }
+    }
+  }
+  // Segunda pasada: el mismo grupo repetido pero NO seguido, que es lo que
+  // deja el reinicio de sesión ("llamar a llamar a pura"). Se queda la
+  // aparición más tardía, que suele ser la frase ya completa.
+  for(let n=4; n>=2; n--){
+    let cambiado=true, vueltas=0;
+    while(cambiado && vueltas++<20){
+      cambiado=false;
+      for(let i=0; i+n<=out.length; i++){
+        const grupo = out.slice(i,i+n).map(x=>x.toLowerCase()).join(' ');
+        if(!out.slice(i,i+n).some(x=>x.length>3)) continue;   // evitar "de la"
+        for(let k=i+n; k+n<=out.length; k++){
+          if(out.slice(k,k+n).map(x=>x.toLowerCase()).join(' ')===grupo){
+            out = [...out.slice(0,i), ...out.slice(i+n)];      // borra la primera
+            cambiado=true; break;
+          }
+        }
+        if(cambiado) break;
+      }
+    }
+  }
+
+  // Y palabras sueltas repetidas seguidas: "el el filtro"
+  const limpio=[];
+  for(const p of out){
+    if(!limpio.length || limpio[limpio.length-1].toLowerCase()!==p.toLowerCase()) limpio.push(p);
+  }
+  return limpio.join(' ');
+};
+
+// ══════════════════════════════════════════════════════════════
+// FASE 3 — DÓNDE EMPIEZA LO QUE IMPORTA
+// Hasta ahora se quitaba relleno con una lista de palabras prohibidas, y por
+// eso se colaban "sobre", "y dale", "cobrarle"... Siempre habrá una palabra
+// nueva que no esté en la lista.
+// El enfoque cambia: en español los CONECTORES (conjunciones, preposiciones
+// y muletillas) son un conjunto cerrado y conocido; las palabras con
+// contenido son infinitas. Así que en vez de decir qué se quita, se dice
+// dónde EMPIEZA lo que vale: en la primera palabra que no sea un conector.
+// Los artículos, los pronombres y los verbos NO se tocan: forman parte de lo
+// que dijiste ("la caldera pierde agua" no puede quedarse en "caldera").
+// ══════════════════════════════════════════════════════════════
+const _VZ_CONECTORES = new Set([
+  // Conjunciones y preposiciones sueltas: enlazan, no dicen nada por sí solas
+  'que','y','e','o','u','ni','pero','mas','porque','pues','si','como',
+  'a','ante','bajo','con','contra','de','del','desde','en','entre','hacia',
+  'hasta','para','por','segun','sin','sobre','tras','al',
+  // Muletillas
+  'eh','em','mmm','bueno','vale','oye','mira','venga','dale','ademas','luego','entonces','o sea'
+]);
+
+// Verbos que solo repiten lo que ya dice el tipo de documento: en un cobro no
+// aporta nada empezar por "cobrarle", ni en un aviso por "avisar".
+const _VZ_REDUNDANTES = {
+  cobro: /^(?:cobrar(?:le|les|lo|la)?|cobra|cobro|pagar(?:me|le)?|facturar(?:le)?|factura)\b/,
+  aviso: /^(?:avisar(?:le|les)?|avisa|aviso|apuntar|apunta)\b/,
+  recordatorio: /^(?:recordar(?:le|me)?|recuerda|recordatorio)\b/,
+};
+
+// Recorta el principio hasta la primera palabra con contenido real
+const _vzDondeEmpieza = (texto, tipo) => {
+  if(!texto) return texto;
+  let pal = texto.split(/\s+/).filter(Boolean);
+  let i = 0;
+  while(i < pal.length){
+    const limpia = _vzNorm(pal[i]).replace(/[^a-zñ0-9]/g,'');
+    if(!limpia){ i++; continue; }                    // puntuación suelta
+    if(_VZ_CONECTORES.has(limpia)){ i++; continue; } // conector: fuera
+    break;
+  }
+  // No dejar el texto vacío: si todo eran palabras de unión, se deja tal cual
+  if(i >= pal.length) return texto;
+  pal = pal.slice(i);
+
+  // Y si arranca con el verbo que ya dice el tipo, también fuera
+  const red = _VZ_REDUNDANTES[tipo];
+  if(red && red.test(_vzNorm(pal[0]))){
+    const resto = pal.slice(1);
+    if(resto.length) return _vzDondeEmpieza(resto.join(' '), null);
+  }
+  return pal.join(' ');
+};
+
+// Limpieza final de puntuación suelta que deja la transcripción
+const _vzPulirTexto = (texto) => (texto||'')
+  .replace(/\s+([,.;:])/g,'$1')      // " ," -> ","
+  .replace(/([,.;:])\1+/g,'$1')      // ",," -> ","
+  .replace(/^[\s,.;:·-]+/,'')
+  .replace(/[\s,.;:·-]+$/,'')
+  .replace(/\s{2,}/g,' ')
+  .trim();
+
+// ── ¿Esto merece guardarse? ──
+// "enero" o "ficha enero" creaban avisos vacíos de sentido. Si no hay cliente
+// y el texto no llega a dos palabras con contenido, se descarta.
+const _VZ_VACIAS = new Set(['el','la','los','las','un','una','unos','unas','de','del','a','al','en','y','o','que','por','para','con','se','su','sus','lo','le','les','mi','tu','es','ha','han','hay']);
+const _vzTieneSustancia = (texto) => {
+  if(!texto) return false;
+  const utiles = _vzNorm(texto).split(' ').filter(p=>p.length>2 && !_VZ_VACIAS.has(p));
+  return utiles.length >= 2;
+};
+
 const _vzFecha = (txtNorm) => {
   const hoy=new Date(); hoy.setHours(12,0,0,0);
   const dias=(n)=>{ const d=new Date(hoy); d.setDate(d.getDate()+n); return d; };
@@ -16218,14 +16352,40 @@ const _vzFecha = (txtNorm) => {
     return {fecha:_vzISO(d), txt:m[0]};
   }
 
+  // Días dichos con letras: "el quince de enero", "el veinte de marzo".
+  // Antes solo entendía cifras, así que "el quince de enero" se quedaba sin
+  // fecha Y además se colaba entero dentro del texto del aviso.
+  {
+    const DIAPAL='treinta y uno|treinta|veintinueve|veintiocho|veintisiete|veintiseis|veinticinco|veinticuatro|veintitres|veintidos|veintiuno|veinte|diecinueve|dieciocho|diecisiete|dieciseis|quince|catorce|trece|doce|once|diez|nueve|ocho|siete|seis|cinco|cuatro|tres|dos|uno|una|primero';
+    const mp = txtNorm.match(new RegExp('\\b(?:el\\s+)?(?:dia\\s+)?('+DIAPAL+')\\s+de\\s+([a-z]+)(?:\\s+(?:de|del)\\s+(\\d{4}))?'));
+    if(mp && _VZ_MESES[mp[2]]!==undefined){
+      const dia = mp[1]==='primero' ? 1 : (_vzNumeroEnPalabras(mp[1]) || 1);
+      const anio = mp[3] ? parseInt(mp[3],10) : hoy.getFullYear();
+      let d=new Date(anio, _VZ_MESES[mp[2]], dia, 12,0,0);
+      const pasada = !mp[3] && d<hoy;
+      if(pasada) d=new Date(anio+1, _VZ_MESES[mp[2]], dia, 12,0,0);
+      return {fecha:_vzISO(d), txt:mp[0], ambigua:pasada};
+    }
+    // "el día quince" a secas
+    const mps = txtNorm.match(new RegExp('\\bel\\s+dia\\s+('+DIAPAL+')\\b'));
+    if(mps){
+      const dia = mps[1]==='primero' ? 1 : (_vzNumeroEnPalabras(mps[1]) || 1);
+      let d=new Date(hoy.getFullYear(), hoy.getMonth(), dia, 12,0,0);
+      if(d<hoy) d=new Date(hoy.getFullYear(), hoy.getMonth()+1, dia, 12,0,0);
+      return {fecha:_vzISO(d), txt:mps[0]};
+    }
+  }
+
   // "el 20 de marzo" / "el 20 de marzo de 2027"
   m = _vzUltimaCoincidencia(txtNorm, /\b(?:el\s+)?(\d{1,2})\s+de\s+([a-z]+)(?:\s+de\s+(\d{4}))?/g);
   if(m && _VZ_MESES[m[2]]!==undefined){
     const dia=parseInt(m[1],10), mes=_VZ_MESES[m[2]];
     const anio = m[3] ? parseInt(m[3],10) : hoy.getFullYear();
     let d=new Date(anio,mes,dia,12,0,0);
-    if(!m[3] && d<hoy) d=new Date(anio+1,mes,dia,12,0,0);
-    return {fecha:_vzISO(d), txt:m[0]};
+    // Fecha ya pasada este año: no se decide en silencio, se pregunta
+    const pasada = !m[3] && d<hoy;
+    if(pasada) d=new Date(anio+1,mes,dia,12,0,0);
+    return {fecha:_vzISO(d), txt:m[0], ambigua:pasada};
   }
 
   // "en marzo" (día 1 de ese mes)
@@ -16259,7 +16419,41 @@ const _vzFecha = (txtNorm) => {
 };
 
 // ── Importe ──
+// Suma de importes: "noventa euros y 10 euros más" son 100, no 10.
+// Antes se quedaba con el último que encontraba, en silencio.
+const _vzImportesTodos = (txtNorm) => {
+  const encontrados=[];
+  const rx=/(\d+(?:[.,]\d{1,2})?)\s*(?:con\s+(\d{1,2})\s*)?euros?\b/g;
+  let m;
+  while((m=rx.exec(txtNorm))!==null){
+    let v=parseFloat(m[1].replace(',','.'));
+    if(m[2]) v=Math.floor(v)+parseInt(m[2],10)/100;
+    encontrados.push({valor:v, txt:m[0], idx:m.index});
+  }
+  // en palabras
+  const rxp=new RegExp('((?:\\b(?:'+_VZ_NUMPAL_RE+'|y)\\b\\s*)+)euros?\\b','g');
+  while((m=rxp.exec(txtNorm))!==null){
+    const v=_vzNumeroEnPalabras(m[1]);
+    if(v && !encontrados.some(e=>Math.abs(e.idx-m.index)<4)) encontrados.push({valor:v, txt:m[0], idx:m.index});
+  }
+  return encontrados.sort((a,b)=>a.idx-b.idx);
+};
+
 const _vzImporte = (txtNorm) => {
+  // Si hay más de una cantidad y la frase las suma ("y ... más", "y otros"),
+  // se suman. Si hay varias sin nada que las una, se devuelven todas para
+  // que el asistente pregunte en vez de elegir a ciegas.
+  const todos=_vzImportesTodos(txtNorm);
+  if(todos.length>1){
+    const suma = /\b(?:y|mas|ademas|y ademas|en total|junto con)\b/.test(
+      txtNorm.slice(todos[0].idx+todos[0].txt.length, todos[todos.length-1].idx));
+    if(suma){
+      return {importe: todos.reduce((a,b)=>a+b.valor,0),
+              txt: todos.map(t=>t.txt).join(' '),
+              sumados: todos.map(t=>t.valor)};
+    }
+    return {importe: todos[0].valor, txt: todos[0].txt, varios: todos.map(t=>t.valor)};
+  }
   // "45 euros con 50 centimos" / "45 euros y 50 centimos"
   let mCent = txtNorm.match(/(\d+)\s*euros?\s*(?:con|y)\s+(\d{1,2})\s*(?:centimos?|centavos?)\b/);
   if(mCent) return {importe: parseInt(mCent[1],10)+parseInt(mCent[2],10)/100, txt:mCent[0]};
@@ -16347,6 +16541,15 @@ const _vzUltimoUso=(cliId)=>{
 const _VZ_PREP_CLIENTE = new Set(['para','de','del','a','al','con','en']);
 const _vzCliente = (resto) => {
   const activos = (allClientes||[]).filter(c=>!c.archivado);
+
+  // "para un nuevo cliente llamado Paco", "a un cliente nuevo, Paco"
+  // Aqui SI has dicho que es nuevo, asi que no hace falta preguntar.
+  const mNuevo = resto.match(/\b(?:un|una)?\s*(?:nuev[oa]\s+client[ae]|client[ae]\s+nuev[oa])\s*(?:llamad[oa]|que se llama|de nombre)?\s*,?\s*([a-z0-9ñ]+(?:\s+[a-z0-9ñ]+){0,2})/);
+  if(mNuevo){
+    const nom=mNuevo[1].trim();
+    const sobra=(resto.slice(0,mNuevo.index)+' '+resto.slice(mNuevo.index+mNuevo[0].length)).replace(/\s+/g,' ').trim();
+    return {estado:'nuevo', nombre:nom, resto:sobra, explicitoNuevo:true};
+  }
   // El nombre suele ir tras "para/de/a/al/en" y termina en coma o en un verbo
   let nombre='', rest=resto;
   // El nombre va SIEMPRE al principio, nunca en mitad de la frase: si no,
@@ -16425,6 +16628,18 @@ const _vzCliente = (resto) => {
       if(esc && esc.p-scorePatron>=0.12){ nombre=esc.nombre; rest=esc.rest; }
     }
   }
+  // Fase 4: limpiar preposiciones y artículos pegados al nombre, por delante
+  // y por detrás. De tus registros: "a paco", "paco a", "de bermudez".
+  if(nombre){
+    const fuera=new Set(['a','al','de','del','para','por','con','en','el','la','los','las','un','una','que','y']);
+    let pal=nombre.split(/\s+/).filter(Boolean);
+    while(pal.length>1 && fuera.has(_vzNorm(pal[0]))) pal.shift();
+    while(pal.length>1 && fuera.has(_vzNorm(pal[pal.length-1]))) { rest=(pal.pop()+' '+rest).trim(); }
+    // Si queda una sola palabra y es una preposición, no es un nombre
+    if(pal.length===1 && fuera.has(_vzNorm(pal[0]))) { nombre=''; }
+    else nombre=pal.join(' ');
+  }
+
   if(!nombre) return {estado:'sin_nombre', resto:resto};
 
   // Recorte progresivo: "pura y dice" -> "pura y" -> "pura" (encaja)
@@ -16477,8 +16692,14 @@ const _vzCliente = (resto) => {
     const partes=cn.split(' '), partesF=cf.split(' ');
     if(partes.some(p=>p===nNorm)) return .9;         // solo nombre o solo apellido
     if(partesF.some(p=>p===nFon)) return .88;
-    // lo mejor entre comparar la escritura y comparar el sonido
-    return Math.max(_vzParecido(cn,nNorm), _vzParecido(cf,nFon)*.97);
+    // Comparar tambien contra CADA palabra del nombre de la ficha. Sin esto,
+    // "puro" contra "pura martinez" daba un parecido bajisimo (0,31) porque
+    // se comparaba con el nombre entero, y el cliente se creaba de cero sin
+    // preguntar. Contra la palabra "pura" da 0,75 y se pregunta.
+    let porPartes=0;
+    partes.forEach(p=>{ if(p.length>=3) porPartes=Math.max(porPartes,_vzParecido(p,nNorm)*.92); });
+    partesF.forEach(p=>{ if(p.length>=3) porPartes=Math.max(porPartes,_vzParecido(p,nFon)*.90); });
+    return Math.max(_vzParecido(cn,nNorm), _vzParecido(cf,nFon)*.97, porPartes);
   };
   const puntuados = activos.map(c=>({c, p:puntuar(c)})).sort((a,b)=>b.p-a.p);
   const buenos = puntuados.filter(x=>x.p>=.82);
@@ -16871,9 +17092,18 @@ window._vzAnalizar = (texto) => {
   return {
     tipo:tipoFinal, explicito,
     cliente:cli,
-    texto:cuerpo ? cuerpo.charAt(0).toUpperCase()+cuerpo.slice(1) : '',
+    texto:(()=>{
+      // Fase 1: quitar repeticiones · Fase 3: empezar donde empieza el contenido
+      let c=_vzQuitarRepeticiones(cuerpo);
+      c=_vzDondeEmpieza(c, tipoFinal);
+      c=_vzPulirTexto(c);
+      return c ? c.charAt(0).toUpperCase()+c.slice(1) : '';
+    })(),
     fecha:fecha?fecha.fecha:null, fechaTxt:fecha?fecha.txt:'',
     importe:imp?imp.importe:null,
+    importesVarios: imp?.varios || null,      // hay que preguntar cuál
+    importesSumados: imp?.sumados || null,    // se han sumado, se avisa
+    fechaAmbigua: !!fecha?.ambigua,           // fecha pasada: ¿este año o el que viene?
     prioridad:prio?prio.prio:'baja',
     original:texto
   };
@@ -16903,12 +17133,25 @@ window._vzDeshacer = async () => {
 // ── Respuesta hablada ──
 // Con las manos ocupadas no puedes mirar la pantalla: te lo dice en voz alta.
 let _vzVozActiva = (localStorage.getItem('alberto_voz_hablar')!=='0');
+// Corta cualquier locucion en curso y deja constancia de que ya no habla
+window._vzCallar = () => {
+  _vzHablando=false;
+  if(!window.speechSynthesis) return;
+  try{ speechSynthesis.cancel(); }catch(e){}
+};
+let _vzHablando=false;
+
 window._vzHablar = (txt) => {
   if(!_vzVozActiva || !window.speechSynthesis || !txt) return;
+  // Nunca hablar mientras el microfono esta abierto: se oiria a si mismo
+  if(_vzEscuchando) return;
   try{
     speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(txt);
     u.lang='es-ES'; u.rate=1.05; u.pitch=1;
+    _vzHablando=true;
+    u.onend=()=>{ _vzHablando=false; };
+    u.onerror=()=>{ _vzHablando=false; };
     const v=speechSynthesis.getVoices().find(x=>x.lang&&x.lang.startsWith('es'));
     if(v) u.voice=v;
     speechSynthesis.speak(u);
@@ -16936,6 +17179,24 @@ const _vzApuntar = (oido, r, resultado) => {
     localStorage.setItem('alberto_voz_log', JSON.stringify(log.slice(0,15)));
   }catch(e){}
 };
+// Fase 5: medir en vez de suponer. Cada dictado queda clasificado y de ahí
+// sale el porcentaje de acierto. Si una mejora funciona, se ve aquí.
+const _vzEstadisticas = () => {
+  let log=[]; try{ log=JSON.parse(localStorage.getItem('alberto_voz_log')||'[]'); }catch(e){}
+  const total=log.length;
+  if(!total) return null;
+  const creados   = log.filter(l=>/creado/.test(l.resultado||'')).length;
+  const corregidos= log.filter(l=>/corrección aplicada/.test(l.resultado||'')).length;
+  const fallidos  = log.filter(l=>/no entendido|descartado|no entendida|fallida/.test(l.resultado||'')).length;
+  // Un dictado "limpio" es uno creado que no necesitó corrección después
+  const limpios = Math.max(0, creados-corregidos);
+  return {total, creados, corregidos, fallidos, limpios,
+          pctLimpio: Math.round(limpios/total*100),
+          pctCorregido: Math.round(corregidos/total*100),
+          pctFallido: Math.round(fallidos/total*100)};
+};
+window._vzEstadisticas = _vzEstadisticas;
+
 window._vzVerLog = () => {
   let log=[]; try{ log=JSON.parse(localStorage.getItem('alberto_voz_log')||'[]'); }catch(e){}
   if(!log.length){ toast('Aún no has dictado nada','i'); return; }
@@ -16949,7 +17210,23 @@ window._vzVerLog = () => {
         importe: ${l.importe??'—'} · fecha: ${l.fecha||'—'} · prioridad: ${l.prio||'—'}
       </div>
     </div>`).join('');
-  abrirSB('Últimos dictados', `
+  const st=_vzEstadisticas();
+  const barra = st ? `
+    <div class="card" style="margin-bottom:14px;padding:14px">
+      <div style="font-size:10px;font-weight:800;color:var(--tx2);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px">Acierto · últimos ${st.total}</div>
+      <div style="display:flex;height:10px;border-radius:6px;overflow:hidden;background:var(--card2);margin-bottom:10px">
+        <div style="width:${st.pctLimpio}%;background:#4caf50"></div>
+        <div style="width:${st.pctCorregido}%;background:#ff9800"></div>
+        <div style="width:${st.pctFallido}%;background:#ef4444"></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:11.5px;font-weight:700">
+        <span style="color:#4caf50">${st.pctLimpio}% a la primera</span>
+        <span style="color:#ff9800">${st.pctCorregido}% corregidos</span>
+        <span style="color:#ef4444">${st.pctFallido}% fallidos</span>
+      </div>
+    </div>` : '';
+
+  abrirSB('Últimos dictados', barra + `
     <div style="font-size:12px;color:var(--tx2);line-height:1.5;margin-bottom:14px">
       Lo que ha oído el móvil y lo que ha entendido la app. Copia los que hayan salido mal y mándalos para afinar el reconocimiento.
     </div>
@@ -16965,15 +17242,22 @@ window._vzCopiarLog = async () => {
 };
 
 // Aviso en pantalla con lo que ha entendido y botón de deshacer 8 segundos
+let _vzUltimoR=null, _vzCierreToast=null;
+
 const _vzAvisoCreado = (resumen) => {
   const prev=document.getElementById('vzToast'); if(prev) prev.remove();
   const el=document.createElement('div');
   el.id='vzToast';
   el.innerHTML=`<div class="vz-toast-txt">${resumen}</div>
-    <button class="vz-toast-undo" onclick="document.getElementById('vzToast')?.remove();window._vzDeshacer()">Deshacer</button>`;
+    <div class="vz-toast-btns">
+      <button class="vz-toast-fix" onclick="window._vzCorregir()">Corregir</button>
+      <button class="vz-toast-undo" onclick="document.getElementById('vzToast')?.remove();window._vzDeshacer()">Deshacer</button>
+    </div>`;
   document.body.appendChild(el);
   requestAnimationFrame(()=>el.classList.add('open'));
-  setTimeout(()=>{ el.classList.remove('open'); setTimeout(()=>el.remove(),300); _vzUltimo=null; }, 8000);
+  clearTimeout(_vzCierreToast);
+  // 12 s: deshacer eran 8, pero corregir hablando necesita algo mas de margen
+  _vzCierreToast=setTimeout(()=>{ el.classList.remove('open'); setTimeout(()=>el.remove(),300); _vzUltimo=null; _vzUltimoR=null; }, 12000);
 };
 
 const _vzNombreCliente = (cli) => cli.cliente ? (cli.cliente.nombre||'') : (cli.nombre||'');
@@ -16992,7 +17276,7 @@ window._vzGuardar = async (r) => {
         creadoPor:CU.uid, creadoPorNombre:CUD?.nombre||CU.email||'Técnico',
         creado:serverTimestamp(), estado:'pendiente', resueltaEn:null, ...marca
       });
-      _vzUltimo={tipo:'aviso', col:'avisos', id:ref.id};
+      _vzUltimo={tipo:'aviso', col:'avisos', id:ref.id}; _vzUltimoR={...r};
       _vzAvisoCreado(`<strong>Aviso</strong> para ${cliNom||'sin cliente'}: ${r.texto}${r.prioridad==='alta'?' · urgente':''}`);
       _vzHablar(`Aviso creado para ${cliNom||'cliente sin ficha'}. ${r.texto}`);
       _vzApuntar(r.original, r, 'aviso creado');
@@ -17003,9 +17287,9 @@ window._vzGuardar = async (r) => {
         fecha:r.fecha||'', prioridad:'normal', importe:r.importe,
         estado:'pendiente', creado:serverTimestamp(), ...marca
       });
-      _vzUltimo={tipo:'cobro', col:'cobros', id:ref.id};
+      _vzUltimo={tipo:'cobro', col:'cobros', id:ref.id}; _vzUltimoR={...r};
       _vzAvisoCreado(`<strong>Cobro</strong> de ${cliNom||'sin cliente'}: ${r.importe.toFixed(2)} € · ${r.texto||'sin concepto'}`);
-      _vzHablar(`Cobro de ${r.importe.toFixed(2)} euros creado para ${cliNom||'cliente sin ficha'}.`);
+      _vzHablar(`Cobro de ${r.importe.toFixed(2)} euros creado para ${cliNom||'cliente sin ficha'}.${r.importesSumados?' He sumado '+r.importesSumados.join(' y ')+'.':''}`);
       _vzApuntar(r.original, r, 'cobro creado');
     }
     else {
@@ -17018,7 +17302,7 @@ window._vzGuardar = async (r) => {
       });
       _recSaveAll();
       if(document.querySelector('#screenRecordatorios.active')) renderRecordatorios();
-      _vzUltimo={tipo:'recordatorio', id};
+      _vzUltimo={tipo:'recordatorio', id}; _vzUltimoR={...r};
       _vzAvisoCreado(`<strong>Recordatorio</strong> para ${cliNom||'sin cliente'}: ${r.texto} · ${fmtFISO?fmtFISO(r.fecha):r.fecha}`);
       _vzHablar(`Recordatorio creado para ${cliNom||'cliente sin ficha'}. ${r.texto}`);
       _vzApuntar(r.original, r, 'recordatorio creado');
@@ -17054,11 +17338,52 @@ window._vzContinuar = (r) => {
   const c=r.cliente;
   if((c.estado==='ambiguo'||c.estado==='parecido') && !c.resuelto){
     const lista=c.candidatos.map((x,i)=>
-      `<button class="btn btn-s" style="width:100%;margin-bottom:6px;justify-content:flex-start" onclick="window._vzElegirCliente(${i})">${x.nombre}${x.direccion?` <span style="opacity:.6;font-weight:600">· ${x.direccion}</span>`:''}</button>`).join('');
+      `<button class="btn btn-s" style="width:100%;margin-bottom:6px;justify-content:flex-start;text-align:left;height:auto;padding:11px 14px" onclick="window._vzElegirCliente(${i})">
+         <span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+           <span style="font-weight:800">${x.nombre}</span>
+           ${(x.telefono||x.direccion)?`<span style="font-size:11px;font-weight:600;opacity:.65">${[x.telefono,x.direccion].filter(Boolean).join(' · ')}</span>`:''}
+         </span>
+       </button>`).join('');
     const nuevo=`<button class="btn btn-s" style="width:100%;margin-bottom:6px;justify-content:flex-start;opacity:.8" onclick="window._vzElegirCliente(-1)">Ninguno — usar "${c.nombre}" sin ficha</button>`;
     _vzPreguntar(c.estado==='ambiguo'
       ? `Tienes varios clientes que encajan con "${c.nombre}"`
       : `¿Te refieres a alguno de estos?`, lista+nuevo);
+    return;
+  }
+
+  // 1 bis) Cliente que no existe: se confirma SIEMPRE antes de crearlo, salvo
+  // que hayas dicho expresamente "un nuevo cliente llamado...". Antes se
+  // creaba en silencio, y una palabra mal oida ("puro" por "Pura") ensuciaba
+  // la lista de clientes con fantasmas.
+  if(c.estado==='nuevo' && !c.resuelto && !c.explicitoNuevo && c.nombre){
+    const otros=(allClientes||[]).filter(x=>!x.archivado)
+      .map(x=>({x, p:Math.max(_vzParecido(_vzNorm(x.nombre||''),_vzNorm(c.nombre)), _vzParecido(_vzFonetica(x.nombre||''),_vzFonetica(c.nombre)))}))
+      .sort((a,b)=>b.p-a.p).slice(0,3).filter(o=>o.p>=.45).map(o=>o.x);
+    window._vzCandNuevo=otros;
+    const sugeridos=otros.map((x,i)=>
+      `<button class="btn btn-s" style="width:100%;margin-bottom:6px;justify-content:flex-start" onclick="window._vzElegirSugerido(${i})"><span style="display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left"><span style="font-weight:800">${x.nombre}</span>${(x.telefono||x.direccion)?`<span style="font-size:11px;font-weight:600;opacity:.65">${[x.telefono,x.direccion].filter(Boolean).join(" · ")}</span>`:``}</span></button>`).join('');
+    _vzPreguntar(`No tengo ningún cliente llamado "${c.nombre}"`,
+      `${otros.length?`<div style="font-size:12.5px;color:var(--tx2);margin-bottom:8px">¿Querías decir…?</div>${sugeridos}<div class="d-sep" style="margin:10px 0"></div>`:''}
+       <button class="btn btn-p" style="width:100%" onclick="window._vzCrearSinFicha()">Crear "${c.nombre}" como cliente sin ficha</button>`);
+    return;
+  }
+
+  // 1 ter) Varias cantidades y ninguna pista de que se sumen
+  if(r.importesVarios && !r.importeResuelto){
+    const ops=r.importesVarios.map((v,i)=>
+      `<button class="btn btn-s" style="width:100%;margin-bottom:6px" onclick="window._vzElegirImporte(${v})">${v.toFixed(2)} €</button>`).join('');
+    const total=r.importesVarios.reduce((a,b)=>a+b,0);
+    _vzPreguntar('He oído varias cantidades. ¿Cuál es el importe?',
+      ops+`<button class="btn btn-p" style="width:100%;margin-top:4px" onclick="window._vzElegirImporte(${total})">Sumarlas: ${total.toFixed(2)} €</button>`);
+    return;
+  }
+
+  // 1 quater) Fecha que ya ha pasado este año
+  if(r.fechaAmbigua && !r.fechaResuelta && r.fecha){
+    const esteAnio = r.fecha.replace(/^\d{4}/, String(new Date().getFullYear()));
+    _vzPreguntar(`¿${_vzFechaBonita(r.fecha)} de este año o del que viene?`,
+      `<button class="btn btn-s" style="width:100%;margin-bottom:6px" onclick="window._vzElegirFecha('${esteAnio}')">De este año — ${_vzFechaBonita(esteAnio)}</button>
+       <button class="btn btn-p" style="width:100%" onclick="window._vzElegirFecha('${r.fecha}')">Del que viene — ${_vzFechaBonita(r.fecha)}</button>`);
     return;
   }
 
@@ -17093,6 +17418,20 @@ window._vzContinuar = (r) => {
   _vzGuardar(r);
 };
 
+window._vzElegirSugerido = (i) => {
+  const r=window._vzPend; if(!r) return;
+  const c=(window._vzCandNuevo||[])[i]; if(!c) return;
+  _vzAprender(_vzNorm(r.cliente.nombre), c.id);
+  r.cliente={estado:'unico', cliente:c, nombre:r.cliente.nombre, resuelto:true};
+  document.getElementById('vzAsk')?.remove();
+  window._vzContinuar(r);
+};
+window._vzCrearSinFicha = () => {
+  const r=window._vzPend; if(!r) return;
+  r.cliente={...r.cliente, estado:'nuevo', resuelto:true};
+  document.getElementById('vzAsk')?.remove();
+  window._vzContinuar(r);
+};
 window._vzElegirCliente = (i) => {
   const r=window._vzPend; if(!r) return;
   if(i>=0){
@@ -17100,6 +17439,21 @@ window._vzElegirCliente = (i) => {
     r.cliente={estado:'unico', cliente:r.cliente.candidatos[i], nombre:r.cliente.nombre, resuelto:true};
   }
   else r.cliente={estado:'nuevo', nombre:r.cliente.nombre, resuelto:true};
+  document.getElementById('vzAsk')?.remove();
+  window._vzContinuar(r);
+};
+const _vzFechaBonita = (iso) => {
+  try{ const [a,m,d]=iso.split('-'); return `${parseInt(d,10)}/${parseInt(m,10)}/${a}`; }catch(e){ return iso; }
+};
+window._vzElegirImporte = (v) => {
+  const r=window._vzPend; if(!r) return;
+  r.importe=v; r.importeResuelto=true; r.importesVarios=null;
+  document.getElementById('vzAsk')?.remove();
+  window._vzContinuar(r);
+};
+window._vzElegirFecha = (iso) => {
+  const r=window._vzPend; if(!r) return;
+  r.fecha=iso; r.fechaResuelta=true; r.fechaAmbigua=false;
   document.getElementById('vzAsk')?.remove();
   window._vzContinuar(r);
 };
@@ -17133,6 +17487,13 @@ window._vzPonerFecha = () => {
 // ══════════════════════════════════════════════════════════════
 const _VZ_SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 let _vzRec=null, _vzEscuchando=false;
+// Cuánto silencio significa "he terminado". Ajustable desde Perfil: si sueles
+// hacer pausas largas, súbelo.
+let _VZ_PAUSA = parseInt(localStorage.getItem('alberto_voz_pausa')||'5000',10);
+window._vzSetPausa = (ms) => {
+  _VZ_PAUSA=ms; localStorage.setItem('alberto_voz_pausa',String(ms));
+  toast(`Esperaré ${(ms/1000).toFixed(0)} s de silencio antes de dar por terminada la frase`,'o');
+};
 
 const _vzPanel = (estado, texto) => {
   let el=document.getElementById('vzPanel');
@@ -17158,7 +17519,114 @@ const _vzCerrarPanel = () => {
 let _vzParadoPorUsuario=false;
 window._vzParar = () => { _vzParadoPorUsuario=true; try{ _vzRec?.stop(); }catch(e){} };
 
-window._vzToggle = () => {
+// ══════════════════════════════════════════════════════════════
+// CORREGIR HABLANDO
+// Tras crear un documento, el resumen trae un botón "Corregir": pulsas,
+// dices qué está mal y se arregla sobre el mismo documento, sin rehacerlo.
+// Entiende cosas como:
+//   "el cliente es Pura Martínez"      "no es Pura, es Paco"
+//   "pon cuarenta euros"               "son 45 con 50"
+//   "la fecha es el 20 de agosto"      "es urgente"
+//   "el texto es limpiar la piscina"   (o simplemente dices la frase buena)
+// Todo queda en el registro de dictados, marcado como corrección.
+// ══════════════════════════════════════════════════════════════
+window._vzCorregir = () => {
+  if(!_vzUltimo){ toast('Ya no hay nada que corregir','i'); return; }
+  clearTimeout(_vzCierreToast);          // que no se cierre mientras hablas
+  document.getElementById('vzToast')?.remove();
+  _vzCallar();
+  window._vzToggle('corregir');
+};
+
+// Aplica la corrección dictada sobre el documento recién creado
+window._vzAplicarCorreccion = async (dicho) => {
+  const u=_vzUltimo, r=_vzUltimoR;
+  if(!u || !r){ toast('Ya no hay nada que corregir','i'); return; }
+  const t=_vzNorm(dicho);
+  const cambios=[];
+  const parche={};
+  let nuevoCli=null;
+
+  // ── Cliente ──
+  let m = t.match(/\b(?:el\s+)?client[ae]\s+(?:es|era|deberia ser)\s+(.+)$/)
+       || t.match(/\bno\s+es\s+\S+[,]?\s+es\s+(.+)$/)
+       || t.match(/\bes\s+(?:para|de)\s+(.+)$/);
+  if(m){
+    const res=_vzCliente('para '+m[1].trim());
+    if(res.estado==='unico'){ nuevoCli=res.cliente; cambios.push('cliente → '+res.cliente.nombre); }
+    else if(res.candidatos?.length){ nuevoCli=res.candidatos[0]; cambios.push('cliente → '+res.candidatos[0].nombre); }
+    else if(res.nombre){ parche.clienteNombre=res.nombre; parche.clienteId=null; cambios.push('cliente → '+res.nombre+' (sin ficha)'); }
+  }
+
+  // ── Importe ──
+  const imp=_vzImporte(t);
+  if(imp && (u.tipo==='cobro' || /\b(importe|euros?|cobr)/.test(t))){
+    parche.importe=imp.importe; cambios.push('importe → '+imp.importe+' €');
+  }
+
+  // ── Fecha ──
+  const fec=_vzFecha(t);
+  if(fec){
+    if(u.tipo==='recordatorio') parche.fecha=fec.fecha;
+    else if(u.tipo==='cobro')   parche.fecha=fec.fecha;
+    else                        parche.fechaAlerta=fec.fecha;
+    cambios.push('fecha → '+fec.fecha);
+  }
+
+  // ── Prioridad ──
+  const pri=_vzPrioridad(t);
+  if(pri && u.tipo==='aviso'){ parche.prioridad=pri.prio; cambios.push('prioridad → '+pri.prio); }
+
+  // ── Texto ──
+  m = t.match(/\b(?:el\s+)?(?:texto|aviso|descripcion|concepto|titulo)\s+(?:es|era|deberia ser|pon|ponle)\s+(.+)$/)
+   || t.match(/\b(?:pon|ponle|cambialo a|deberia decir|es)\s+(.+)$/);
+  if(m && !cambios.length){
+    const limpio=m[1].trim();
+    if(limpio.length>2){
+      const bonito=limpio.charAt(0).toUpperCase()+limpio.slice(1);
+      if(u.tipo==='aviso') parche.descripcion=bonito; else parche.titulo=bonito;
+      cambios.push('texto → '+bonito);
+    }
+  }
+  // Si no ha reconocido ninguna orden, se toma la frase entera como texto
+  if(!cambios.length && dicho.trim().length>3){
+    const bonito=dicho.trim().charAt(0).toUpperCase()+dicho.trim().slice(1);
+    if(u.tipo==='aviso') parche.descripcion=bonito; else parche.titulo=bonito;
+    cambios.push('texto → '+bonito);
+  }
+
+  if(nuevoCli){ parche.clienteId=nuevoCli.id; parche.clienteNombre=nuevoCli.nombre; }
+  if(!Object.keys(parche).length){
+    toast('No he entendido la corrección','e'); _vzHablar('No he entendido la corrección.');
+    _vzApuntar(dicho, null, 'corrección no entendida');
+    return;
+  }
+
+  try{
+    if(u.tipo==='recordatorio'){
+      _asegurarLocalesCargados();
+      allRecordatorios=(allRecordatorios||[]).map(x=>x.id===u.id?{...x,...parche,corregidoPorVoz:true}:x);
+      _recSaveAll();
+      if(document.querySelector('#screenRecordatorios.active')) renderRecordatorios();
+    } else {
+      await updateDoc(doc(db,'grupos',CGID,u.col,u.id), {...parche, corregidoPorVoz:true});
+    }
+    const resumen='Corregido: '+cambios.join(' · ');
+    toast('✓ '+resumen,'o');
+    _vzHablar('Corregido. '+cambios.join('. '));
+    _vzApuntar(dicho, {tipo:u.tipo, cliente:{estado:'correccion', nombre:parche.clienteNombre}, texto:cambios.join(' · ')}, 'corrección aplicada');
+  }catch(e){
+    toast('No se pudo corregir','e');
+    _vzApuntar(dicho, null, 'corrección fallida: '+e.message);
+  }
+};
+
+window._vzToggle = (modo) => {
+  window._vzModo = (modo==='corregir') ? 'corregir' : 'crear';
+  // Lo primero: callar. Si el asistente esta hablando y pulsas el micro,
+  // seguia hablando y el reconocedor se oia a si mismo, metiendo en la frase
+  // lo que el propio movil acababa de decir.
+  _vzCallar();
   if(_vzEscuchando){ window._vzParar(); return; }
   if(!_VZ_SR){ toast('Este navegador no reconoce voz. Prueba con Chrome.','e'); return; }
   if(!CGID){ toast('Abre un grupo primero','e'); return; }
@@ -17167,10 +17635,11 @@ window._vzToggle = () => {
   let acumulado='', confianza=1, alternativas=[];
   _vzParadoPorUsuario=false;
   _vzEscuchando=true;
-  _vzPanel('escuchando');
+  _vzPanel('escuchando', window._vzModo==='corregir' ? '¿Qué he hecho mal?' : null);
   document.getElementById('btnVoz')?.classList.add('grabando');
 
   let silencio=null, hablando=false, intencionParar=false;
+  let ultimaActividad=Date.now();     // último momento en que se te oyó algo
   const reiniciarSilencio=()=>{
     clearTimeout(silencio);
     // Antes de empezar a hablar esperamos 8 s (te da tiempo a colocarte).
@@ -17178,7 +17647,18 @@ window._vzToggle = () => {
     // dar la frase por terminada: así una pausa para respirar o pensar a
     // media frase no la corta. Este temporizador es nuestro, no el del
     // navegador: es el único que decide "has terminado tú de verdad".
-    silencio=setTimeout(()=>{ intencionParar=true; try{_vzRec.stop();}catch(e){} }, hablando ? 3500 : 8000);
+    // Margen amplio para pensar a mitad de frase. Antes, un parón normal
+    // ("crear un nuevo aviso… limpiar piscina") se tomaba por final y se
+    // perdía lo que venía después.
+    const margen = hablando ? _VZ_PAUSA : 10000;
+    silencio=setTimeout(()=>{
+      // Comprobación final antes de cortar: si se te ha oído algo mientras
+      // corría el temporizador, no se corta, se vuelve a esperar. Así una
+      // pausa para pensar no termina la frase ni provoca otro pitido.
+      if(Date.now()-ultimaActividad < margen - 200){ reiniciarSilencio(); return; }
+      intencionParar=true;
+      try{_vzRec.stop();}catch(e){}
+    }, margen);
   };
 
   const terminar=()=>{
@@ -17204,6 +17684,12 @@ window._vzToggle = () => {
       // De todas las interpretaciones que ha oído el móvil, nos quedamos con
       // la que reconoce a un cliente tuyo. Suele arreglar los nombres propios,
       // que es donde más se equivoca.
+      if(window._vzModo==='corregir'){
+        window._vzModo='crear';
+        _vzCerrarPanel();
+        window._vzAplicarCorreccion(dicho);
+        return;
+      }
       let r=_vzAnalizar(dicho);
       let usoAlternativa=false;
       if(r.cliente.estado!=='unico'){
@@ -17218,6 +17704,14 @@ window._vzToggle = () => {
       // Solo se rechaza si no hay nada aprovechable: ni cliente, ni causa, ni importe.
       // Si falta un dato pero hay cliente, se pregunta en vez de descartar.
       const hayCliente = r.cliente.estado!=='sin_nombre' && (r.cliente.cliente || r.cliente.nombre);
+      // Fase 1: nada de documentos basura. Sin cliente y con un texto que no
+      // llega a dos palabras con contenido ("enero", "ficha enero"), se tira.
+      if(!hayCliente && r.importe===null && !_vzTieneSustancia(r.texto)){
+        toast('No he entendido qué crear','e');
+        _vzHablar('No te he entendido. Dime el cliente y qué pasa.');
+        _vzApuntar(dicho, r, 'descartado: sin cliente y sin contenido');
+        return;
+      }
       if(!r.texto && r.importe===null && !hayCliente){
         toast('No he entendido qué crear. Prueba: "aviso para Pura, gotea el termo"','e');
         _vzHablar('No te he entendido. Prueba diciendo: aviso para, el nombre del cliente, y qué pasa.');
@@ -17244,6 +17738,7 @@ window._vzToggle = () => {
         _vzApuntar(dicho, r, 'confirmacion pedida');
         return;
       }
+      if(window._vzModo==='corregir'){ window._vzModo='crear'; window._vzAplicarCorreccion(dicho); return; }
       window._vzContinuar(r);
     }, 150);
   };
@@ -17340,10 +17835,12 @@ window._vzToggle = () => {
     _vzRec.interimResults=true;
     _vzRec.maxAlternatives=5;        // mas interpretaciones entre las que elegir
 
-    _vzRec.onspeechstart=()=>{ hablando=true; reiniciarSilencio(); };
-    _vzRec.onaudiostart =()=>{ reiniciarSilencio(); };
+    _vzRec.onspeechstart=()=>{ hablando=true; ultimaActividad=Date.now(); reiniciarSilencio(); };
+    _vzRec.onaudiostart =()=>{ ultimaActividad=Date.now(); reiniciarSilencio(); };
+    _vzRec.onsoundstart =()=>{ ultimaActividad=Date.now(); };
 
     _vzRec.onresult=(ev)=>{
+      ultimaActividad=Date.now();
       hablando=true;
       reiniciarSilencio();
       let parcial='';
@@ -17381,13 +17878,22 @@ window._vzToggle = () => {
 
     _vzRec.onend=()=>{
       if(_vzParadoPorUsuario || intencionParar){ terminar(); return; }
+      // ¿Se te oyó algo dentro del margen de silencio? Si sí, seguías
+      // hablando y hay que reabrir. Si no, ya habías terminado: se cierra sin
+      // reabrir, y así nos ahorramos un pitido de más.
+      const margen = hablando ? _VZ_PAUSA : 10000;
+      if(Date.now()-ultimaActividad > margen){ terminar(); return; }
       // El navegador ha cerrado la sesión por su cuenta (poco frecuente en
       // modo continuo, pero puede pasar tras un rato largo): se reabre sin
       // perder lo ya acumulado. Es una nueva sesión, así que su numeración
       // de resultados empieza de cero (el aviso de "sesión distinta" de
       // arriba es lo que evita que esto duplique la última frase).
       indiceProcesado=0;
-      try{ _vzIniciarSesion(); }catch(e){ terminar(); }
+      // El sistema ha cortado solo. Se reabre al instante y se avisa en el
+      // panel de que sigue escuchando, para que no te calles pensando que
+      // ha terminado.
+      try{ _vzIniciarSesion(); _vzPanel('escuchando', (acumulado||'')+' …'); }
+      catch(e){ terminar(); }
     };
 
     try{ _vzRec.start(); }
@@ -17399,131 +17905,6 @@ window._vzToggle = () => {
 
   reiniciarSilencio();
   _vzIniciarSesion();
-};
-
-// ══════════════════════════════════════════════════════════════
-// ACTIVACIÓN POR VOZ ("oye Alberto")
-// ══════════════════════════════════════════════════════════════
-// Segundo reconocedor, aparte del de dictado, que escucha en segundo
-// plano SOLO mientras la app está abierta, visible y con un grupo
-// abierto (mismo requisito que ya tenía el micro manual). En cuanto
-// oye la palabra de activación (con margen de error, reutilizando
-// _vzParecido), para de escuchar, dice "Dime, ¿qué quieres hacer?" y
-// arranca la sesión de dictado normal (window._vzToggle), que es la
-// misma que se usa al pulsar el botón del micro: así todo lo que el
-// asistente ya sabe hacer (avisos, cobros, recordatorios, llamar,
-// abrir WhatsApp, preguntas sobre clientes...) queda disponible sin
-// tocar el móvil. Cuando esa sesión termina, se retoma sola la
-// escucha de la palabra de activación.
-let _vzWakeHabilitado = (localStorage.getItem('alberto_voz_activacion')==='1');
-let _vzWakeRec=null, _vzWakeActivo=false;
-
-const _vzWakeFrases = ['oye alberto','oye al berto','oye albert','ei alberto','eh alberto','ey alberto','oi alberto','ok alberto','hola alberto','hey alberto'];
-
-const _vzWakeNorm = (s) => (s||'').toLowerCase()
-  .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-  .replace(/[^a-z\s]/g,' ').replace(/\s+/g,' ').trim();
-
-const _vzWakeDetectado = (texto) => {
-  const t=_vzWakeNorm(texto);
-  if(!t) return false;
-  for(const f of _vzWakeFrases) if(t.includes(f)) return true;
-  // Tolerante a que el móvil oiga mal "oye"/"Alberto": compara por parejas
-  // de palabras consecutivas con la misma distancia de error que ya usa
-  // el asistente para los nombres de clientes.
-  if(typeof _vzParecido==='function'){
-    const palabras=t.split(' ');
-    for(let i=0;i<palabras.length;i++){
-      if(palabras[i] && _vzParecido(palabras[i],'alberto')>0.78){
-        if(i===0) return true; // "Alberto" solo, dicho como reclamo
-        if(_vzParecido(palabras[i-1],'oye')>0.55 || _vzParecido(palabras[i-1],'eh')>0.6 || _vzParecido(palabras[i-1],'hola')>0.6) return true;
-      }
-    }
-  }
-  return false;
-};
-
-// Mismo requisito que el micro manual (toast 'Abre un grupo primero'):
-// solo escucha activación dentro de un grupo abierto, con la app visible.
-const _vzWakeDebeEscuchar = () => _vzWakeHabilitado && !!_VZ_SR && !!CGID && !document.hidden && !_vzEscuchando && navigator.onLine!==false;
-
-const _vzWakeParar = () => {
-  _vzWakeActivo=false;
-  const rec=_vzWakeRec; _vzWakeRec=null;
-  if(rec){ try{ rec.onend=null; rec.onresult=null; rec.onerror=null; rec.stop(); }catch(e){} }
-};
-
-const _vzWakeIniciar = () => {
-  if(_vzWakeActivo || !_vzWakeDebeEscuchar()) return;
-  _vzWakeActivo=true;
-  const rec=new _VZ_SR();
-  _vzWakeRec=rec;
-  rec.lang='es-ES';
-  rec.continuous=true;
-  rec.interimResults=true;
-  rec.maxAlternatives=1;
-
-  rec.onresult=(ev)=>{
-    for(let i=ev.resultIndex;i<ev.results.length;i++){
-      const tr=ev.results[i][0].transcript;
-      if(_vzWakeDetectado(tr)){ _vzWakeParar(); window._vzActivarPorVoz(); return; }
-    }
-  };
-  rec.onerror=(ev)=>{
-    // Sin permiso: no insistimos, y avisamos apagando el interruptor.
-    if(ev.error==='not-allowed' || ev.error==='service-not-allowed'){
-      _vzWakeHabilitado=false;
-      localStorage.setItem('alberto_voz_activacion','0');
-      const chk=document.getElementById('togVozActivacion'); if(chk) chk.checked=false;
-      toast('Sin permiso de micrófono: activación por voz desactivada','e');
-      _vzWakeActivo=false; _vzWakeRec=null;
-      return;
-    }
-    // "no-speech", "network", "audio-capture"...: se reintenta en onend.
-  };
-  rec.onend=()=>{
-    _vzWakeActivo=false;
-    if(_vzWakeRec===rec) _vzWakeRec=null;
-    if(_vzWakeDebeEscuchar()) setTimeout(()=>{ if(_vzWakeDebeEscuchar()) _vzWakeIniciar(); }, 400);
-  };
-  try{ rec.start(); }catch(e){ _vzWakeActivo=false; _vzWakeRec=null; }
-};
-
-window._vzActivarPorVoz = () => {
-  if(_vzEscuchando) return;
-  if(!CGID){ // por si el grupo se cerró justo antes de reconocer la palabra
-    try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance('Abre antes un grupo.'); u.lang='es-ES'; speechSynthesis.speak(u); }catch(e){}
-    return;
-  }
-  if(navigator.vibrate){ try{ navigator.vibrate(60); }catch(e){} }
-  let arrancado=false;
-  const arrancar=()=>{ if(arrancado || _vzEscuchando) return; arrancado=true; window._vzToggle(); };
-  try{
-    speechSynthesis.cancel();
-    const u=new SpeechSynthesisUtterance('Dime, ¿qué quieres hacer?');
-    u.lang='es-ES'; u.rate=1.05; u.pitch=1;
-    const v=speechSynthesis.getVoices().find(x=>x.lang&&x.lang.startsWith('es'));
-    if(v) u.voice=v;
-    u.onend=arrancar;
-    u.onerror=arrancar;
-    speechSynthesis.speak(u);
-    setTimeout(arrancar, 2200); // salvavidas si el navegador no dispara onend
-  }catch(e){ arrancar(); }
-};
-
-const _vzWakeVigilar = () => {
-  if(_vzWakeDebeEscuchar()) _vzWakeIniciar();
-  else if(_vzWakeActivo && !_vzWakeDebeEscuchar()) _vzWakeParar();
-};
-setInterval(_vzWakeVigilar, 1500);
-document.addEventListener('visibilitychange', ()=>{ if(document.hidden) _vzWakeParar(); else _vzWakeVigilar(); });
-
-window._vzToggleActivacion = () => {
-  _vzWakeHabilitado=!_vzWakeHabilitado;
-  localStorage.setItem('alberto_voz_activacion', _vzWakeHabilitado?'1':'0');
-  toast(_vzWakeHabilitado?'Activación por voz encendida: di «oye Alberto»':'Activación por voz apagada','i');
-  if(_vzWakeHabilitado) _vzWakeVigilar(); else _vzWakeParar();
-  return _vzWakeHabilitado;
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
