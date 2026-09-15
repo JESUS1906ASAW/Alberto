@@ -14379,6 +14379,13 @@ const renderPerfil=()=>{
         </div>
         <label class="toggle-sw"><input type="checkbox" id="togVozHablar" onchange="window._vzToggleVoz()" ${localStorage.getItem('alberto_voz_hablar')!=='0'?'checked':''}><span></span></label>
       </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13.5px;font-weight:800;color:var(--tx)">Activarlo diciendo «oye Alberto»</div>
+          <div style="font-size:11.5px;color:var(--tx2);margin-top:2px">Con la app abierta y un grupo abierto, lo llamas por voz sin tocar la pantalla. Gasta algo más de batería y datos mientras está encendido.</div>
+        </div>
+        <label class="toggle-sw"><input type="checkbox" id="togVozActivacion" onchange="window._vzToggleActivacion()" ${localStorage.getItem('alberto_voz_activacion')==='1'?'checked':''}><span></span></label>
+      </div>
       <button class="btn btn-s" style="width:100%" onclick="window._vzVerLog()">Ver mis últimos dictados</button>
       <div style="font-size:11px;color:var(--tx2);margin-top:8px;line-height:1.5">Ahí verás qué oyó el móvil y qué entendió la app. Sirve para afinar el reconocimiento cuando falla.</div>
       <div style="font-size:11px;color:var(--tx2);margin-top:12px;line-height:1.6;background:rgba(var(--theme-rgb),.08);border:1px solid rgba(var(--theme-rgb),.18);border-radius:10px;padding:9px 11px">
@@ -17392,6 +17399,131 @@ window._vzToggle = () => {
 
   reiniciarSilencio();
   _vzIniciarSesion();
+};
+
+// ══════════════════════════════════════════════════════════════
+// ACTIVACIÓN POR VOZ ("oye Alberto")
+// ══════════════════════════════════════════════════════════════
+// Segundo reconocedor, aparte del de dictado, que escucha en segundo
+// plano SOLO mientras la app está abierta, visible y con un grupo
+// abierto (mismo requisito que ya tenía el micro manual). En cuanto
+// oye la palabra de activación (con margen de error, reutilizando
+// _vzParecido), para de escuchar, dice "Dime, ¿qué quieres hacer?" y
+// arranca la sesión de dictado normal (window._vzToggle), que es la
+// misma que se usa al pulsar el botón del micro: así todo lo que el
+// asistente ya sabe hacer (avisos, cobros, recordatorios, llamar,
+// abrir WhatsApp, preguntas sobre clientes...) queda disponible sin
+// tocar el móvil. Cuando esa sesión termina, se retoma sola la
+// escucha de la palabra de activación.
+let _vzWakeHabilitado = (localStorage.getItem('alberto_voz_activacion')==='1');
+let _vzWakeRec=null, _vzWakeActivo=false;
+
+const _vzWakeFrases = ['oye alberto','oye al berto','oye albert','ei alberto','eh alberto','ey alberto','oi alberto','ok alberto','hola alberto','hey alberto'];
+
+const _vzWakeNorm = (s) => (s||'').toLowerCase()
+  .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+  .replace(/[^a-z\s]/g,' ').replace(/\s+/g,' ').trim();
+
+const _vzWakeDetectado = (texto) => {
+  const t=_vzWakeNorm(texto);
+  if(!t) return false;
+  for(const f of _vzWakeFrases) if(t.includes(f)) return true;
+  // Tolerante a que el móvil oiga mal "oye"/"Alberto": compara por parejas
+  // de palabras consecutivas con la misma distancia de error que ya usa
+  // el asistente para los nombres de clientes.
+  if(typeof _vzParecido==='function'){
+    const palabras=t.split(' ');
+    for(let i=0;i<palabras.length;i++){
+      if(palabras[i] && _vzParecido(palabras[i],'alberto')>0.78){
+        if(i===0) return true; // "Alberto" solo, dicho como reclamo
+        if(_vzParecido(palabras[i-1],'oye')>0.55 || _vzParecido(palabras[i-1],'eh')>0.6 || _vzParecido(palabras[i-1],'hola')>0.6) return true;
+      }
+    }
+  }
+  return false;
+};
+
+// Mismo requisito que el micro manual (toast 'Abre un grupo primero'):
+// solo escucha activación dentro de un grupo abierto, con la app visible.
+const _vzWakeDebeEscuchar = () => _vzWakeHabilitado && !!_VZ_SR && !!CGID && !document.hidden && !_vzEscuchando && navigator.onLine!==false;
+
+const _vzWakeParar = () => {
+  _vzWakeActivo=false;
+  const rec=_vzWakeRec; _vzWakeRec=null;
+  if(rec){ try{ rec.onend=null; rec.onresult=null; rec.onerror=null; rec.stop(); }catch(e){} }
+};
+
+const _vzWakeIniciar = () => {
+  if(_vzWakeActivo || !_vzWakeDebeEscuchar()) return;
+  _vzWakeActivo=true;
+  const rec=new _VZ_SR();
+  _vzWakeRec=rec;
+  rec.lang='es-ES';
+  rec.continuous=true;
+  rec.interimResults=true;
+  rec.maxAlternatives=1;
+
+  rec.onresult=(ev)=>{
+    for(let i=ev.resultIndex;i<ev.results.length;i++){
+      const tr=ev.results[i][0].transcript;
+      if(_vzWakeDetectado(tr)){ _vzWakeParar(); window._vzActivarPorVoz(); return; }
+    }
+  };
+  rec.onerror=(ev)=>{
+    // Sin permiso: no insistimos, y avisamos apagando el interruptor.
+    if(ev.error==='not-allowed' || ev.error==='service-not-allowed'){
+      _vzWakeHabilitado=false;
+      localStorage.setItem('alberto_voz_activacion','0');
+      const chk=document.getElementById('togVozActivacion'); if(chk) chk.checked=false;
+      toast('Sin permiso de micrófono: activación por voz desactivada','e');
+      _vzWakeActivo=false; _vzWakeRec=null;
+      return;
+    }
+    // "no-speech", "network", "audio-capture"...: se reintenta en onend.
+  };
+  rec.onend=()=>{
+    _vzWakeActivo=false;
+    if(_vzWakeRec===rec) _vzWakeRec=null;
+    if(_vzWakeDebeEscuchar()) setTimeout(()=>{ if(_vzWakeDebeEscuchar()) _vzWakeIniciar(); }, 400);
+  };
+  try{ rec.start(); }catch(e){ _vzWakeActivo=false; _vzWakeRec=null; }
+};
+
+window._vzActivarPorVoz = () => {
+  if(_vzEscuchando) return;
+  if(!CGID){ // por si el grupo se cerró justo antes de reconocer la palabra
+    try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance('Abre antes un grupo.'); u.lang='es-ES'; speechSynthesis.speak(u); }catch(e){}
+    return;
+  }
+  if(navigator.vibrate){ try{ navigator.vibrate(60); }catch(e){} }
+  let arrancado=false;
+  const arrancar=()=>{ if(arrancado || _vzEscuchando) return; arrancado=true; window._vzToggle(); };
+  try{
+    speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance('Dime, ¿qué quieres hacer?');
+    u.lang='es-ES'; u.rate=1.05; u.pitch=1;
+    const v=speechSynthesis.getVoices().find(x=>x.lang&&x.lang.startsWith('es'));
+    if(v) u.voice=v;
+    u.onend=arrancar;
+    u.onerror=arrancar;
+    speechSynthesis.speak(u);
+    setTimeout(arrancar, 2200); // salvavidas si el navegador no dispara onend
+  }catch(e){ arrancar(); }
+};
+
+const _vzWakeVigilar = () => {
+  if(_vzWakeDebeEscuchar()) _vzWakeIniciar();
+  else if(_vzWakeActivo && !_vzWakeDebeEscuchar()) _vzWakeParar();
+};
+setInterval(_vzWakeVigilar, 1500);
+document.addEventListener('visibilitychange', ()=>{ if(document.hidden) _vzWakeParar(); else _vzWakeVigilar(); });
+
+window._vzToggleActivacion = () => {
+  _vzWakeHabilitado=!_vzWakeHabilitado;
+  localStorage.setItem('alberto_voz_activacion', _vzWakeHabilitado?'1':'0');
+  toast(_vzWakeHabilitado?'Activación por voz encendida: di «oye Alberto»':'Activación por voz apagada','i');
+  if(_vzWakeHabilitado) _vzWakeVigilar(); else _vzWakeParar();
+  return _vzWakeHabilitado;
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
