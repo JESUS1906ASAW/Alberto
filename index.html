@@ -16351,7 +16351,7 @@ const _vzCliente = (resto) => {
     // 2) "para Pura Martinez, ..." / "de Antonio Ruiz de 340 euros"
     // Se admiten las formas largas: "a la clienta X", "al cliente X",
     // "para el cliente X", ademas de las cortas "para X" / "de X".
-    m = resto.match(/^\s*,?\s*(?:para|de|del|a|al|con|en)\s+(?:(?:el|la|los|las)\s+)?(?:client[ae]s?|senor|senora|sr|sra|comunidad de)?\s*([a-z0-9ñ\s.]+?)(?:\s*,|\s+(?:que|hay|tiene|se|esta|no|por|urgente|manana|hoy|de|en el que|en la que)\b|(?=\s+(?:revisar|revision|cambiar|arreglar|reparar|mirar|limpiar|instalar|montar|gotea|pierde|suena|huele|vibra|salta|arranca|enciende|funciona|estropead|averiad|averia|fuga|rot)\b)|$)/);
+    m = resto.match(/^\s*,?\s*(?:para|de|del|a|al|con|en)\s+(?:(?:el|la|los|las)\s+)?(?:client[ae]s?|senor|senora|sr|sra|comunidad de)?\s*([a-z0-9ñ\s.]+?)(?:\s*,|(?=\s+(?:que|hay|tiene|se|esta|no|por|urgente|manana|hoy|de|en el que|en la que)\b)|(?=\s+(?:revisar|revision|cambiar|arreglar|reparar|mirar|limpiar|instalar|montar|gotea|pierde|suena|huele|vibra|salta|arranca|enciende|funciona|estropead|averiad|averia|fuga|rot)\b)|$)/);
     if(m){ nombre=m[1].trim(); rest=resto.slice(m.index+m[0].length).trim(); if(resto[m.index+m[0].length-1]===',') rest=resto.slice(m.index+m[0].length).trim(); }
   }
   if(!nombre){
@@ -16690,7 +16690,11 @@ window._vzElegirClienteConsulta = (i) => {
 // mientras se dicta. A diferencia de los "arranques" (que solo se quitan al
 // principio de la frase), estas se limpian en CUALQUIER punto, para que no
 // acaben coladas en mitad del texto del aviso/cobro/recordatorio.
-const _VZ_RELLENO = /\b(?:eh+|em+|mmm+|ah+|esto|o sea|bueno|entonces|digamos|es que|vale|oye|mira|pues|venga|a ver|vamos a ver|espera|digo|corrijo|perdon|mejor dicho|en realidad|quiero decir|mejor no)\b/g;
+// "espera" y el resto de esta lista NUNCA disparan una corrección por sí
+// solas: son muletillas puras, se limpian y ya. Las palabras que sí son
+// marcas de autocorrección real ("perdon", "corrijo"...) se han sacado de
+// aquí porque las gestiona _vzResolverCorreccionesProsa más abajo.
+const _VZ_RELLENO = /\b(?:eh+|em+|mmm+|ah+|esto|o sea|bueno|entonces|digamos|es que|vale|oye|mira|pues|venga|a ver|vamos a ver|espera|mejor no)\b/g;
 const _vzQuitarRelleno = (t) => t.replace(_VZ_RELLENO,' ').replace(/\s+/g,' ').trim();
 
 // ── Repeticiones por titubeo ──
@@ -16721,9 +16725,101 @@ const _VZ_CORRECCIONES = [
 ];
 const _vzCorregir = (t) => { let x=t; _VZ_CORRECCIONES.forEach(([re,por])=>{ x=x.replace(re,por); }); return x; };
 
+// ── Autocorrecciones habladas ──
+// Al dictar es muy normal corregirse en voz alta ("el jueves... no, el
+// viernes", "no no no, quiero decir..."). Se maneja en dos pasadas:
+//
+// PASE A — swap de un valor suelto (día o número) seguido de un "no"
+// SUELTO ("el jueves no", "300 euros no"): se borran el valor viejo y el
+// "no" juntos, sin tocar el resto de la frase. Solo actúa si justo antes
+// Y justo después hay un día/número (si no, es una negación normal: "el
+// jueves no puedo" se deja tal cual). No entra en tandas de "no no no"
+// (eso lo resuelve el PASE B).
+const _VZ_DIAS_RE = 'lunes|martes|miercoles|jueves|viernes|sabado|domingo';
+const _VZ_NUMPAL_RE = 'cero|uno?|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|dieciseis|diecisiete|dieciocho|diecinueve|veinte|veintiuno|veintidos|veintitres|veinticuatro|veinticinco|veintiseis|veintisiete|veintiocho|veintinueve|treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa|cien|ciento|doscientos|trescientos|cuatrocientos|quinientos|seiscientos|setecientos|ochocientos|novecientos|mil';
+const _vzHayValor = (s) =>
+  new RegExp(`\\b(?:${_VZ_DIAS_RE})\\b`).test(s) ||
+  /\b\d+(?:[.,]\d+)?\b/.test(s) ||
+  new RegExp(`\\b(?:${_VZ_NUMPAL_RE})\\b`).test(s);
+
+const _vzCorregirValorSuelto = (texto) => {
+  const re = /\bno\b/g;
+  const cortes = [];
+  let m;
+  while((m=re.exec(texto))){
+    const iniAntes = Math.max(0, m.index-20);
+    const ventanaAntes = texto.slice(iniAntes, m.index);
+    const ventanaDespues = texto.slice(re.lastIndex, re.lastIndex+20);
+    // Ni pegado a otro "no" antes ni después: eso es una tanda, la
+    // resuelve el PASE B, no este swap puntual.
+    if(/\bno[\s,.]*$/.test(ventanaAntes) || /^[\s,.]*no\b/.test(ventanaDespues)) continue;
+    if(!_vzHayValor(ventanaAntes) || !_vzHayValor(ventanaDespues)) continue;
+    // Retrocede hasta el principio del valor viejo (día o número) para
+    // borrar justo ese tramo + el "no".
+    const mv = ventanaAntes.match(new RegExp(
+      `(?:\\b(?:el\\s+)?(?:${_VZ_DIAS_RE})|\\b(?:\\d+(?:[.,]\\d+)?|(?:${_VZ_NUMPAL_RE})(?:\\s+(?:${_VZ_NUMPAL_RE}))*)\\s*(?:euros?)?)\\s*$`
+    ));
+    const desde = mv ? iniAntes+mv.index : m.index;
+    cortes.push({desde, hasta:re.lastIndex});
+  }
+  if(!cortes.length) return texto;
+  let resultado='', prev=0;
+  for(const c of cortes){ resultado+=texto.slice(prev,c.desde)+' '; prev=c.hasta; }
+  resultado+=texto.slice(prev);
+  return resultado.replace(/\s+/g,' ').trim();
+};
+
+// PASE B — tandas de "no" seguidas (2 o más) o palabras explícitas de
+// autocorrección ("corrijo", "digo", "perdon", "mejor dicho", "en
+// realidad", "quiero decir"): lo dicho DESPUÉS de la marca sustituye a lo
+// dicho ANTES, porque decir eso dos veces seguidas casi siempre significa
+// "olvida lo anterior, es esto". Única excepción: si lo de después
+// empieza señalando que es un añadido ("también", "además", "aparte",
+// "encima", "igualmente"), entonces se suman los dos trozos en vez de
+// descartar el primero. Un "no" suelto y aislado (uno solo, no repetido,
+// y sin marca de corrección) no entra aquí: sigue siendo negación normal.
+// Se aplica solo al CUERPO del aviso/parte/etc. (después de sacar cliente
+// y tipo), para no tocar nunca el nombre del cliente.
+const _VZ_PALABRAS_CORRECCION_RE = 'corrijo|digo|perdon|mejor dicho|en realidad|quiero decir';
+const _VZ_RE_ADITIVO = /^(?:y\s+)?(?:tambien|ademas|aparte|encima|igualmente)\b/;
+
+const _vzMarcasCorreccion = (texto) => {
+  const marcas = [];
+  let re = /\b(?:no[\s,.]+){1,}no\b/g, m;
+  while((m=re.exec(texto))){ marcas.push({start:m.index, end:re.lastIndex}); }
+  re = new RegExp(`\\b(?:${_VZ_PALABRAS_CORRECCION_RE})\\b`,'g');
+  while((m=re.exec(texto))){ marcas.push({start:m.index, end:re.lastIndex}); }
+  marcas.sort((a,b)=>a.start-b.start);
+  const fusion=[];
+  for(const x of marcas){
+    if(fusion.length && x.start<=fusion[fusion.length-1].end) fusion[fusion.length-1].end=Math.max(fusion[fusion.length-1].end,x.end);
+    else fusion.push({...x});
+  }
+  return fusion;
+};
+
+const _vzResolverCorreccionesProsa = (texto) => {
+  const marcas = _vzMarcasCorreccion(texto);
+  if(!marcas.length) return texto;
+  const trozos = [];
+  let cursor=0;
+  for(const mk of marcas){ trozos.push(texto.slice(cursor, mk.start)); cursor=mk.end; }
+  trozos.push(texto.slice(cursor));
+
+  let acc = trozos[0].replace(/\s+/g,' ').trim();
+  for(let i=1;i<trozos.length;i++){
+    const candidato = trozos[i].replace(/\s+/g,' ').trim();
+    if(!candidato) continue; // marca al final sin nada detrás: se ignora
+    if(!acc){ acc = candidato; continue; }
+    if(_VZ_RE_ADITIVO.test(candidato)) acc = (acc+' '+candidato).trim();
+    else acc = candidato; // sustituye entero: "lo de después" manda
+  }
+  return acc.replace(/\s+/g,' ').trim();
+};
+
 // ── Analizar la frase completa ──
 window._vzAnalizar = (texto) => {
-  const norm=_vzQuitarTitubeos(_vzQuitarRelleno(_vzCorregir(_vzNorm(texto))));
+  const norm=_vzQuitarTitubeos(_vzQuitarRelleno(_vzCorregir(_vzCorregirValorSuelto(_vzNorm(texto)))));
   const {tipo, resto, explicito} = _vzTipo(norm);
 
   // Importe, fecha y prioridad se sacan ANTES del cliente: si no, un "de
@@ -16741,6 +16837,11 @@ window._vzAnalizar = (texto) => {
   const cli = _vzCliente(trabajo);
   let cuerpo = (cli.resto!==undefined?cli.resto:trabajo);
 
+  // Autocorrecciones habladas sobre el cuerpo (tandas de "no" o palabras
+  // como "perdon"/"corrijo"): lo dicho después sustituye a lo dicho antes.
+  // Va DESPUÉS de sacar el cliente a propósito: así nunca se toca su nombre.
+  cuerpo = _vzResolverCorreccionesProsa(cuerpo);
+
   // Limpiar restos de puntuación y conectores sueltos.
   // Puede haber varios seguidos ("y que hay una fuga"), así que se repite
   // hasta que no quede ninguno al principio.
@@ -16748,7 +16849,7 @@ window._vzAnalizar = (texto) => {
   let _cambiado=true;
   while(_cambiado){
     const _antes=cuerpo;
-    cuerpo = cuerpo.replace(/^(?:de|del|por|para|que|y|porque|ya que|en concepto de|por el concepto de|por lo de|en el que|en la que|en el cual|en la cual)\s+/,'').trim();
+    cuerpo = cuerpo.replace(/^(?:de|del|por|para|que|y|porque|ya que|en concepto de|por el concepto de|por lo de|en el que|en la que|en el cual|en la cual)(?:\s+|$)/,'').trim();
     _cambiado = (cuerpo!==_antes);
   }
   cuerpo = cuerpo.replace(/\s+/g,' ').trim();
@@ -17156,7 +17257,21 @@ window._vzToggle = () => {
   // cada evento; aquí se lleva la cuenta de qué resultados "finales" ya se
   // han sumado (indiceProcesado) y cada uno se añade una sola vez.
   let indiceProcesado=0;
+  // Se lleva la cuenta de en qué "sesión" (instancia de _vzRec) va cada
+  // trozo final ya añadido, y cuál fue el último. En algunos móviles el
+  // reconocedor se reinicia solo de vez en cuando (aunque sigas en
+  // silencio) y, al reabrir, vuelve a reconocer y a dar como "final" la
+  // MISMA frase que ya se había oído justo antes — así es como salía
+  // "hola hola hola hola…". Por eso un trozo se descarta por repetido
+  // SOLO si es idéntico al último Y pertenece a una sesión distinta (un
+  // reinicio de por medio): si es la MISMA sesión, se añade siempre,
+  // aunque sea la misma palabra, porque entonces es la persona repitiendo
+  // adrede (p.ej. "no no no no no" para corregirse).
+  let sesionId=0;
+  let ultimoFinal={texto:'', sesion:-1};
   const _vzIniciarSesion=()=>{
+    sesionId++;
+    const miSesion=sesionId;
     _vzRec=new _VZ_SR();
     _vzRec.lang='es-ES';
     _vzRec.continuous=true;
@@ -17174,10 +17289,15 @@ window._vzToggle = () => {
         const res=ev.results[i];
         if(res.isFinal){
           if(i>=indiceProcesado){
-            acumulado=(acumulado+' '+res[0].transcript).replace(/\s+/g,' ').trim();
-            if(res[0].confidence) confianza=res[0].confidence;
-            // Las otras interpretaciones: a veces la buena es la segunda
-            alternativas=[]; for(let k=0;k<res.length;k++) alternativas.push(res[k].transcript);
+            const transcrito=res[0].transcript;
+            const repetidoTrasReinicio = _vzNorm(transcrito)===_vzNorm(ultimoFinal.texto) && miSesion!==ultimoFinal.sesion;
+            if(!repetidoTrasReinicio){
+              acumulado=(acumulado+' '+transcrito).replace(/\s+/g,' ').trim();
+              if(res[0].confidence) confianza=res[0].confidence;
+              // Las otras interpretaciones: a veces la buena es la segunda
+              alternativas=[]; for(let k=0;k<res.length;k++) alternativas.push(res[k].transcript);
+              ultimoFinal={texto:transcrito, sesion:miSesion};
+            }
             indiceProcesado=i+1;
           }
         } else {
@@ -17207,7 +17327,8 @@ window._vzToggle = () => {
       // El navegador ha cerrado la sesión por su cuenta (poco frecuente en
       // modo continuo, pero puede pasar tras un rato largo): se reabre sin
       // perder lo ya acumulado. Es una nueva sesión, así que su numeración
-      // de resultados empieza de cero.
+      // de resultados empieza de cero (el aviso de "sesión distinta" de
+      // arriba es lo que evita que esto duplique la última frase).
       indiceProcesado=0;
       try{ _vzIniciarSesion(); }catch(e){ terminar(); }
     };
