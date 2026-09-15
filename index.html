@@ -771,6 +771,17 @@ body.sel-mode .scroll-pad{padding-bottom:140px}
 .accion-btn:active{transform:scale(.96)}
 .accion-btn .a-ico{font-size:22px}
 
+/* ── MODAL DE CONFIRMACIÓN (sustituye a confirm()/alert() nativos) ── */
+#confirmOverlay{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:1400;display:none;backdrop-filter:blur(3px)}
+#confirmModal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.92);width:min(340px,88vw);z-index:1410;display:none;background:rgba(17,17,17,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:var(--rd-lg);border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.5);padding:26px 22px 20px;text-align:center;opacity:0;transition:transform .22s cubic-bezier(.16,1,.3,1),opacity .18s ease}
+#confirmOverlay.open{display:block}
+#confirmModal.open{display:block;transform:translate(-50%,-50%) scale(1);opacity:1}
+body.modo-claro #confirmModal{background:rgba(253,253,252,.98)}
+.confirm-ico{font-size:30px;line-height:1;margin-bottom:10px}
+.confirm-msg{font-size:14.5px;font-weight:600;color:var(--tx);line-height:1.45;white-space:pre-line;margin-bottom:20px}
+.confirm-btns{display:flex;gap:10px}
+.confirm-btns .btn{flex:1;padding:12px;font-size:14px}
+
 /* ── SLIDE-OVER (SB) ── */
 #sbOverlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1180;display:none;backdrop-filter:blur(3px)}
 #sb{position:fixed;bottom:-100%;left:0;right:0;max-height:92vh;background:rgba(17,17,17,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:24px 24px 0 0;z-index:1190;display:flex;flex-direction:column;transition:bottom .38s cubic-bezier(.16,1,.3,1),box-shadow .38s ease;border-top:1px solid var(--border);box-shadow:none}
@@ -1706,6 +1717,16 @@ body.is-scrolling .presu-card{
     </div>
     <div id="drawerBody"></div>
   </div>
+  <!-- MODAL DE CONFIRMACIÓN (sustituye a confirm() nativo) -->
+  <div id="confirmOverlay"></div>
+  <div id="confirmModal" role="alertdialog" aria-modal="true">
+    <div class="confirm-ico" id="confirmIco">❓</div>
+    <div class="confirm-msg" id="confirmMsg"></div>
+    <div class="confirm-btns">
+      <button class="btn btn-s" id="confirmBtnNo">Cancelar</button>
+      <button class="btn btn-del" id="confirmBtnSi">Confirmar</button>
+    </div>
+  </div>
   <!-- SLIDE-OVER -->
   <div id="sbOverlay" onclick="cerrarSBTotal()"></div>
   <div id="sb">
@@ -2541,24 +2562,55 @@ const _sndUpdate=()=>{try{const ac=audioCtx();if(!ac)return;
   o2.start(ac.currentTime+.34);o2.stop(ac.currentTime+.66);
 }catch(e){}};
 
-// ── Auto-sonido en toasts de éxito y en confirmaciones de borrado ──
-// Intercepta window.confirm para detectar borrados y reproducir sonido
+// ── Modal de confirmación propio (sustituye al confirm() nativo del navegador) ──
+// Antes se interceptaba window.confirm solo para añadir sonido; el diálogo en
+// sí seguía siendo el cuadro gris del sistema, que desentonaba con el resto de
+// la interfaz. askConfirm() abre un modal con el mismo estilo "cristal" que el
+// resto de la app y devuelve una Promise<boolean>, así que cada sitio que antes
+// hacía "if(!confirm(msg))return;" ahora hace "if(!(await askConfirm(msg)))return;".
+let _confirmResolver=null, _confirmEsBorrado=false;
+window.askConfirm=(msg, opts)=>{
+  opts=opts||{};
+  return new Promise(resolve=>{
+    const lower=(msg||'').toLowerCase();
+    const esBorrado = opts.danger!==undefined ? opts.danger
+      : /eliminar|borrar|archivar|descartar|limpiar|papelera|suprimir/.test(lower);
+    _confirmResolver=resolve;
+    _confirmEsBorrado=esBorrado;
+    $('confirmMsg').textContent=msg||'';
+    $('confirmIco').textContent=esBorrado?'🗑️':(opts.icon||'❓');
+    const btnSi=$('confirmBtnSi');
+    btnSi.textContent=opts.textoSi||(esBorrado?'Eliminar':'Confirmar');
+    btnSi.className='btn '+(esBorrado?'btn-del':'btn-p');
+    $('confirmBtnNo').textContent=opts.textoNo||'Cancelar';
+    $('confirmOverlay').classList.add('open');
+    // Forzar reflow para que la transición de apertura se reproduzca siempre
+    const modal=$('confirmModal');
+    modal.style.display='block';
+    requestAnimationFrame(()=>modal.classList.add('open'));
+  });
+};
+window._confirmCerrar=(res)=>{
+  $('confirmOverlay').classList.remove('open');
+  $('confirmModal').classList.remove('open');
+  setTimeout(()=>{ $('confirmModal').style.display='none'; },200);
+  if(res){
+    const snd=_confirmEsBorrado?_sndDelete:_sndConfirm;
+    if(typeof _sndGuard==='function'){ _sndGuard(()=>setTimeout(snd,0)); }
+    else{ setTimeout(snd,0); }
+  }
+  if(_confirmResolver){ const r=_confirmResolver; _confirmResolver=null; r(res); }
+};
 (()=>{
-  const _origConfirm=window.confirm.bind(window);
-  window.confirm=(msg)=>{
-    const res=_origConfirm(msg);
-    if(res){
-      const lower=(msg||'').toLowerCase();
-      const esBorrado=/eliminar|borrar|archivar|descartar|limpiar|papelera|suprimir/.test(lower);
-      // Usar guard para no solapear con el toast que viene después
-      if(typeof _sndGuard==='function'){
-        _sndGuard(()=>setTimeout(esBorrado?_sndDelete:_sndConfirm,0));
-      }else{
-        setTimeout(esBorrado?_sndDelete:_sndConfirm,0);
-      }
-    }
-    return res;
-  };
+  const btnSi=document.getElementById('confirmBtnSi');
+  const btnNo=document.getElementById('confirmBtnNo');
+  if(btnSi) btnSi.addEventListener('click',()=>window._confirmCerrar(true));
+  if(btnNo) btnNo.addEventListener('click',()=>window._confirmCerrar(false));
+  const overlay=document.getElementById('confirmOverlay');
+  if(overlay) overlay.addEventListener('click',()=>window._confirmCerrar(false));
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape' && _confirmResolver) window._confirmCerrar(false);
+  });
 })();
 
 // ── IMAGEN HELPER: comprime imagen y devuelve base64 ──
@@ -3264,7 +3316,7 @@ window._fabSetDefault=(key)=>{
     const {type,ids}=window._selMode;
     if(!ids||!ids.size)return;
     const conf=TYPE_CONF[type]; if(!conf)return;
-    if(!confirm(`¿Eliminar ${ids.size} ${ids.size!==1?conf.plural:conf.label}? Esta acción no tiene vuelta atrás.`))return;
+    if(!(await askConfirm(`¿Eliminar ${ids.size} ${ids.size!==1?conf.plural:conf.label}? Esta acción no tiene vuelta atrás.`)))return;
     const idArr=[...ids];
     window._selCancel();
     if(typeof window[conf.deleteFn]==='function') await window[conf.deleteFn](idArr);
@@ -3387,7 +3439,7 @@ window.swipeRestaurarCobro=async(id)=>{
 };
 window.swipeEliminarCobro=async(id)=>{
   if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
-  if(!confirm('¿Seguro que quieres eliminar este cobro?'))return;
+  if(!(await askConfirm('¿Seguro que quieres eliminar este cobro?')))return;
   try{
     await deleteDoc(doc(db,'grupos',CGID,'cobros',id));
     toast('🗑️ Cobro eliminado','o');
@@ -4237,9 +4289,11 @@ const iniciarApp=async()=>{
       mantPlantillas     = mpSnap.docs.map(d=>d.data().nombre);
       _partePlantillasFull = ppfSnap.docs.map(d=>({id:d.id,...d.data()}));
       _reconciliarFirmasPendientes();
-      // Equipos y recordatorios preventivos: no viajan por Firestore, hay que
-      // leerlos de la cache local. Si se omite, quedan en [] y el primer
-      // guardado los borra del almacenamiento.
+      // Equipos y recordatorios preventivos: viven en Firestore (grupos/{gid}/equipos
+      // y grupos/{gid}/recordatorios) igual que clientes/partes; esta llamada carga
+      // primero la caché local (respuesta instantánea) y arranca los listeners
+      // en tiempo real que los mantienen sincronizados entre dispositivos.
+      // Si se omite, quedan en [] y el primer guardado los borra del almacenamiento.
       _cargarLocalesDeGrupo(CGID);
 
       // Arrancar listeners en tiempo real del grupo
@@ -5559,7 +5613,7 @@ window.verSimple=(tipo,itemId)=>{
 };
 
 window.completarSimple=async(tipo,itemId,silent)=>{
-  if(!silent && !confirm(`¿Marcar ${_SIMPLE_CONF[tipo].artEste} ${_SIMPLE_CONF[tipo].labelSing.toLowerCase()} como completado?`)) return;
+  if(!silent && !(await askConfirm(`¿Marcar ${_SIMPLE_CONF[tipo].artEste} ${_SIMPLE_CONF[tipo].labelSing.toLowerCase()} como completado?`,{danger:false,icon:'✅',textoSi:'Marcar'}))) return;
   try{
     await updateDoc(doc(db,'grupos',CGID,_SIMPLE_CONF[tipo].col,itemId),{estado:'completado',completadoEn:serverTimestamp()});
     if(!silent) toast(_SIMPLE_CONF[tipo].labelSing+' completado ✅','o');
@@ -5572,7 +5626,7 @@ window.restaurarSimple=async(tipo,itemId)=>{
   }catch(e){ toast('Error','e'); }
 };
 window.borrarSimple=async(tipo,itemId)=>{
-  if(!confirm('¿Eliminar este elemento? Esta acción no tiene vuelta atrás.')) return;
+  if(!(await askConfirm('¿Eliminar este elemento? Esta acción no tiene vuelta atrás.'))) return;
   try{
     await deleteDoc(doc(db,'grupos',CGID,_SIMPLE_CONF[tipo].col,itemId));
     toast('Eliminado','i');
@@ -6212,7 +6266,7 @@ window.completarMantCal3=async(id,fecha,btn)=>{
 };
 window.desmarcarMantCal3=async(id,fecha,btn)=>{
   const m=allMantenimientos.find(x=>x.id===id);if(!m)return;
-  if(!confirm('¿Desmarcar este mantenimiento como completado?'))return;
+  if(!(await askConfirm('¿Desmarcar este mantenimiento como completado?')))return;
   try{
     if(m.estado==='completado'){
       const fechaRest=m.ultimoCompletado||m.fechaProxima||fecha;
@@ -6368,8 +6422,9 @@ window.filtrarClis=v=>{
 // opción de marcar como completado o eliminar directamente desde el aviso.
 // Sección independiente de "Mantenimientos" (oculta, sin usar) y solo
 // accesible desde el menú desplegable. Sin notificaciones del sistema: es un
-// aviso puramente visual dentro de la app. Se guardan en localStorage por
-// grupo (CGID) — no se sincronizan entre dispositivos.
+// aviso puramente visual dentro de la app. Se guardan en Firestore
+// (grupos/{gid}/recordatorios) y se cachean en localStorage por grupo (CGID)
+// como copia offline — ver _syncSubir/_syncAplicarSnap más arriba.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const _recHoyStr=()=>new Date().toISOString().split('T')[0];
 const _recSaveAll=()=>{
@@ -6703,9 +6758,9 @@ window.completarRecordatorio=(id)=>{
   _recRefrescarClientesTab();
 };
 
-window.eliminarRecordatorio=(id)=>{
+window.eliminarRecordatorio=async(id)=>{
   _asegurarLocalesCargados();
-  if(!confirm('¿Eliminar este recordatorio?')) return;
+  if(!(await askConfirm('¿Eliminar este recordatorio?'))) return;
   allRecordatorios=(allRecordatorios||[]).filter(x=>x.id!==id);
   _recSaveAll();
   toast('🗑 Recordatorio eliminado','o');
@@ -6743,8 +6798,8 @@ window.swipeEliminarRecordatorio=(id)=>{
 // Ficha de equipo por cliente: datos básicos + ficha técnica reducida +
 // historial (solo recordatorios preventivos vinculados — sin enlazar con
 // avisos/presupuestos/cobros a propósito, para que sea un módulo ligero e
-// independiente). Se guarda en localStorage por grupo (CGID), igual que
-// Recordatorios preventivos: no se sincroniza por Firestore.
+// independiente). Se guarda en Firestore (grupos/{gid}/equipos), igual que
+// Recordatorios preventivos, con localStorage como caché offline.
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const _eqSaveAll=()=>{
   if(!CGID) return false;
@@ -6849,9 +6904,9 @@ window.guardarEquipo=(cliId,id)=>{
   verEquipo(equipoId);
 };
 
-window.eliminarEquipo=(id)=>{
+window.eliminarEquipo=async(id)=>{
   _asegurarLocalesCargados();
-  if(!confirm('¿Eliminar este equipo? Los recordatorios ya creados no se borran, pero dejarán de estar vinculados a él.')) return;
+  if(!(await askConfirm('¿Eliminar este equipo? Los recordatorios ya creados no se borran, pero dejarán de estar vinculados a él.'))) return;
   const e=(allEquipos||[]).find(x=>x.id===id);
   allEquipos=(allEquipos||[]).filter(x=>x.id!==id);
   // Los recordatorios que apuntaban a este equipo conservan el nombre como texto, pero pierden el enlace
@@ -8281,7 +8336,7 @@ const _eliminarDocsArchivadosDeCliente = async (cliId) => {
 
 window.archivarCli=async(id)=>{
   if(window._clienteOcupado(id)){toast('Archivado en curso — espera a que termine','e');return;}
-  if(!confirm('¿Mover este cliente a archivos?'))return;
+  if(!(await askConfirm('¿Mover este cliente a archivos?')))return;
   const c=allClientes.find(x=>x.id===id);if(!c)return;
   await _conBloqueoCliente(id,'Archivado',async()=>{
   try{
@@ -8923,7 +8978,7 @@ window.clonarParte=async(id)=>{
 };
 
 window.archivarParte=async(id)=>{
-  if(!confirm('¿Mover este parte a archivos?'))return;
+  if(!(await askConfirm('¿Mover este parte a archivos?')))return;
   const p=allPartes.find(x=>x.id===id);if(!p)return;
   try{
     await addDoc(collection(db,'grupos',CGID,'archivos'),{...p,id:p.id,tipo:'parte',eliminadoEn:serverTimestamp()});
@@ -9811,13 +9866,14 @@ window.restaurarDesdeBackup=()=>{
         (backup.mantenimientos||[]).length+(backup.averias||[]).length+
         (backup.averias_historial||[]).length+(backup.presupuestos||[]).length;
 
-      if(!confirm(
+      if(!(await askConfirm(
         `Vas a importar el backup de "${backup._meta.grupoNombre||'?'}" (${new Date(backup._meta.fecha).toLocaleDateString('es-ES')}).\n\n` +
         `Contiene ${totalItems} registros en total.\n\n` +
         `✅ Los datos existentes en este grupo NO se tocarán.\n` +
         `✅ Solo se añadirán los registros que aún no estén aquí.\n\n` +
-        `¿Confirmar importación?`
-      ))return;
+        `¿Confirmar importación?`,
+        {danger:false, icon:'📦', textoSi:'Importar'}
+      )))return;
 
       toast('Importando datos... no cierres la app','i');
 
@@ -10252,7 +10308,7 @@ window.abrirMantPlantillaParaEditar=(pid)=>{
 };
 
 window.borrarMantPlantillaFull=async(id)=>{
-  if(!confirm('¿Eliminar esta plantilla?'))return;
+  if(!(await askConfirm('¿Eliminar esta plantilla?')))return;
   try{await deleteDoc(doc(db,'grupos',CGID,'mantPlantillasFull',id));toast('Plantilla eliminada','i');renderMantPlantillasCompletas()}catch(e){toast('Error','e')}
 };
 
@@ -10405,7 +10461,7 @@ window.guardarEditMant=async(id)=>{
 };
 
 window.eliminarMant=async(id)=>{
-  if(!confirm('¿Eliminar este mantenimiento? Esta acción no se puede deshacer.'))return;
+  if(!(await askConfirm('¿Eliminar este mantenimiento? Esta acción no se puede deshacer.')))return;
   try{
     await deleteDoc(doc(db,'grupos',CGID,'mantenimientos',id));
     allMantenimientos=allMantenimientos.filter(m=>m.id!==id);
@@ -10419,7 +10475,7 @@ window.eliminarMant=async(id)=>{
 // completarMant se mantiene para el botón ✅ del calendario (no cambia allí)
 window.completarMant=async(id)=>{
   const m=allMantenimientos.find(x=>x.id===id);if(!m)return;
-  if(!confirm('¿Eliminar este mantenimiento?'))return;
+  if(!(await askConfirm('¿Eliminar este mantenimiento?')))return;
   try{
     await deleteDoc(doc(db,'grupos',CGID,'mantenimientos',id));
     toast('Mantenimiento eliminado','i');
@@ -10444,7 +10500,7 @@ window.subirFotosMant=async(mantId,files)=>{
   if(subidas>0){toast(`${subidas} foto${subidas>1?'s':''} añadida${subidas>1?'s':''}!`,'o');verMant(mantId,true);}
 };
 window.borrarMantFoto=async(mantId,fotoId)=>{
-  if(!confirm('¿Eliminar esta foto?'))return;
+  if(!(await askConfirm('¿Eliminar esta foto?')))return;
   try{
     await deleteDoc(doc(db,'grupos',CGID,'mantenimientos',mantId,'fotos',fotoId));
     toast('Foto eliminada','i');verMant(mantId,true);
@@ -10575,7 +10631,7 @@ window.copiarIdGrupo=async(id)=>{
 };
 
 window.aceptarSolicitud=async(solId,uid,nombre)=>{
-  if(!confirm(`¿Aceptar a ${nombre} en el grupo?`))return;
+  if(!(await askConfirm(`¿Aceptar a ${nombre} en el grupo?`)))return;
   try{
     await updateDoc(doc(db,'grupos',CGID),{miembros:arrayUnion(uid)});
     await updateDoc(doc(db,'solicitudes',solId),{estado:'aceptada'});
@@ -10601,13 +10657,13 @@ window.rechazarSolicitud=async(solId,uid,nombre)=>{
 };
 
 window.expulsarMiembro=async uid=>{
-  if(!confirm('¿Eliminar este miembro del grupo?'))return;
+  if(!(await askConfirm('¿Eliminar este miembro del grupo?')))return;
   try{await updateDoc(doc(db,'grupos',CGID),{miembros:arrayRemove(uid)});toast('Miembro eliminado','i');renderAdministracion()}catch(e){toast('Error','e')}
 };
 
 window.delegarAdmin=async(uid,nombre,e)=>{
   if(e)e.stopPropagation();
-  if(!confirm(`¿Delegar la administración del grupo a ${nombre}?\n\nPerderás el rol de admin y ${nombre} pasará a ser el nuevo administrador.`))return;
+  if(!(await askConfirm(`¿Delegar la administración del grupo a ${nombre}?\n\nPerderás el rol de admin y ${nombre} pasará a ser el nuevo administrador.`)))return;
   try{
     const snap=await getDoc(doc(db,'usuarios',uid));
     const nuevoAdminNombre=snap.exists()?(snap.data().nombre||nombre):nombre;
@@ -10618,7 +10674,7 @@ window.delegarAdmin=async(uid,nombre,e)=>{
   }catch(err){toast('Error al delegar','e')}
 };
 window.abandonarGrupo=async()=>{
-  if(!confirm('¿Salir del grupo? No podrás volver a acceder a menos que te reinviten.'))return;
+  if(!(await askConfirm('¿Salir del grupo? No podrás volver a acceder a menos que te reinviten.')))return;
   try{
     const snap=await getDoc(doc(db,'grupos',CGID));
     if(!snap.exists()){toast('Grupo no encontrado','e');return;}
@@ -10668,8 +10724,8 @@ const _borrarGrupoCompleto=async(gid)=>{
 
 window.eliminarGrupoCompleto=async()=>{
   if(!CGID)return;
-  if(!confirm('⚠️ ¿Eliminar el grupo y TODOS sus datos (clientes, partes, mantenimientos...)? Esta acción es irreversible.'))return;
-  if(!confirm('Confirma de nuevo: ¿Eliminar grupo permanentemente?'))return;
+  if(!(await askConfirm('⚠️ ¿Eliminar el grupo y TODOS sus datos (clientes, partes, mantenimientos...)? Esta acción es irreversible.')))return;
+  if(!(await askConfirm('Confirma de nuevo: ¿Eliminar grupo permanentemente?')))return;
   try{
     await _borrarGrupoCompleto(CGID);
     CGID=null;CG=null;
@@ -11218,7 +11274,7 @@ window.abrirParteDesdeMantenimiento=(m,cli,fechaCompletado)=>{
 
 window.desmarcarMantCal=async(id,fecha,btn)=>{
   const m=allMantenimientos.find(x=>x.id===id);if(!m)return;
-  if(!confirm('¿Desmarcar este mantenimiento como completado?'))return;
+  if(!(await askConfirm('¿Desmarcar este mantenimiento como completado?')))return;
   try{
     if(m.estado==='completado'){
       // Si estaba completado permanente, volver a pendiente con la fecha original
@@ -11576,7 +11632,7 @@ window.borrarArchivo=async(id)=>{
   const nombre=itemData.nombre||itemData.titulo||'este elemento';
 
   if(!esCliente){
-    if(!confirm(`¿Eliminar permanentemente "${nombre}"? Esta acción no se puede deshacer.`))return;
+    if(!(await askConfirm(`¿Eliminar permanentemente "${nombre}"? Esta acción no se puede deshacer.`)))return;
     await _ejecutarBorradoDefinitivo(itemData._archId||id,null,itemData);
     return;
   }
@@ -11928,7 +11984,7 @@ window.subirImagenesInstalacion=async()=>{
 };
 
 window.borrarImagen=async(id)=>{
-  if(!confirm('¿Eliminar esta imagen?'))return;
+  if(!(await askConfirm('¿Eliminar esta imagen?')))return;
   try{
     await deleteDoc(doc(db,'grupos',CGID,'imagenes',id));
     toast('Imagen eliminada','i');cerrarSB();renderImagenes();
@@ -12575,7 +12631,7 @@ window.subirAveriaFotos=async(avId,files)=>{
   verAveria(avId);
 };
 window.borrarAveriaFoto=async(avId,fotoId)=>{
-  if(!confirm('¿Eliminar foto?'))return;
+  if(!(await askConfirm('¿Eliminar foto?')))return;
   try{
     await deleteDoc(doc(db,'grupos',CGID,'averias',avId,'fotos',fotoId));
     verAveria(avId);
@@ -12612,7 +12668,7 @@ window.verAveriaFoto=(src, allSrcs)=>{
 };
 
 window.resolverAveria=async(avId,clienteId)=>{
-  if(!confirm('¿Marcar esta avería como resuelta?'))return;
+  if(!(await askConfirm('¿Marcar esta avería como resuelta?')))return;
   try{
     const snap=await getDoc(doc(db,'grupos',CGID,'averias',avId));
     if(!snap.exists())return;
@@ -12629,7 +12685,7 @@ window.resolverAveria=async(avId,clienteId)=>{
   }catch(e){toast('Error','e')}
 };
 window.borrarAveria=async(avId)=>{
-  if(!confirm('¿Eliminar esta avería?'))return;
+  if(!(await askConfirm('¿Eliminar esta avería?')))return;
   try{
     await deleteDoc(doc(db,'grupos',CGID,'averias',avId));
     cerrarSB();toast('Eliminada','i');
@@ -13308,7 +13364,7 @@ window._guardarFirmaPresupuestoEditada=async(prId)=>{
   if(p) _renderVerPresupuesto(prId,p); else verPresupuesto(prId);
 };
 window.eliminarFirmaPresupuesto=async(prId)=>{
-  if(!confirm('¿Eliminar la firma de este presupuesto?'))return;
+  if(!(await askConfirm('¿Eliminar la firma de este presupuesto?')))return;
   const cambios={firmaCliente:null,firmado:false};
   const actualizarLocal=(arr)=>(arr||[]).map(x=>x.id===prId?{...x,...cambios}:x);
   _presusPend=actualizarLocal(_presusPend);
@@ -13633,7 +13689,7 @@ const _quitarPresupuestoLocal=(prId)=>{
 };
 
 window.borrarPresupuesto=async(prId)=>{
-  if(!confirm('¿Eliminar este presupuesto?'))return;
+  if(!(await askConfirm('¿Eliminar este presupuesto?')))return;
   _quitarPresupuestoLocal(prId);
   cerrarSB();
   try{
@@ -13662,7 +13718,7 @@ window.swipeRestaurarPresupuesto=async(prId)=>{
 // borrar nada.
 window.swipeEliminarPresupuesto=async(prId)=>{
   if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
-  if(!confirm('¿Seguro que quieres eliminar este presupuesto?'))return;
+  if(!(await askConfirm('¿Seguro que quieres eliminar este presupuesto?')))return;
   _quitarPresupuestoLocal(prId);
   try{
     await deleteDoc(doc(db,'grupos',CGID,'presupuestos',prId));
@@ -14049,7 +14105,7 @@ window.verHistorialMantCliente=async(clienteId)=>{
 
 // ── Eliminar entrada del historial de mantenimientos ──
 window.eliminarHMHistorial=async(hmId,clienteId)=>{
-  if(!confirm('¿Eliminar este registro del historial? No se puede deshacer.'))return;
+  if(!(await askConfirm('¿Eliminar este registro del historial? No se puede deshacer.')))return;
   try{
     await deleteDoc(doc(db,'grupos',CGID,'historial_mantenimientos',hmId));
     toast('Registro eliminado','i');
@@ -14060,7 +14116,7 @@ window.eliminarHMHistorial=async(hmId,clienteId)=>{
 
 // ── Restablecer mantenimiento desde historial al calendario ──
 window.restablecerMantHistorial=async(hmId)=>{
-  if(!confirm('¿Restablecer este mantenimiento al calendario? Volverá a aparecer en la fecha en que se completó.'))return;
+  if(!(await askConfirm('¿Restablecer este mantenimiento al calendario? Volverá a aparecer en la fecha en que se completó.')))return;
   try{
     const hmSnap=await getDoc(doc(db,'grupos',CGID,'historial_mantenimientos',hmId));
     if(!hmSnap.exists()){toast('Registro no encontrado','e');return;}
@@ -14114,7 +14170,7 @@ window.restablecerMantHistorial=async(hmId)=>{
 
 // ── Restaurar mantenimiento completado a activo ──
 window.restaurarMantCompletado=async(mantId,clienteId)=>{
-  if(!confirm('¿Restaurar este mantenimiento como activo? Volverá a aparecer en pendientes.'))return;
+  if(!(await askConfirm('¿Restaurar este mantenimiento como activo? Volverá a aparecer en pendientes.')))return;
   try{
     await updateDoc(doc(db,'grupos',CGID,'mantenimientos',mantId),{
       estado:'pendiente',
@@ -14370,7 +14426,7 @@ window.enviarAvisoGrupo=async()=>{
 // Aceptar/Rechazar solicitud directamente desde notificaciones
 window.aceptarSolDesdeNotif=async(notifId,uid,nombre,grupoId)=>{
   if(!uid){toast('Error: sin datos de usuario','e');return}
-  if(!confirm(`¿Aceptar a ${nombre}?`))return;
+  if(!(await askConfirm(`¿Aceptar a ${nombre}?`)))return;
   try{
     await updateDoc(doc(db,'grupos',grupoId),{miembros:arrayUnion(uid)});
     // Buscar solicitud pendiente
@@ -14640,7 +14696,7 @@ window.subirFotoPerfil=async(input)=>{
 };
 
 window.borrarFotoPerfil=async()=>{
-  if(!confirm('¿Eliminar la foto de perfil?'))return;
+  if(!(await askConfirm('¿Eliminar la foto de perfil?')))return;
   try{
     await setDoc(doc(db,'usuarios',CU.uid),{fotoUrl:''},{merge:true});
     CUD={...CUD,fotoUrl:''};
@@ -14716,7 +14772,7 @@ window._guardarFirmaPerfil=async()=>{
   }
 };
 window.borrarFirmaPerfil=async()=>{
-  if(!confirm('¿Eliminar tu firma guardada?'))return;
+  if(!(await askConfirm('¿Eliminar tu firma guardada?')))return;
   try{
     await setDoc(doc(db,'usuarios',CU.uid),{firmaUrl:''},{merge:true});
     CUD={...CUD,firmaUrl:''};
@@ -15153,7 +15209,7 @@ window.resolverAvisoConOpcion=(id)=>{ resolverAviso(id); };
 
 
 window.eliminarAviso=async(id)=>{
-  if(!confirm('¿Eliminar este aviso? Esta acción no tiene vuelta atrás.'))return;
+  if(!(await askConfirm('¿Eliminar este aviso? Esta acción no tiene vuelta atrás.')))return;
   try{
     await deleteDoc(doc(db,'grupos',CGID,'avisos',id));
     toast('Aviso eliminado','i');
@@ -15181,7 +15237,7 @@ window.swipeRestaurarAviso=async(id)=>{
 };
 window.swipeEliminarAviso=async(id)=>{
   if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
-  if(!confirm('¿Seguro que quieres eliminar este aviso?'))return;
+  if(!(await askConfirm('¿Seguro que quieres eliminar este aviso?')))return;
   try{
     await deleteDoc(doc(db,'grupos',CGID,'avisos',id));
     toast('🗑️ Aviso eliminado','o');
@@ -16628,6 +16684,26 @@ const _vzUltimoUso=(cliId)=>{
 // ── Cliente: busca en las fichas y decide si hay duda ──
 // Devuelve {estado:'unico'|'ambiguo'|'nuevo', cliente, candidatos, nombre, resto}
 const _VZ_PREP_CLIENTE = new Set(['para','de','del','a','al','con','en']);
+// ══════════════════════════════════════════════════════════════
+// FASE 2 — CUÁNDO CONFIAR Y CUÁNDO PREGUNTAR
+// Aquí es donde se decide si el asistente actúa solo o interrumpe:
+//  - puntuar() da a cada cliente activo un parecido de 0 a 1 contra lo oído.
+//  - _vzCliente() usa esa puntuación para devolver uno de cuatro estados:
+//    'unico' (bastante seguro, sigue sin preguntar), 'ambiguo' (empate real
+//    entre dos o mas, se pregunta cuál), 'parecido' (ninguno encaja bien
+//    pero hay candidatos cercanos, se pregunta antes de crear un duplicado)
+//    o 'nuevo' (no hay nada parecido).
+//  - Más abajo, en el cierre de _vzToggle, esa puntuación se combina con la
+//    confianza que da el propio navegador y con si hubo que rescatar la
+//    frase con una interpretación alternativa, en una "certeza" final: por
+//    debajo de 0.55 se pregunta "¿es esto?" antes de guardar nada.
+//  - _vzContinuar() es quien realmente pregunta: encadena una pantalla por
+//    cada dato que falte o esté en duda (cliente, texto, importe, fecha)
+//    hasta que todo está resuelto y entonces guarda.
+// Cerrada: las cuatro rutas (unico/ambiguo/parecido/nuevo) tienen su propia
+// pantalla de resolución más abajo, y ninguna llamada a estas funciones
+// queda sin gestionar.
+// ══════════════════════════════════════════════════════════════
 const _vzCliente = (resto) => {
   const activos = (allClientes||[]).filter(c=>!c.archivado);
 
