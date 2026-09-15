@@ -1160,7 +1160,7 @@ body.modo-claro .stab.active{box-shadow:0 2px 6px rgba(16,24,22,.1),0 0 0 1px rg
 }
 .swipe-content.dragging{transition:none!important;will-change:transform}
 .swipe-content:not(.dragging){transition:transform .32s var(--ease-spring)}
-.swipe-content .presu-card,.swipe-content .averia-card,.swipe-content .cli-card{margin-bottom:0;border:none;border-radius:0;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
+.swipe-content .presu-card,.swipe-content .averia-card,.swipe-content .cli-card,.swipe-content .arch-card,.swipe-content>.card{margin-bottom:0;border:none;border-radius:0;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;box-shadow:none}
 /* ── Rendimiento de scroll en Android: el desenfoque de cristal (backdrop-filter)
    de cada tarjeta es muy costoso de recalcular en tiempo real. Con muchas
    tarjetas visibles el navegador puede "atascarse" recalculando el blur justo
@@ -1855,8 +1855,8 @@ body.is-scrolling .presu-card{
   <div class="screen" id="screenRecordatorios">
     <div class="scroll-pad">
       <button class="inicio-btn" onclick="goScreen('grupo')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Inicio</button>
-      <div style="font-size:20px;font-weight:900;color:var(--tx);margin-bottom:4px;display:flex;align-items:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Recordatorios preventivos</div>
-      <div style="font-size:12px;color:var(--tx2);margin-bottom:18px;line-height:1.5">Para esos clientes a los que solo visitas una vez al año. Crea un recordatorio con fecha y, cuando llegue, te avisará en rojo en la pestaña de Clientes.</div>
+      <div style="font-size:20px;font-weight:900;color:var(--tx);margin-bottom:4px;display:flex;align-items:center;gap:8px"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Recordatorios</div>
+      <div style="font-size:12px;color:var(--tx2);margin-bottom:18px;line-height:1.5">Para todo lo que no quieres olvidar: mantenimientos de clientes, o cosas tuyas de la semana. Crea un recordatorio con fecha y, cuando llegue, te avisará.</div>
       <div id="recordatoriosContent"></div>
     </div>
   </div>
@@ -1944,7 +1944,7 @@ body.is-scrolling .presu-card{
         <span class="fab-opt-ico">💰</span><span class="fab-opt-txt">Nuevo cobro</span><span class="fab-opt-star">⭐</span>
       </button>
       <button class="fab-opt" id="fabOptRecordatorio" onclick="fabAccion('recordatorio')">
-        <span class="fab-opt-ico">🔔</span><span class="fab-opt-txt">Nuevo recordatorio preventivo</span><span class="fab-opt-star">⭐</span>
+        <span class="fab-opt-ico">🔔</span><span class="fab-opt-txt">Nuevo recordatorio</span><span class="fab-opt-star">⭐</span>
       </button>
     </div>
     <button id="fabMain" aria-label="Acciones rápidas">
@@ -2965,7 +2965,7 @@ const _renderScreen=id=>{
 // FAB — Acciones rápidas (Presupuesto / Avería / Cliente)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let _fabOpen=false;
-const _FAB_LABELS={presupuesto:'Presupuesto',aviso:'Aviso',cliente:'Cliente',cobro:'Cobro',recordatorio:'Recordatorio preventivo'};
+const _FAB_LABELS={presupuesto:'Presupuesto',aviso:'Aviso',cliente:'Cliente',cobro:'Cobro',recordatorio:'Recordatorio'};
 const _FAB_KEYS=['presupuesto','aviso','cliente','cobro','recordatorio'];
 window._fabDefaultKey=()=>localStorage.getItem('alberto_fab_default')||'presupuesto';
 
@@ -3369,6 +3369,31 @@ window._selRestaurarCobros=async(ids)=>{
   toast(`↩️ ${ids.length>1?'Cobros restaurados a pendientes':'Cobro restaurado a pendiente'}`,'o');
 };
 
+// Marcar/eliminar/restaurar un cobro directamente desde el gesto de deslizar.
+// El listener de Firestore (onSnapshot en _suscribirSimple) repinta la lista solo.
+window.swipeCompletarCobro=async(id)=>{
+  if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
+  try{
+    await updateDoc(doc(db,'grupos',CGID,'cobros',id),{estado:'completado',completadoEn:serverTimestamp()});
+    toast('✅ Cobro completado','o');
+  }catch(e){ console.error('swipeCompletarCobro',e); toast('Sin conexión: se completará al recuperar internet','i'); }
+};
+window.swipeRestaurarCobro=async(id)=>{
+  if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
+  try{
+    await updateDoc(doc(db,'grupos',CGID,'cobros',id),{estado:'pendiente'});
+    toast('↩️ Cobro restaurado a pendiente','o');
+  }catch(e){ console.error('swipeRestaurarCobro',e); toast('Sin conexión: se restaurará al recuperar internet','i'); }
+};
+window.swipeEliminarCobro=async(id)=>{
+  if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
+  if(!confirm('¿Seguro que quieres eliminar este cobro?'))return;
+  try{
+    await deleteDoc(doc(db,'grupos',CGID,'cobros',id));
+    toast('🗑️ Cobro eliminado','o');
+  }catch(e){ console.error('swipeEliminarCobro',e); toast('Sin conexión: se eliminará al recuperar internet','i'); }
+};
+
 // ── Recordatorios preventivos ──
 window._selDeleteRecordatorios=async(ids)=>{
   _asegurarLocalesCargados();
@@ -3597,7 +3622,7 @@ window._buildDrawerBody=(tieneGrupo)=>{
     ${sep}
     <div class="d-grupo-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:5px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>${grupoNombre}</div>
     <div class="d-item${act('grupo','cobros')}" onclick="abrirTabExclusiva('cobros');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v2m0 8v2M9.5 9a2.5 2.5 0 0 1 2.5-1.5h.5a2 2 0 0 1 0 4h-1a2 2 0 0 0 0 4h.5A2.5 2.5 0 0 0 14.5 15"/></svg></span>Cobros</div>
-    <div class="d-item${act('recordatorios')}" onclick="goScreen('recordatorios');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>Recordatorios preventivos${(typeof allRecordatorios!=='undefined'&&allRecordatorios.filter(r=>r.estado!=='completado'&&r.fecha&&r.fecha<=new Date().toISOString().split('T')[0]).length)?`<span style="margin-left:auto;background:#ef4444;color:#fff;border-radius:20px;padding:1px 7px;font-size:10.5px;font-weight:900">${allRecordatorios.filter(r=>r.estado!=='completado'&&r.fecha&&r.fecha<=new Date().toISOString().split('T')[0]).length}</span>`:''}</div>
+    <div class="d-item${act('recordatorios')}" onclick="goScreen('recordatorios');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>Recordatorios${(typeof allRecordatorios!=='undefined'&&allRecordatorios.filter(r=>r.estado!=='completado'&&r.fecha&&r.fecha<=new Date().toISOString().split('T')[0]).length)?`<span style="margin-left:auto;background:#ef4444;color:#fff;border-radius:20px;padding:1px 7px;font-size:10.5px;font-weight:900">${allRecordatorios.filter(r=>r.estado!=='completado'&&r.fecha&&r.fecha<=new Date().toISOString().split('T')[0]).length}</span>`:''}</div>
     <div class="d-item${act('imagenes')}" onclick="goScreen('imagenes');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>Galería de instalaciones</div>
     ${sep}
     <div class="d-section" style="padding-top:6px">Opciones de grupo</div>
@@ -5302,18 +5327,28 @@ const _simpleCardHtml=(tipo,item,completado)=>{
   const fecha=completado?(item.completadoEn||item.creado):item.creado;
   const importeTxt=(tipo==='cobro'&&item.importe)?`<span style="font-size:11px;font-weight:900;color:var(--r);margin-left:6px">${fmtM(item.importe)}</span>`:'';
   const marcaVoz = item.creadoPorVoz?`<span title="Creado dictando" style="font-size:11px;opacity:.55;margin-right:5px">🎤</span>`:'';
-  return `<div class="averia-card ${completado?'resuelta':''}" data-sel-id="${item.id}" data-sel-type="${tipo}" style="cursor:pointer;border-left:${borderLeft}" onclick="verSimple('${tipo}','${item.id}')">
+  // Deslizar a la derecha elimina; deslizar a la izquierda completa (pendientes) o restaura (completados).
+  const rightAttrs = `data-right-fn="swipeEliminarCobro" data-right-action="delete" data-right-label="Eliminar"`;
+  const leftAttrs = completado
+    ? `data-left-fn="swipeRestaurarCobro" data-left-action="restore" data-left-label="Restaurar"`
+    : `data-left-fn="swipeCompletarCobro" data-left-action="complete" data-left-label="Completar"`;
+  return `<div class="swipe-item" data-swipe-id="${item.id}" data-sel-id="${item.id}" data-sel-type="${tipo}" ${rightAttrs} ${leftAttrs}>
+    <div class="swipe-bg"></div>
     <div class="sel-check"></div>
-    <div class="averia-header">
-      <div class="averia-ico" style="background:${completado?'rgba(76,175,80,.12)':'rgba('+conf.colorRgb+',.15)'}">${_simpleIco(tipo,completado?'#4caf50':'rgb('+conf.colorRgb+')')}</div>
-      <div style="flex:1;min-width:0">
-        <div class="averia-title">${item.titulo||conf.labelSing}${importeTxt}</div>
-        <div class="averia-sub">${c?.nombre||item.clienteNombre||'Sin cliente'} · ${completado?'Completado ':''}${fmtF(fecha)}${fechaTxt&&!completado?' · 📅 '+fechaTxt:''}</div>
-        <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">${_simplePrioTag(prio)}</div>
+    <div class="swipe-content" onclick="verSimple('${tipo}','${item.id}')">
+    <div class="averia-card ${completado?'resuelta':''}" style="cursor:pointer;border-left:${borderLeft}">
+      <div class="averia-header">
+        <div class="averia-ico" style="background:${completado?'rgba(76,175,80,.12)':'rgba('+conf.colorRgb+',.15)'}">${_simpleIco(tipo,completado?'#4caf50':'rgb('+conf.colorRgb+')')}</div>
+        <div style="flex:1;min-width:0">
+          <div class="averia-title">${item.titulo||conf.labelSing}${importeTxt}</div>
+          <div class="averia-sub">${c?.nombre||item.clienteNombre||'Sin cliente'} · ${completado?'Completado ':''}${fmtF(fecha)}${fechaTxt&&!completado?' · 📅 '+fechaTxt:''}</div>
+          <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">${_simplePrioTag(prio)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <span class="averia-badge ${completado?'resuelta':'pend'}">${completado?'Completado':'Pendiente'}</span>
+        </div>
       </div>
-      <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
-        <span class="averia-badge ${completado?'resuelta':'pend'}">${completado?'Completado':'Pendiente'}</span>
-      </div>
+    </div>
     </div>
   </div>`;
 };
@@ -6368,7 +6403,7 @@ const _recordatoriosAlertHTML=()=>{
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
         </div>
         <div style="flex:1;min-width:0">
-          <div style="font-size:12.5px;font-weight:900;color:#ef4444;text-transform:uppercase;letter-spacing:.3px">${esHoy?'Mantenimiento hoy':'Mantenimiento pendiente'} · ${fechaFmt}</div>
+          <div style="font-size:12.5px;font-weight:900;color:#ef4444;text-transform:uppercase;letter-spacing:.3px">${esHoy?'Recordatorio hoy':'Recordatorio pendiente'} · ${fechaFmt}</div>
           <div style="font-size:13.5px;font-weight:800;color:var(--tx);margin-top:3px">${r.titulo||'Recordatorio'}</div>
           <div style="font-size:12px;color:var(--tx2);margin-top:1px">${r.clienteNombre||'Sin cliente asignado'}</div>
           ${r.notas?`<div style="font-size:11.5px;color:var(--tx2);margin-top:5px;line-height:1.4">${r.notas}</div>`:''}
@@ -6409,22 +6444,33 @@ const _recCardHtml=(r)=>{
     const hoy=_recHoyStr();
     const vencido=r.estado!=='completado'&&r.fecha&&r.fecha<=hoy;
     const fechaFmt=typeof fmtFISO==='function'?fmtFISO(r.fecha):r.fecha;
-    return `<div class="card" data-sel-id="${r.id}" data-sel-type="recordatorio" style="margin-bottom:10px;${vencido?'border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.06)':''}">
+    const completado=r.estado==='completado';
+    // Deslizar a la derecha elimina; deslizar a la izquierda completa (pendientes) o restaura (completados).
+    const rightAttrs = `data-right-fn="swipeEliminarRecordatorio" data-right-action="delete" data-right-label="Eliminar"`;
+    const leftAttrs = completado
+      ? `data-left-fn="swipeRestaurarRecordatorio" data-left-action="restore" data-left-label="Restaurar"`
+      : `data-left-fn="swipeCompletarRecordatorio" data-left-action="complete" data-left-label="Completar"`;
+    return `<div class="swipe-item" data-swipe-id="${r.id}" data-sel-id="${r.id}" data-sel-type="recordatorio" ${rightAttrs} ${leftAttrs} style="margin-bottom:10px">
+      <div class="swipe-bg"></div>
       <div class="sel-check"></div>
-      <div style="display:flex;align-items:flex-start;gap:12px">
-        <div style="flex-shrink:0;width:38px;height:38px;border-radius:14px;background:${r.estado==='completado'?'rgba(76,175,80,.12)':vencido?'rgba(239,68,68,.15)':'rgba(255,152,0,.12)'};display:flex;align-items:center;justify-content:center">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${r.estado==='completado'?'#4caf50':vencido?'#ef4444':'#ff9800'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-        </div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:14px;font-weight:900;color:var(--tx)">${r.titulo||'Recordatorio'}</div>
-          <div style="font-size:12px;color:var(--tx2);margin-top:2px">${r.clienteNombre||'Sin cliente'} · ${fechaFmt}${vencido?' · <span style="color:#ef4444;font-weight:800">Vencido</span>':''}</div>
-          ${r.notas?`<div style="font-size:12px;color:var(--tx2);margin-top:5px;line-height:1.4">${r.notas}</div>`:''}
-          <div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">
-            ${r.estado!=='completado'?`<button onclick="completarRecordatorio('${r.id}')" style="border:none;background:rgba(76,175,80,.15);color:#4caf50;border-radius:10px;padding:6px 10px;font-size:11.5px;font-weight:900;cursor:pointer;font-family:var(--font)">✓ Completar</button>`:''}
-            <button onclick="abrirFormRecordatorio('${r.id}')" style="border:none;background:rgba(255,255,255,.07);color:var(--tx2);border-radius:10px;padding:6px 10px;font-size:11.5px;font-weight:900;cursor:pointer;font-family:var(--font)">✏️ Editar</button>
-            <button onclick="eliminarRecordatorio('${r.id}')" style="border:none;background:rgba(239,68,68,.1);color:#ef4444;border-radius:10px;padding:6px 10px;font-size:11.5px;font-weight:900;cursor:pointer;font-family:var(--font)">🗑 Eliminar</button>
+      <div class="swipe-content">
+      <div class="card" style="margin-bottom:0;${vencido?'border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.06)':''}">
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="flex-shrink:0;width:38px;height:38px;border-radius:14px;background:${completado?'rgba(76,175,80,.12)':vencido?'rgba(239,68,68,.15)':'rgba(255,152,0,.12)'};display:flex;align-items:center;justify-content:center">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${completado?'#4caf50':vencido?'#ef4444':'#ff9800'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:14px;font-weight:900;color:var(--tx)">${r.titulo||'Recordatorio'}</div>
+            <div style="font-size:12px;color:var(--tx2);margin-top:2px">${r.clienteNombre||'Sin cliente'} · ${fechaFmt}${vencido?' · <span style="color:#ef4444;font-weight:800">Vencido</span>':''}</div>
+            ${r.notas?`<div style="font-size:12px;color:var(--tx2);margin-top:5px;line-height:1.4">${r.notas}</div>`:''}
+            <div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">
+              ${!completado?`<button onclick="event.stopPropagation();completarRecordatorio('${r.id}')" style="border:none;background:rgba(76,175,80,.15);color:#4caf50;border-radius:10px;padding:6px 10px;font-size:11.5px;font-weight:900;cursor:pointer;font-family:var(--font)">✓ Completar</button>`:''}
+              <button onclick="event.stopPropagation();abrirFormRecordatorio('${r.id}')" style="border:none;background:rgba(255,255,255,.07);color:var(--tx2);border-radius:10px;padding:6px 10px;font-size:11.5px;font-weight:900;cursor:pointer;font-family:var(--font)">✏️ Editar</button>
+              <button onclick="event.stopPropagation();eliminarRecordatorio('${r.id}')" style="border:none;background:rgba(239,68,68,.1);color:#ef4444;border-radius:10px;padding:6px 10px;font-size:11.5px;font-weight:900;cursor:pointer;font-family:var(--font)">🗑 Eliminar</button>
+            </div>
           </div>
         </div>
+      </div>
       </div>
     </div>`;
 };
@@ -6469,7 +6515,7 @@ const _COMP_SUBS = {
   avisos:        {ico:'💬', label:'Avisos resueltos',                        color:'#ef4444', ph:'🔍 Buscar por cliente o descripción...'},
   presupuestos:  {ico:'💶', label:'Presupuestos completados',                color:'#3b82f6', ph:'🔍 Buscar por cliente, título, notas...'},
   cobros:        {ico:'💰', label:'Cobros completados',                      color:'#22c55e', ph:'🔍 Buscar por cliente, título...'},
-  recordatorios: {ico:'🔔', label:'Recordatorios preventivos completados',   color:'#eab308', ph:'🔍 Buscar por cliente, título o notas...'}
+  recordatorios: {ico:'🔔', label:'Recordatorios completados',   color:'#eab308', ph:'🔍 Buscar por cliente, título o notas...'}
 };
 let _compSub = null;                  // null = portada de la seccion
 window._compQuery = {avisos:'',presupuestos:'',cobros:'',recordatorios:''};
@@ -6569,19 +6615,19 @@ window.abrirFormRecordatorio=(id,presetCliId)=>{
   const r=id?(allRecordatorios||[]).find(x=>x.id===id):null;
   const html=`
     <div class="fsec">
-      <div class="fgrp"><label>Cliente</label>
+      <div class="fgrp"><label>Cliente (opcional)</label>
         <div id="_recCli-wrap"></div>
       </div>
       <div class="fgrp" id="_recEquipo-wrap" style="display:none">
         <label>Equipo (opcional)</label>
         <select id="_recEquipo"><option value="">Sin equipo asociado</option></select>
       </div>
-      <div class="fgrp"><label>¿Qué hay que hacer? *</label><input id="_recTitulo" value="${(r?.titulo||'').replace(/"/g,'&quot;')}" placeholder="Ej: Revisión anual bomba de riego"></div>
+      <div class="fgrp"><label>¿Qué hay que recordar? *</label><input id="_recTitulo" value="${(r?.titulo||'').replace(/"/g,'&quot;')}" placeholder="Ej: Revisión anual bomba de riego, o renovar el seguro"></div>
       <div class="fgrp"><label>Fecha *</label><input type="date" id="_recFecha" value="${r?.fecha||new Date().toISOString().split('T')[0]}"></div>
       <div class="fgrp"><label>Notas</label><textarea id="_recNotas" placeholder="Detalles, referencias, lo que necesites recordar...">${r?.notas||''}</textarea></div>
       <button class="btn btn-p" onclick="guardarRecordatorio('${id||''}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> ${r?'Guardar cambios':'Crear recordatorio'}</button>
     </div>`;
-  abrirSB(r?'Editar recordatorio':'Nuevo recordatorio preventivo', html, undefined, 'recordatorio');
+  abrirSB(r?'Editar recordatorio':'Nuevo recordatorio', html, undefined, 'recordatorio');
   setTimeout(()=>{
     const _recPre = r?.clienteId || presetCliId || '';
     _buildCliSelect('_recCli', _recPre, cliId=>_recRefrescarSelectEquipo(cliId));
@@ -6653,6 +6699,7 @@ window.completarRecordatorio=(id)=>{
   _recSaveAll();
   toast('✓ Recordatorio completado','o');
   if(document.querySelector('#screenRecordatorios.active')) renderRecordatorios();
+  if(typeof _renderCompLista==='function') _renderCompLista();
   _recRefrescarClientesTab();
 };
 
@@ -6663,7 +6710,31 @@ window.eliminarRecordatorio=(id)=>{
   _recSaveAll();
   toast('🗑 Recordatorio eliminado','o');
   if(document.querySelector('#screenRecordatorios.active')) renderRecordatorios();
+  if(typeof _renderCompLista==='function') _renderCompLista();
   _recRefrescarClientesTab();
+};
+
+// Completar/restaurar/eliminar un recordatorio directamente desde el gesto de deslizar.
+window.swipeCompletarRecordatorio=(id)=>{
+  if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
+  completarRecordatorio(id);
+};
+window.swipeRestaurarRecordatorio=(id)=>{
+  if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
+  _asegurarLocalesCargados();
+  const i=(allRecordatorios||[]).findIndex(x=>x.id===id);
+  if(i<0) return;
+  allRecordatorios[i].estado='pendiente';
+  allRecordatorios[i].completadoEn=null;
+  _recSaveAll();
+  toast('↩️ Recordatorio restaurado a pendiente','o');
+  if(document.querySelector('#screenRecordatorios.active')) renderRecordatorios();
+  if(typeof _renderCompLista==='function') _renderCompLista();
+  _recRefrescarClientesTab();
+};
+window.swipeEliminarRecordatorio=(id)=>{
+  if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
+  eliminarRecordatorio(id);
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -6902,7 +6973,7 @@ window.verEquipo=(id)=>{
       <div style="font-size:13px;font-weight:800;color:var(--tx);margin-top:3px">${proximo.titulo}</div>
       <div style="font-size:11.5px;color:var(--tx2);margin-top:1px">${fmtFISO(proximo.fecha)}</div>
     </div>`:''}
-    <button class="btn btn-s" style="width:100%;margin-bottom:12px" onclick="_eqNuevoRecordatorio('${e.id}','${e.clienteId}')">+ Recordatorio preventivo para este equipo</button>
+    <button class="btn btn-s" style="width:100%;margin-bottom:12px" onclick="_eqNuevoRecordatorio('${e.id}','${e.clienteId}')">+ Recordatorio para este equipo</button>
     ${recComp.length?recComp.map(r=>`<div class="card" style="margin-bottom:8px">
       <div style="display:flex;align-items:center;gap:8px">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#4caf50" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
@@ -7093,7 +7164,7 @@ window.verCliente=async id=>{
       </button>
       <button onclick="window._crearRecordatorioRapidoCli('${id}')" style="display:flex;align-items:center;gap:8px;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.24);border-radius:14px;padding:11px 12px;cursor:pointer;font-family:var(--font);text-align:left">
         <span style="font-size:18px">🔔</span>
-        <div style="text-align:left"><div style="font-size:12px;font-weight:900;color:var(--tx)">Recordatorio</div><div style="font-size:10px;color:var(--tx2)">${_recDeCliente(id).filter(r=>r.estado!=='completado').length?`${_recDeCliente(id).filter(r=>r.estado!=='completado').length} pendiente${_recDeCliente(id).filter(r=>r.estado!=='completado').length!==1?'s':''}`:'Preventivo'}</div></div>
+        <div style="text-align:left"><div style="font-size:12px;font-weight:900;color:var(--tx)">Recordatorio</div><div style="font-size:10px;color:var(--tx2)">${_recDeCliente(id).filter(r=>r.estado!=='completado').length?`${_recDeCliente(id).filter(r=>r.estado!=='completado').length} pendiente${_recDeCliente(id).filter(r=>r.estado!=='completado').length!==1?'s':''}`:'Crear nuevo'}</div></div>
       </button>
       <button onclick="abrirImagenesClienteDesdeCli('${id}')" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;padding:11px 12px;cursor:pointer;font-family:var(--font);transition:.15s" onmouseover="this.style.borderColor='rgba(var(--theme-rgb),.4)'" onmouseout="this.style.borderColor='var(--border)'">
         <span style="font-size:18px">📷</span>
@@ -11201,7 +11272,8 @@ const _quitarArchCard=id=>{
   if(window._archivosAllSorted) window._archivosAllSorted=window._archivosAllSorted.filter(it=>it.id!==id);
   const cont=$('archivosContent');
   if(!cont)return;
-  const card=cont.querySelector(`.arch-card[data-archid="${id}"]`);
+  const inner=cont.querySelector(`.arch-card[data-archid="${id}"]`);
+  const card=inner?(inner.closest('.swipe-item')||inner):null;
   if(card){
     card.querySelectorAll('button').forEach(b=>b.disabled=true);
     card.style.transition='opacity .22s,transform .22s';
@@ -11236,23 +11308,40 @@ const _renderArchivosCard=(it)=>{
   // activan el mismo mecanismo genérico y heredan la misma protección para
   // que "mantener pulsado" no seleccione texto ni abra el menú nativo.
   const selAttrs = esCliente ? `data-sel-id="${it.id}" data-sel-type="archcliente"` : '';
+  // Deslizar a la derecha elimina definitivamente; deslizar a la izquierda restaura.
+  const rightAttrs = `data-right-fn="borrarArchivo" data-right-action="delete" data-right-label="Eliminar"`;
+  const leftAttrs = `data-left-fn="swipeRestaurarArchivo" data-left-action="restore" data-left-label="Restaurar"`;
   return `
-  <div class="arch-card" data-archid="${it.id}" ${selAttrs} onclick="${esCliente?`_verClienteArchivado('${it.id}')`:`_verParteArchivado('${it.id}')`}" style="cursor:pointer">
+  <div class="swipe-item" data-swipe-id="${it.id}" ${selAttrs} ${rightAttrs} ${leftAttrs}>
+    <div class="swipe-bg"></div>
     ${esCliente?'<div class="sel-check"></div>':''}
-    <div class="arch-card-ico">
-      ${esCliente
-        ?`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`
-        :`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`}
+    <div class="swipe-content" onclick="${esCliente?`_verClienteArchivado('${it.id}')`:`_verParteArchivado('${it.id}')`}" style="cursor:pointer">
+    <div class="arch-card" data-archid="${it.id}">
+      <div class="arch-card-ico">
+        ${esCliente
+          ?`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`
+          :`<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>`}
+      </div>
+      <div class="arch-info">
+        <div class="arch-name">${nombreMostrar}</div>
+        <div class="arch-sub">${subInfo}</div>
+      </div>
+      <div class="arch-btns">
+        <button class="btn btn-ok btn-sm" title="Restaurar" onclick="event.stopPropagation();restaurarArchivo('${it.id}','${it.tipo}')">↩</button>
+        <button class="btn btn-del btn-sm" title="Eliminar definitivamente" onclick="event.stopPropagation();borrarArchivo('${it.id}')">🗑</button>
+      </div>
     </div>
-    <div class="arch-info">
-      <div class="arch-name">${nombreMostrar}</div>
-      <div class="arch-sub">${subInfo}</div>
-    </div>
-    <div class="arch-btns">
-      <button class="btn btn-ok btn-sm" title="Restaurar" onclick="event.stopPropagation();restaurarArchivo('${it.id}','${it.tipo}')">↩</button>
-      <button class="btn btn-del btn-sm" title="Eliminar definitivamente" onclick="event.stopPropagation();borrarArchivo('${it.id}')">🗑</button>
     </div>
   </div>`;
+};
+
+// Restaurar directamente desde el gesto de deslizar hacia la izquierda en la
+// lista de archivados. Usa el mismo restaurarArchivo(id,tipo) que el botón ↩,
+// resolviendo el tipo desde la caché si no se pasa explícito.
+window.swipeRestaurarArchivo=async(id)=>{
+  if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
+  const tipo=(window._archivosCache&&window._archivosCache[id]&&window._archivosCache[id].tipo)||undefined;
+  await restaurarArchivo(id,tipo);
 };
 
 // ─── Ficha de un CLIENTE archivado: sus datos y todo lo que se archivo con el ───
@@ -11293,7 +11382,7 @@ window._verClienteArchivado=async(archId)=>{
 
   const META={
     aviso:{ico:'💬',label:'Avisos'}, cobro:{ico:'💰',label:'Cobros'},
-    presupuesto:{ico:'💶',label:'Presupuestos'}, recordatorio:{ico:'🔔',label:'Recordatorios preventivos'},
+    presupuesto:{ico:'💶',label:'Presupuestos'}, recordatorio:{ico:'🔔',label:'Recordatorios'},
     imagen:{ico:'🖼️',label:'Imágenes'}, parte:{ico:'🔧',label:'Partes'}
   };
   const grupos={};
