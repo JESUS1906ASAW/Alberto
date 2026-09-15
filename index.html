@@ -17257,21 +17257,33 @@ window._vzToggle = () => {
   // cada evento; aquí se lleva la cuenta de qué resultados "finales" ya se
   // han sumado (indiceProcesado) y cada uno se añade una sola vez.
   let indiceProcesado=0;
-  // Se lleva la cuenta de en qué "sesión" (instancia de _vzRec) va cada
-  // trozo final ya añadido, y cuál fue el último. En algunos móviles el
-  // reconocedor se reinicia solo de vez en cuando (aunque sigas en
-  // silencio) y, al reabrir, vuelve a reconocer y a dar como "final" la
-  // MISMA frase que ya se había oído justo antes — así es como salía
-  // "hola hola hola hola…". Por eso un trozo se descarta por repetido
-  // SOLO si es idéntico al último Y pertenece a una sesión distinta (un
-  // reinicio de por medio): si es la MISMA sesión, se añade siempre,
-  // aunque sea la misma palabra, porque entonces es la persona repitiendo
-  // adrede (p.ej. "no no no no no" para corregirse).
-  let sesionId=0;
-  let ultimoFinal={texto:'', sesion:-1};
+  // En algunos móviles cada trozo "final" que da el reconocedor no es solo
+  // la palabra nueva desde el trozo anterior: es la FRASE ENTERA dicha
+  // hasta ese momento, repetida y ampliada cada vez ("crea" -> "crea un" ->
+  // "crea un nuevo" -> "crea un nuevo aviso"...). Sumar cada trozo al
+  // acumulado (como se hacía antes) metía la frase entera una y otra vez,
+  // cada vez más larga — así salía "crea crea un crea un nuevo...".
+  // Por eso, antes de sumar un trozo nuevo, se compara con lo que ya
+  // había acumulado:
+  //  - si el trozo nuevo EMPIEZA por lo ya acumulado (lo amplía), se
+  //    SUSTITUYE el acumulado por el trozo nuevo en vez de sumarlo: es la
+  //    misma frase, más completa.
+  //  - si el trozo nuevo es exactamente igual a lo acumulado, no aporta
+  //    nada: se ignora.
+  //  - si lo acumulado ya contiene al trozo nuevo (llega "viejo" o corto),
+  //    también se ignora.
+  //  - si no tiene nada que ver con lo acumulado, es contenido MENOS
+  //    directo (otra frase después de una pausa): ahí sí se suma detrás,
+  //    como antes.
+  const _vzFundirTrozo = (acc, nuevo) => {
+    const nAcc=_vzNorm(acc), nNuevo=_vzNorm(nuevo);
+    if(!nAcc) return nuevo;
+    if(nNuevo===nAcc) return acc;                 // igual, no aporta nada
+    if(nNuevo.startsWith(nAcc)) return nuevo;      // amplía lo ya dicho: se sustituye
+    if(nAcc.startsWith(nNuevo)) return acc;        // llega algo más corto/viejo: se ignora
+    return (acc+' '+nuevo).replace(/\s+/g,' ').trim(); // frase distinta: se suma
+  };
   const _vzIniciarSesion=()=>{
-    sesionId++;
-    const miSesion=sesionId;
     _vzRec=new _VZ_SR();
     _vzRec.lang='es-ES';
     _vzRec.continuous=true;
@@ -17289,15 +17301,10 @@ window._vzToggle = () => {
         const res=ev.results[i];
         if(res.isFinal){
           if(i>=indiceProcesado){
-            const transcrito=res[0].transcript;
-            const repetidoTrasReinicio = _vzNorm(transcrito)===_vzNorm(ultimoFinal.texto) && miSesion!==ultimoFinal.sesion;
-            if(!repetidoTrasReinicio){
-              acumulado=(acumulado+' '+transcrito).replace(/\s+/g,' ').trim();
-              if(res[0].confidence) confianza=res[0].confidence;
-              // Las otras interpretaciones: a veces la buena es la segunda
-              alternativas=[]; for(let k=0;k<res.length;k++) alternativas.push(res[k].transcript);
-              ultimoFinal={texto:transcrito, sesion:miSesion};
-            }
+            acumulado = _vzFundirTrozo(acumulado, res[0].transcript);
+            if(res[0].confidence) confianza=res[0].confidence;
+            // Las otras interpretaciones: a veces la buena es la segunda
+            alternativas=[]; for(let k=0;k<res.length;k++) alternativas.push(res[k].transcript);
             indiceProcesado=i+1;
           }
         } else {
