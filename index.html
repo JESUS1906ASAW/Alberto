@@ -17167,10 +17167,11 @@ window._vzToggle = () => {
   const reiniciarSilencio=()=>{
     clearTimeout(silencio);
     // Antes de empezar a hablar esperamos 8 s (te da tiempo a colocarte).
-    // Una vez has empezado, hace falta un silencio CLARO de unos 3 s para
+    // Una vez has empezado, hace falta un silencio CLARO de unos 3,5 s para
     // dar la frase por terminada: así una pausa para respirar o pensar a
-    // media frase no la corta.
-    silencio=setTimeout(()=>{ intencionParar=true; try{_vzRec.stop();}catch(e){} }, hablando ? 3000 : 8000);
+    // media frase no la corta. Este temporizador es nuestro, no el del
+    // navegador: es el único que decide "has terminado tú de verdad".
+    silencio=setTimeout(()=>{ intencionParar=true; try{_vzRec.stop();}catch(e){} }, hablando ? 3500 : 8000);
   };
 
   const terminar=()=>{
@@ -17275,13 +17276,55 @@ window._vzToggle = () => {
   //  - si no tiene nada que ver con lo acumulado, es contenido MENOS
   //    directo (otra frase después de una pausa): ahí sí se suma detrás,
   //    como antes.
+  // Comparación TOLERANTE, no exacta: cuando Android corta la sesión por su
+  // cuenta y la reabre sola (pasa incluso con continuous:true, es cosa del
+  // propio sistema, no de este código), el trozo que se repite casi nunca
+  // sale transcrito IGUAL que la primera vez — una palabra cambia, un
+  // acento se oye distinto... Antes esta función solo detectaba la
+  // repetición si coincidía letra por letra, así que en cuanto había la más
+  // mínima diferencia la daba por "frase distinta" y la pegaba entera otra
+  // vez (de ahí las palabras dobladas). Ahora compara PALABRA A PALABRA con
+  // margen de error (reutilizando _vzParecido, la misma distancia de
+  // edición que ya se usa para tolerar nombres de clientes mal oídos), y
+  // busca dónde se solapa el final de lo acumulado con el principio del
+  // trozo nuevo, aunque no sea una coincidencia perfecta.
   const _vzFundirTrozo = (acc, nuevo) => {
     const nAcc=_vzNorm(acc), nNuevo=_vzNorm(nuevo);
     if(!nAcc) return nuevo;
-    if(nNuevo===nAcc) return acc;                 // igual, no aporta nada
-    if(nNuevo.startsWith(nAcc)) return nuevo;      // amplía lo ya dicho: se sustituye
-    if(nAcc.startsWith(nNuevo)) return acc;        // llega algo más corto/viejo: se ignora
-    return (acc+' '+nuevo).replace(/\s+/g,' ').trim(); // frase distinta: se suma
+    if(!nNuevo) return acc;
+
+    // Iguales o casi iguales del todo: no aporta nada nuevo.
+    if(_vzParecido(nAcc,nNuevo) > 0.92) return nNuevo.length>=nAcc.length ? nuevo : acc;
+
+    const wAcc=nAcc.split(' '), wNuevo=nNuevo.split(' ');
+
+    // ¿El trozo nuevo amplía lo ya dicho (empieza como lo acumulado, con
+    // margen de error), o es un trozo viejo/corto que ya tenemos?
+    const inicioParecido=(ws1,ws2)=>{
+      const k=Math.min(ws1.length,ws2.length);
+      let ok=0;
+      for(let i=0;i<k;i++) if(_vzParecido(ws1[i],ws2[i])>0.72) ok++;
+      return k>0 && ok/k>0.8;
+    };
+    if(inicioParecido(wAcc,wNuevo)) return wNuevo.length>=wAcc.length ? nuevo : acc;
+
+    // Solape parcial: el trozo nuevo repite (con margen de error) el FINAL
+    // de lo acumulado antes de traer contenido de verdad nuevo. Se busca el
+    // mayor solape posible y solo se añade lo que viene después.
+    const maxSolape=Math.min(wAcc.length,wNuevo.length,10);
+    for(let k=maxSolape;k>=1;k--){
+      const finAcc=wAcc.slice(-k), inicioNuevo=wNuevo.slice(0,k);
+      let ok=0;
+      for(let i=0;i<k;i++) if(_vzParecido(finAcc[i],inicioNuevo[i])>0.72) ok++;
+      if(ok/k>0.8){
+        const resto=wNuevo.slice(k).join(' ');
+        return resto ? (acc+' '+resto).replace(/\s+/g,' ').trim() : acc;
+      }
+    }
+
+    // Nada en común: es contenido realmente distinto (otra frase después
+    // de una pausa larga), se suma detrás como antes.
+    return (acc+' '+nuevo).replace(/\s+/g,' ').trim();
   };
   const _vzIniciarSesion=()=>{
     _vzRec=new _VZ_SR();
