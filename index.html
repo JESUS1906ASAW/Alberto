@@ -6493,6 +6493,14 @@ const _recRefrescarClientesTab=()=>{
 };
 
 // ─── Pantalla: listado de Recordatorios Preventivos ───
+// Texto corto para la marca de repetición ("Cada 6 meses", "Cada semana"...).
+// r.repetir es {cada, unidad:'dia'|'semana'|'mes'|'ano'} o null/undefined si no se repite.
+const _recRepetirLabel=(rep)=>{
+  if(!rep||!rep.cada||!rep.unidad) return '';
+  const sing={dia:'día',semana:'semana',mes:'mes',ano:'año'}[rep.unidad]||rep.unidad;
+  const plur={dia:'días',semana:'semanas',mes:'meses',ano:'años'}[rep.unidad]||rep.unidad+'s';
+  return rep.cada===1?`Cada ${sing}`:`Cada ${rep.cada} ${plur}`;
+};
 // Tarjeta de recordatorio. La usan la seccion de pendientes y la de
 // Completados / Resueltos, para que se vean identicas en los dos sitios.
 const _recCardHtml=(r)=>{
@@ -6515,7 +6523,7 @@ const _recCardHtml=(r)=>{
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="${completado?'#4caf50':vencido?'#ef4444':'#ff9800'}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
           <div style="flex:1;min-width:0">
-            <div style="font-size:14px;font-weight:900;color:var(--tx)">${r.titulo||'Recordatorio'}</div>
+            <div style="font-size:14px;font-weight:900;color:var(--tx);display:flex;align-items:center;gap:6px">${r.titulo||'Recordatorio'}${r.repetir?`<span style="font-size:10.5px;font-weight:800;color:#8b5cf6;background:rgba(139,92,246,.13);border-radius:8px;padding:2px 7px;white-space:nowrap">🔁 ${_recRepetirLabel(r.repetir)}</span>`:''}</div>
             <div style="font-size:12px;color:var(--tx2);margin-top:2px">${r.clienteNombre||'Sin cliente'} · ${fechaFmt}${vencido?' · <span style="color:#ef4444;font-weight:800">Vencido</span>':''}</div>
             ${r.notas?`<div style="font-size:12px;color:var(--tx2);margin-top:5px;line-height:1.4">${r.notas}</div>`:''}
             <div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">
@@ -6679,6 +6687,19 @@ window.abrirFormRecordatorio=(id,presetCliId)=>{
       </div>
       <div class="fgrp"><label>¿Qué hay que recordar? *</label><input id="_recTitulo" value="${(r?.titulo||'').replace(/"/g,'&quot;')}" placeholder="Ej: Revisión anual bomba de riego, o renovar el seguro"></div>
       <div class="fgrp"><label>Fecha *</label><input type="date" id="_recFecha" value="${r?.fecha||new Date().toISOString().split('T')[0]}"></div>
+      <div class="fgrp"><label>Repetir</label>
+        <div style="display:flex;gap:8px">
+          <input type="number" id="_recRepetirCada" min="1" value="${r?.repetir?.cada||1}" style="width:70px" ${r?.repetir?'':'disabled'}>
+          <select id="_recRepetirUnidad" style="flex:1" onchange="document.getElementById('_recRepetirCada').disabled=!this.value">
+            <option value="" ${!r?.repetir?'selected':''}>No se repite</option>
+            <option value="dia" ${r?.repetir?.unidad==='dia'?'selected':''}>Día(s)</option>
+            <option value="semana" ${r?.repetir?.unidad==='semana'?'selected':''}>Semana(s)</option>
+            <option value="mes" ${r?.repetir?.unidad==='mes'?'selected':''}>Mes(es)</option>
+            <option value="ano" ${r?.repetir?.unidad==='ano'?'selected':''}>Año(s)</option>
+          </select>
+        </div>
+        <div style="font-size:11px;color:var(--tx2);margin-top:5px;line-height:1.4">Al completarlo, se crea solo el siguiente recordatorio con esa periodicidad.</div>
+      </div>
       <div class="fgrp"><label>Notas</label><textarea id="_recNotas" placeholder="Detalles, referencias, lo que necesites recordar...">${r?.notas||''}</textarea></div>
       <button class="btn btn-p" onclick="guardarRecordatorio('${id||''}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> ${r?'Guardar cambios':'Crear recordatorio'}</button>
     </div>`;
@@ -6715,6 +6736,9 @@ window.guardarRecordatorio=(id)=>{
   const titulo=(document.getElementById('_recTitulo')?.value||'').trim();
   const fecha=document.getElementById('_recFecha')?.value||'';
   const notas=(document.getElementById('_recNotas')?.value||'').trim();
+  const repUnidad=document.getElementById('_recRepetirUnidad')?.value||'';
+  const repCada=parseInt(document.getElementById('_recRepetirCada')?.value,10)||1;
+  const repetir=repUnidad?{cada:repCada,unidad:repUnidad}:null;
 
   if(!titulo){ toast('Escribe qué recordatorio quieres crear','e'); return; }
   if(!fecha){ toast('Elige una fecha','e'); return; }
@@ -6724,7 +6748,7 @@ window.guardarRecordatorio=(id)=>{
   if(id){
     const i=allRecordatorios.findIndex(x=>x.id===id);
     if(i>=0){
-      allRecordatorios[i]={...allRecordatorios[i], clienteId:clienteId||null, clienteNombre:(window._cliNombreDe('_recCli')||allRecordatorios[i].clienteNombre||''), equipoId:equipoId||null, equipoNombre:equipo?equipo.tipo:(allRecordatorios[i].equipoNombre||''), titulo, fecha, notas};
+      allRecordatorios[i]={...allRecordatorios[i], clienteId:clienteId||null, clienteNombre:(window._cliNombreDe('_recCli')||allRecordatorios[i].clienteNombre||''), equipoId:equipoId||null, equipoNombre:equipo?equipo.tipo:(allRecordatorios[i].equipoNombre||''), titulo, fecha, notas, repetir};
     }
   } else {
     allRecordatorios.push({
@@ -6733,7 +6757,7 @@ window.guardarRecordatorio=(id)=>{
       clienteNombre:window._cliNombreDe('_recCli'),
       equipoId:equipoId||null,
       equipoNombre:equipo?equipo.tipo:'',
-      titulo, fecha, notas,
+      titulo, fecha, notas, repetir,
       estado:'pendiente',
       creadoEn:Date.now()
     });
@@ -6749,10 +6773,30 @@ window.completarRecordatorio=(id)=>{
   _asegurarLocalesCargados();
   const i=(allRecordatorios||[]).findIndex(x=>x.id===id);
   if(i<0) return;
-  allRecordatorios[i].estado='completado';
-  allRecordatorios[i].completadoEn=Date.now();
+  const r=allRecordatorios[i];
+  r.estado='completado';
+  r.completadoEn=Date.now();
+  // Si se repite, se crea ya la siguiente ocasión pendiente (a partir de la
+  // fecha en que tocaba esta, no de hoy: así la periodicidad no se desvía
+  // aunque el aviso se complete unos días tarde). Se conserva el historial:
+  // este queda completado y aparece uno nuevo, no se reabre el mismo.
+  if(r.repetir && r.repetir.cada && r.repetir.unidad){
+    const base=r.fecha?new Date(r.fecha+'T12:00:00'):new Date();
+    allRecordatorios.push({
+      id:'rec_'+Date.now()+'_'+Math.random().toString(36).slice(2,8),
+      clienteId:r.clienteId||null,
+      clienteNombre:r.clienteNombre||'',
+      equipoId:r.equipoId||null,
+      equipoNombre:r.equipoNombre||'',
+      titulo:r.titulo, notas:r.notas||'',
+      fecha:_vzSumarIntervalo(base, r.repetir.cada, r.repetir.unidad),
+      repetir:{cada:r.repetir.cada, unidad:r.repetir.unidad},
+      estado:'pendiente',
+      creadoEn:Date.now()
+    });
+  }
   _recSaveAll();
-  toast('✓ Recordatorio completado','o');
+  toast(r.repetir?'✓ Completado. Se ha creado el siguiente':'✓ Recordatorio completado','o');
   if(document.querySelector('#screenRecordatorios.active')) renderRecordatorios();
   if(typeof _renderCompLista==='function') _renderCompLista();
   _recRefrescarClientesTab();
@@ -16378,6 +16422,13 @@ const _vzQuitarRepeticiones = (texto) => {
   // Segunda pasada: el mismo grupo repetido pero NO seguido, que es lo que
   // deja el reinicio de sesión ("llamar a llamar a pura"). Se queda la
   // aparición más tardía, que suele ser la frase ya completa.
+  // Ojo: remates como "nada más" pueden decirse DOS veces con sentido
+  // distinto cada vez ("nada más que revisar el filtro... nada más" = "solo
+  // hay que revisar el filtro" + la despedida final). Si se tratan como
+  // repetición se borra la primera, la que de verdad importa, y solo queda
+  // la despedida. Por eso esos remates concretos se dejan fuera de esta
+  // pasada; de ellos ya se encarga _vzQuitarCierre, que solo mira el final.
+  const _vzEsRemateProtegido = (g) => /^(?:nada mas|algo mas|ya esta|eso (?:es|era|seria) todo)$/.test(g);
   for(let n=4; n>=2; n--){
     let cambiado=true, vueltas=0;
     while(cambiado && vueltas++<20){
@@ -16385,6 +16436,7 @@ const _vzQuitarRepeticiones = (texto) => {
       for(let i=0; i+n<=out.length; i++){
         const grupo = out.slice(i,i+n).map(x=>x.toLowerCase()).join(' ');
         if(!out.slice(i,i+n).some(x=>x.length>3)) continue;   // evitar "de la"
+        if(_vzEsRemateProtegido(grupo)) continue;
         for(let k=i+n; k+n<=out.length; k++){
           if(out.slice(k,k+n).map(x=>x.toLowerCase()).join(' ')===grupo){
             out = [...out.slice(0,i), ...out.slice(i+n)];      // borra la primera
@@ -16444,8 +16496,13 @@ const _vzDondeEmpieza = (texto, tipo) => {
     if(_VZ_CONECTORES.has(limpia)){ i++; continue; } // conector: fuera
     break;
   }
-  // No dejar el texto vacío: si todo eran palabras de unión, se deja tal cual
-  if(i >= pal.length) return texto;
+  // Si TODO eran conectores ("al", "de", "en el que"...) no queda nada
+  // aprovechable: no es que "se deje tal cual", es que no hay texto real
+  // que mostrar. Esto solo pasa cuando algo se coló como resto por error
+  // más arriba (p. ej. una preposición suelta tras sacar el cliente); si de
+  // verdad no dijiste descripción, este texto ya llegaba vacío y ni entra
+  // en este bucle (ver el "if(!texto)" del principio).
+  if(i >= pal.length) return '';
   pal = pal.slice(i);
 
   // Y si arranca con el verbo que ya dice el tipo, también fuera
@@ -16455,6 +16512,35 @@ const _vzDondeEmpieza = (texto, tipo) => {
     if(resto.length) return _vzDondeEmpieza(resto.join(' '), null);
   }
   return pal.join(' ');
+};
+
+// ── Conectores sueltos al FINAL ──
+// Cuando se saca una fecha/importe/prioridad de en medio de la frase, a
+// veces deja colgando delante la preposición que los introducía: "comprar
+// juntas PARA mañana" saca "mañana" y deja "comprar juntas para" con la
+// preposición huérfana al final. Es la misma idea que _vzDondeEmpieza,
+// pero mirando por el otro extremo: se recortan conectores sueltos desde
+// el final, palabra a palabra, parando en la primera que sí aporta algo.
+const _vzQuitarConectorFinal = (texto) => {
+  if(!texto) return texto;
+  let pal = texto.split(/\s+/).filter(Boolean);
+  let i = pal.length;
+  while(i>0){
+    const limpia = _vzNorm(pal[i-1]).replace(/[^a-zñ0-9]/g,'');
+    if(!limpia){ i--; continue; }
+    // "nada mas" / "algo mas" al final es un cierre con sentido propio
+    // ("no hay nada más que hacer"), no el "mas" (=pero) suelto que esta
+    // función recorta: si se quitara solo el "mas", "nada"/"algo" se
+    // quedaría colgando sin sentido. Se dejan los dos tal cual aquí; es
+    // _vzQuitarCierre quien decide si ese cierre entero se recorta.
+    if(limpia==='mas' && i>=2){
+      const anterior = _vzNorm(pal[i-2]).replace(/[^a-zñ0-9]/g,'');
+      if(anterior==='nada' || anterior==='algo') break;
+    }
+    if(_VZ_CONECTORES.has(limpia)){ i--; continue; }
+    break;
+  }
+  return i<=0 ? '' : pal.slice(0,i).join(' ');
 };
 
 // Limpieza final de puntuación suelta que deja la transcripción
@@ -16469,7 +16555,14 @@ const _vzPulirTexto = (texto) => (texto||'')
 // ── ¿Esto merece guardarse? ──
 // "enero" o "ficha enero" creaban avisos vacíos de sentido. Si no hay cliente
 // y el texto no llega a dos palabras con contenido, se descarta.
-const _VZ_VACIAS = new Set(['el','la','los','las','un','una','unos','unas','de','del','a','al','en','y','o','que','por','para','con','se','su','sus','lo','le','les','mi','tu','es','ha','han','hay']);
+// Un nombre de mes o de día de la semana suelto NO cuenta como esa segunda
+// palabra: son restos de una fecha que se quedó sin encajar en ningún otro
+// sitio, no una descripción real ("enero", "ficha enero" solos no dicen qué
+// hay que hacer). "ficha" tampoco cuenta por sí sola: es la palabra con la
+// que la gente se refiere al propio documento ("ficha de Pura"), nunca el
+// contenido de lo que hay que apuntar.
+const _VZ_VACIAS = new Set(['el','la','los','las','un','una','unos','unas','de','del','a','al','en','y','o','que','por','para','con','se','su','sus','lo','le','les','mi','tu','es','ha','han','hay',
+  ...Object.keys(_VZ_MESES), ...Object.keys(_VZ_DIAS), 'ficha','fichas']);
 const _vzTieneSustancia = (texto) => {
   if(!texto) return false;
   const utiles = _vzNorm(texto).split(' ').filter(p=>p.length>2 && !_VZ_VACIAS.has(p));
@@ -16483,6 +16576,25 @@ const _vzFecha = (txtNorm) => {
   if(/\bpasado manana\b/.test(txtNorm))  return {fecha:_vzISO(dias(2)), txt:'pasado manana'};
   if(/\bmanana\b/.test(txtNorm))         return {fecha:_vzISO(dias(1)), txt:'manana'};
   if(/\bhoy\b/.test(txtNorm))            return {fecha:_vzISO(hoy),     txt:'hoy'};
+
+  // "la semana/el mes/el año que viene" SUELTOS, sin decir un día de la
+  // semana ni una fecha concreta: se toma "hoy + un intervalo completo",
+  // igual que hace _vzSumarIntervalo con la recurrencia. Antes solo
+  // funcionaba "el lunes que viene" (con día de la semana); "el mes que
+  // viene" o "el año que viene" a secas no se reconocían como fecha y se
+  // quedaban sin más como texto suelto del aviso/recordatorio.
+  let mQueViene = txtNorm.match(/\b(?:la\s+)?semana\s+que\s+viene\b/);
+  if(mQueViene) return {fecha:_vzISO(dias(7)), txt:mQueViene[0]};
+  mQueViene = txtNorm.match(/\b(?:el\s+)?mes\s+que\s+viene\b/);
+  if(mQueViene){
+    const d=new Date(hoy); d.setMonth(d.getMonth()+1);
+    return {fecha:_vzISO(d), txt:mQueViene[0]};
+  }
+  mQueViene = txtNorm.match(/\b(?:el\s+)?ano\s+que\s+viene\b/);
+  if(mQueViene){
+    const d=new Date(hoy); d.setFullYear(d.getFullYear()+1);
+    return {fecha:_vzISO(d), txt:mQueViene[0]};
+  }
 
   // "en dos semanas", "dentro de un mes", "dentro de un año"
   let m = txtNorm.match(/\b(?:en|dentro de)\s+([\w]+)\s+(dias?|semanas?|meses|mes|anos?|ano)\b/);
@@ -16542,7 +16654,10 @@ const _vzFecha = (txtNorm) => {
     return {fecha:_vzISO(d), txt:m[0]};
   }
 
-  // "el lunes" / "el lunes que viene"
+  // "el lunes" / "el lunes que viene". "todos los lunes"/"cada lunes"
+  // también caen aquí (la marca "todos los"/"cada" ya se ha quitado antes
+  // por separado, en _vzRecurrencia, dejando solo "lunes"): se coge como
+  // la PRÓXIMA vez que toque ese día, la primera ocasión de la repetición.
   m = _vzUltimaCoincidencia(txtNorm, /\b(?:el\s+)?(lunes|martes|miercoles|jueves|viernes|sabado|domingo)(\s+que\s+viene)?\b/g);
   if(m){
     const objetivo=_VZ_DIAS[m[1]];
@@ -16563,6 +16678,82 @@ const _vzFecha = (txtNorm) => {
   return null;
 };
 
+// ── Recurrencia ──
+// "todos los lunes", "cada mes", "cada seis meses", "una vez al año"...
+// Se guarda APARTE de la fecha (que sigue siendo solo la fecha de la
+// PRÓXIMA vez): así, al completar el recordatorio, la app puede crear ella
+// sola la siguiente ocasión en vez de tener que volver a dictarlo cada
+// vez. "txt" es SOLO la marca de repetición ("todos los", "cada seis
+// meses"...) — cuando la marca lleva pegado un día de la semana ("todos
+// los lunes"), el nombre del día NO entra en "txt": se deja intacto para
+// que _vzFecha lo lea justo igual que si solo hubieras dicho "el lunes".
+// Si se quitara aquí también, _vzFecha ya no lo encontraría.
+const _VZ_DIA_SEMANA_RE = 'lunes|martes|miercoles|jueves|viernes|sabado|domingo';
+const _vzRecurrencia = (txtNorm) => {
+  // "todos los lunes" / "cada lunes"
+  let m = txtNorm.match(new RegExp('\\b(todos\\s+los|cada)\\s+(?='+_VZ_DIA_SEMANA_RE+'\\b)'));
+  if(m) return {cada:1, unidad:'semana', txt:m[0]};
+
+  // "cada N dias/semanas/meses/años", en cifra o en una sola palabra
+  m = txtNorm.match(/\bcada\s+(\d+|[a-zñ]+)\s+(dias?|semanas?|meses|mes|anos?)\b/);
+  if(m){
+    const n = parseInt(m[1],10) || _VZ_NUM[m[1]] || null;
+    if(n){
+      const unidad = /^dia/.test(m[2])?'dia' : /^seman/.test(m[2])?'semana' : /^(mes|meses)$/.test(m[2])?'mes' : 'ano';
+      return {cada:n, unidad, txt:m[0]};
+    }
+  }
+  // "cada mes" / "cada semana" / "cada año" / "cada día" (sin número, =1)
+  m = txtNorm.match(/\bcada\s+(dia|semana|mes|ano)\b/);
+  if(m) return {cada:1, unidad:m[1], txt:m[0]};
+
+  // "cada trimestre" / "cada semestre": no son una unidad propia en el
+  // modelo de datos (solo dia/semana/mes/ano), así que se traducen a meses
+  // (3 y 6) para que se guarden y se repitan igual de bien.
+  if(m=txtNorm.match(/\bcada\s+trimestre\b/)) return {cada:3, unidad:'mes', txt:m[0]};
+  if(m=txtNorm.match(/\bcada\s+semestre\b/))  return {cada:6, unidad:'mes', txt:m[0]};
+
+  // "todos los días" / "todas las semanas" / "todos los meses" / "todos los años" /
+  // "todos los trimestres" / "todos los semestres"
+  m = txtNorm.match(/\btodos\s+los\s+(dias|meses|anos|trimestres|semestres)\b|\btodas\s+las\s+(semanas)\b/);
+  if(m){
+    const palabra=m[1]||m[2];
+    const mapa={dias:'dia',semanas:'semana',meses:'mes',anos:'ano',trimestres:'trimestre',semestres:'semestre'};
+    const u=mapa[palabra];
+    return u==='trimestre' ? {cada:3, unidad:'mes', txt:m[0]}
+         : u==='semestre'  ? {cada:6, unidad:'mes', txt:m[0]}
+         : {cada:1, unidad:u, txt:m[0]};
+  }
+  // "una vez a la semana/al mes/al año/al trimestre/al semestre", "a diario",
+  // "diariamente", "semanalmente", "mensualmente", "anualmente",
+  // "trimestralmente", "semestralmente"
+  if(m=txtNorm.match(/\buna vez a la semana\b/)) return {cada:1, unidad:'semana', txt:m[0]};
+  if(m=txtNorm.match(/\buna vez al mes\b/))      return {cada:1, unidad:'mes',    txt:m[0]};
+  if(m=txtNorm.match(/\buna vez al ano\b/))      return {cada:1, unidad:'ano',    txt:m[0]};
+  if(m=txtNorm.match(/\buna vez al trimestre\b/)) return {cada:3, unidad:'mes',   txt:m[0]};
+  if(m=txtNorm.match(/\buna vez al semestre\b/))  return {cada:6, unidad:'mes',   txt:m[0]};
+  if(m=txtNorm.match(/\ba diario\b|\bdiariamente\b/)) return {cada:1, unidad:'dia', txt:m[0]};
+  if(m=txtNorm.match(/\bsemanalmente\b/)) return {cada:1, unidad:'semana', txt:m[0]};
+  if(m=txtNorm.match(/\bmensualmente\b/)) return {cada:1, unidad:'mes', txt:m[0]};
+  if(m=txtNorm.match(/\banualmente\b/))   return {cada:1, unidad:'ano', txt:m[0]};
+  if(m=txtNorm.match(/\btrimestralmente\b/)) return {cada:3, unidad:'mes', txt:m[0]};
+  if(m=txtNorm.match(/\bsemestralmente\b/))  return {cada:6, unidad:'mes', txt:m[0]};
+  return null;
+};
+
+// Suma "cada N unidad" a una fecha base. Se usa cuando hay recurrencia
+// pero no se ha dicho ninguna fecha propia ("cada seis meses" a secas,
+// sin decir cuándo es la primera vez): la primera ocasión es dentro de un
+// intervalo completo a partir de hoy, no hoy mismo.
+const _vzSumarIntervalo = (base, cada, unidad) => {
+  const d=new Date(base); d.setHours(12,0,0,0);
+  if(unidad==='dia')         d.setDate(d.getDate()+cada);
+  else if(unidad==='semana') d.setDate(d.getDate()+cada*7);
+  else if(unidad==='mes')    d.setMonth(d.getMonth()+cada);
+  else                       d.setFullYear(d.getFullYear()+cada);
+  return _vzISO(d);
+};
+
 // ── Importe ──
 // Suma de importes: "noventa euros y 10 euros más" son 100, no 10.
 // Antes se quedaba con el último que encontraba, en silencio.
@@ -16581,7 +16772,44 @@ const _vzImportesTodos = (txtNorm) => {
     const v=_vzNumeroEnPalabras(m[1]);
     if(v && !encontrados.some(e=>Math.abs(e.idx-m.index)<4)) encontrados.push({valor:v, txt:m[0], idx:m.index});
   }
-  return encontrados.sort((a,b)=>a.idx-b.idx);
+  encontrados.sort((a,b)=>a.idx-b.idx);
+  // "cincuenta euros y diez más": el segundo número no repite "euros" (se
+  // sobreentiende la misma moneda). Sin esto, ese "diez" no se contaba
+  // como importe y se quedaba tal cual metido en el texto del cobro.
+  if(encontrados.length){
+    const ultimo=encontrados[encontrados.length-1];
+    const cola=txtNorm.slice(ultimo.idx+ultimo.txt.length);
+    const mCola=cola.match(new RegExp('^\\s*y\\s+(\\d+(?:[.,]\\d{1,2})?|'+_VZ_NUMPAL_RE+')\\s+(?:mas|ademas)\\b'));
+    if(mCola){
+      const v=/^\d/.test(mCola[1]) ? parseFloat(mCola[1].replace(',','.')) : _VZ_NUM[mCola[1]];
+      if(v!=null) encontrados.push({valor:v, txt:mCola[0], idx:ultimo.idx+ultimo.txt.length});
+    }
+  }
+  return encontrados;
+};
+
+// "y pico"/"y algo" pegado justo detrás de una cantidad ("diez euros y
+// pico") no suma nada calculable, pero SÍ hay que quitarlo del texto junto
+// con la cantidad: si no, "pico" se quedaba suelto colgando en la
+// descripción. Se comprueba en un único sitio, al final de _vzImporte,
+// para que valga para las tres formas de encontrar un importe (cifra,
+// en palabras, o varias sumadas) sin repetir la comprobación tres veces.
+// Recorta también lo que va justo PEGADO al importe ya reconocido, para que
+// no se quede suelto en la descripción del cobro: por delante, una palabra
+// que anuncia el precio en sí misma ("son cuarenta euros" → también se
+// quita "son"); por detrás, un "y pico"/"y algo" ("cuarenta y pico euros").
+const _vzExtenderColaImporte = (txtNorm, resultado) => {
+  if(!resultado) return resultado;
+  const idx = txtNorm.indexOf(resultado.txt);
+  if(idx<0) return resultado;
+  let txt = resultado.txt;
+  const cabeza = txtNorm.slice(0, idx).match(/(?:^|\s)((?:son|es|vale[n]?|cuesta[n]?|sale[n]?\s+por)\s*)$/);
+  if(cabeza) txt = cabeza[1] + txt;
+  const hasta = idx + resultado.txt.length;
+  const cola = txtNorm.slice(hasta).match(/^\s*y\s+(?:pico|algo(?:\s+mas)?)\b/);
+  if(cola) txt = txt + cola[0];
+  if(txt===resultado.txt) return resultado;
+  return {...resultado, txt};
 };
 
 const _vzImporte = (txtNorm) => {
@@ -16590,24 +16818,76 @@ const _vzImporte = (txtNorm) => {
   // que el asistente pregunte en vez de elegir a ciegas.
   const todos=_vzImportesTodos(txtNorm);
   if(todos.length>1){
+    // Se mira desde el final del primer importe hasta el final del
+    // último (no solo el hueco entre ambos): cuando el segundo importe es
+    // un "y diez más" sin repetir "euros", el propio "y"/"más" que lo
+    // delata va DENTRO de su texto, no en el hueco de en medio, que
+    // entonces queda vacío y el aviso de suma nunca saltaba.
     const suma = /\b(?:y|mas|ademas|y ademas|en total|junto con)\b/.test(
-      txtNorm.slice(todos[0].idx+todos[0].txt.length, todos[todos.length-1].idx));
+      txtNorm.slice(todos[0].idx+todos[0].txt.length, todos[todos.length-1].idx+todos[todos.length-1].txt.length));
     if(suma){
-      return {importe: todos.reduce((a,b)=>a+b.valor,0),
-              txt: todos.map(t=>t.txt).join(' '),
-              sumados: todos.map(t=>t.valor)};
+      // El texto a quitar del cuerpo tiene que ser el TRAMO REAL del
+      // original, no las cantidades pegadas con un espacio: "noventa euros"
+      // + "10 euros" unidas así ("noventa euros 10 euros") no existen tal
+      // cual en la frase, que dice "noventa euros Y 10 euros" — y un
+      // .replace() con esa cadena no encuentra nada, así que el importe se
+      // sacaba bien pero se quedaba también escrito en el texto del cobro.
+      // Cogiendo el tramo desde el principio de la primera cantidad hasta
+      // el final de la última si es un fragmento real de txtNorm y se
+      // puede quitar entero, "y"/"además" incluidos.
+      const desde = todos[0].idx;
+      let hasta = todos[todos.length-1].idx + todos[todos.length-1].txt.length;
+      const cola = txtNorm.slice(hasta).match(/^\s*(?:mas|ademas)\b/);
+      if(cola) hasta += cola[0].length;
+      return _vzExtenderColaImporte(txtNorm, {importe: todos.reduce((a,b)=>a+b.valor,0),
+              txt: txtNorm.slice(desde, hasta),
+              sumados: todos.map(t=>t.valor)});
     }
-    return {importe: todos[0].valor, txt: todos[0].txt, varios: todos.map(t=>t.valor)};
+    // Si entre las cantidades hay una marca de corrección ("no... no",
+    // "corrijo", "digo", "perdón", "mejor dicho", "en realidad", "quiero
+    // decir"), no son dos cantidades a la vez: es que te has corregido.
+    // Gana la ÚLTIMA sin preguntar — un "no" suelto ya lo resuelve antes
+    // _vzCorregirValorSuelto, pero estas otras marcas no, y hasta ahora se
+    // quedaba con la PRIMERA cantidad ("treinta euros mejor dicho cuarenta
+    // euros" cobraba 30 en vez de 40).
+    {
+      const entreCantidades = txtNorm.slice(todos[0].idx+todos[0].txt.length, todos[todos.length-1].idx);
+      const hayCorreccion = /\b(?:no[\s,.]+){1,}no\b/.test(entreCantidades) ||
+        new RegExp('\\b(?:'+_VZ_PALABRAS_CORRECCION_RE+')\\b').test(entreCantidades);
+      if(hayCorreccion){
+        const ultimo = todos[todos.length-1];
+        return _vzExtenderColaImporte(txtNorm, {
+          importe: ultimo.valor,
+          txt: txtNorm.slice(todos[0].idx, ultimo.idx+ultimo.txt.length)
+        });
+      }
+    }
+    return _vzExtenderColaImporte(txtNorm, {importe: todos[0].valor, txt: todos[0].txt, varios: todos.map(t=>t.valor)});
   }
   // "45 euros con 50 centimos" / "45 euros y 50 centimos"
   let mCent = txtNorm.match(/(\d+)\s*euros?\s*(?:con|y)\s+(\d{1,2})\s*(?:centimos?|centavos?)\b/);
-  if(mCent) return {importe: parseInt(mCent[1],10)+parseInt(mCent[2],10)/100, txt:mCent[0]};
+  if(mCent) return _vzExtenderColaImporte(txtNorm, {importe: parseInt(mCent[1],10)+parseInt(mCent[2],10)/100, txt:mCent[0]});
+  // "doce euros con cincuenta" (los centimos sin decir "centimos"): el
+  // "con" va DESPUÉS de "euros", al revés que en "12 con 50 euros" de más
+  // abajo — si no se contempla aquí, esos "cincuenta" sueltos se quedaban
+  // como si fueran texto del cobro en vez de los céntimos del importe.
+  // Con cifra ("12 euros con 50") y también en letras ("doce euros con
+  // cincuenta"), que es como más se dicta en voz alta.
+  let mEurosCon = txtNorm.match(/(\d+)\s*euros?\s*con\s+(\d{1,2})\b/);
+  if(mEurosCon) return _vzExtenderColaImporte(txtNorm, {importe: parseInt(mEurosCon[1],10)+parseInt(mEurosCon[2],10)/100, txt:mEurosCon[0]});
+  let mpEurosCon = txtNorm.match(new RegExp(
+    '((?:\\b(?:'+_VZ_NUMPAL_RE+'|y)\\b\\s*)+)euros?\\s*con\\s+((?:\\b(?:'+_VZ_NUMPAL_RE+'|y)\\b\\s*)+)'
+  ));
+  if(mpEurosCon){
+    const ve=_vzNumeroEnPalabras(mpEurosCon[1]), vc=_vzNumeroEnPalabras(mpEurosCon[2]);
+    if(ve!=null && vc!=null) return _vzExtenderColaImporte(txtNorm, {importe: ve+Math.min(vc,99)/100, txt:mpEurosCon[0]});
+  }
   // "340 euros", "45,50 euros", "45 con 50"
   let m = txtNorm.match(/(\d+(?:[.,]\d{1,2})?)\s*(?:con\s+(\d{1,2})\s*)?(?:euros?|eur|e)\b/);
   if(m){
     let v=parseFloat(m[1].replace(',','.'));
     if(m[2]) v=Math.floor(v)+parseInt(m[2],10)/100;
-    return {importe:v, txt:m[0]};
+    return _vzExtenderColaImporte(txtNorm, {importe:v, txt:m[0]});
   }
   // Sin la palabra "euros": "45 con 50", "340". Solo si se pidio un cobro.
   if(_vzEsperaImporte){
@@ -16615,38 +16895,167 @@ const _vzImporte = (txtNorm) => {
     if(m && m[1]){
       let v=parseFloat(m[1].replace(',','.'));
       if(m[2]) v=Math.floor(v)+parseInt(m[2],10)/100;
-      return {importe:v, txt:m[0]};
+      return _vzExtenderColaImporte(txtNorm, {importe:v, txt:m[0]});
+    }
+    // Lo mismo pero dictado entero en letras y sin decir "euros" en
+    // ningún momento: "cóbrale a Marisol cuarenta y cinco con cincuenta".
+    // Solo se acepta la forma "NUMERO con NUMERO" (el "con" de los
+    // céntimos es una forma de precio muy característica, rara vez
+    // significa otra cosa); un número suelto en letras SIN el "con" no
+    // entra aquí a propósito — "cóbrale a Paco por una reparación" no
+    // debe convertir el "una" en un importe de 1 euro.
+    const mpc = txtNorm.match(new RegExp(
+      '((?:\\b(?:'+_VZ_NUMPAL_RE+'|y)\\b\\s*)+)con\\s+((?:\\b(?:'+_VZ_NUMPAL_RE+'|y)\\b\\s*)+)'
+    ));
+    if(mpc){
+      const ve=_vzNumeroEnPalabras(mpc[1]), vc=_vzNumeroEnPalabras(mpc[2]);
+      if(ve!=null && vc!=null) return _vzExtenderColaImporte(txtNorm, {importe: ve+Math.min(vc,99)/100, txt:mpc[0]});
+    }
+    // Número en letras SUELTO, sin "euros" ni "con": "son cuarenta",
+    // "vale treinta y cinco", "cuestan quince". Antes solo se aceptaba con
+    // "con" detrás (céntimos); esto cubre el precio dicho a secas. Se exige
+    // una palabra que en sí misma anuncie el precio ("son"/"es"/"vale(n)"/
+    // "cuesta(n)"/"sale(n) por") justo delante del número: un número suelto
+    // sin esa palabra sigue sin contar, para no confundir con una fecha,
+    // una cantidad de piezas, etc. Si a continuación viene "euros" o "con"
+    // (celda de céntimos), se deja pasar para que lo cojan los patrones de
+    // arriba, que sí incluyen esa palabra en el texto a quitar.
+    // Ojo: la comprobación de "euros"/"con" se hace DESPUÉS del match (no
+    // con un lookahead negativo dentro del propio patrón), porque si no, al
+    // fallar el lookahead el motor de regex recorta la captura letra a
+    // letra hasta que "cuela": "treinta y cinco euros" se quedaba en solo
+    // "treinta y" (perdiendo "cinco"), dando 30 en vez de 35.
+    // Se mira TODA la frase (global) y se queda con la ÚLTIMA coincidencia
+    // válida, no la primera: igual que con fechas o prioridad, si te
+    // corriges ("son veinte... mejor dicho son veinticinco") gana lo último
+    // que has dicho.
+    const reCopula = new RegExp(
+      '\\b(?:son|es|vale[n]?|cuesta[n]?|sale[n]?\\s+por)\\s+((?:\\b(?:'+_VZ_NUMPAL_RE+'|y)\\b\\s*)+)','g'
+    );
+    let mCopula=null, mc;
+    while((mc=reCopula.exec(txtNorm))){
+      const tras = txtNorm.slice(mc.index + mc[0].length);
+      if(/^\s*(?:euros?|con\b)/.test(tras)) continue;
+      const numTxt = mc[1].trim();
+      // "un/una/uno" solos casi siempre son artículos ("son un poco caras"),
+      // no "1 euro": se descartan solos, pero no dentro de un compuesto
+      // como "veintiuno".
+      if(/^(?:un|una|uno)$/.test(numTxt)) continue;
+      mCopula = mc;
+      if(mc[0]==='') reCopula.lastIndex++; // evita bucle infinito con matches vacíos
+    }
+    if(mCopula){
+      const v=_vzNumeroEnPalabras(mCopula[1].trim());
+      if(v) return _vzExtenderColaImporte(txtNorm, {importe:v, txt:mCopula[0]});
     }
   }
   // en palabras: "trescientos cuarenta euros"
   const mp = txtNorm.match(/((?:\b(?:cero|un|uno|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez|once|doce|trece|catorce|quince|dieciseis|diecisiete|dieciocho|diecinueve|veinte|veintiuno|veintidos|veintitres|veinticuatro|veinticinco|veintiseis|veintisiete|veintiocho|veintinueve|treinta|cuarenta|cincuenta|sesenta|setenta|ochenta|noventa|cien|ciento|doscientos|trescientos|cuatrocientos|quinientos|seiscientos|setecientos|ochocientos|novecientos|mil|y)\b\s*)+)euros?\b/);
   if(mp){
     const v=_vzNumeroEnPalabras(mp[1]);
-    if(v) return {importe:v, txt:mp[0]};
+    if(v) return _vzExtenderColaImporte(txtNorm, {importe:v, txt:mp[0]});
   }
   return null;
 };
 let _vzEsperaImporte=false;
 
 // ── Prioridad ──
+// Es habitual decir "urgente" y rectificar en la misma frase ("no,
+// tranquilo, no es para tanto"), o al revés. Por eso no basta con mirar
+// si aparece una palabra u otra: se recogen TODAS las coincidencias de
+// las tres listas y gana la que aparece MÁS TARDE en la frase — igual que
+// ya se hace con fechas e importes, donde lo último dicho manda.
+// Las formas negadas ("no hay prisa", "no es urgente"...) van en la lista
+// de baja: si no, "no hay prisa" haría saltar también la alarma de
+// "prisa" suelta, como si fuera "alta", justo lo contrario de lo dicho.
+const _VZ_PRIORIDAD_PATRONES = [
+  {prio:'alta', re:/\b(?:urgente|urgencia|corre prisa|prisa|importante|prioridad alta|muy grave)\b/g},
+  {prio:'media', re:/\b(?:prioridad media|normal)\b/g},
+  {prio:'baja', re:/\b(?:prioridad baja|sin prisa|no hay (?:tanta )?prisa|no corre prisa|no es urgente|no es tan urgente|no es para tanto|no pasa nada|cuando pueda)\b/g},
+];
 const _vzPrioridad = (txtNorm) => {
-  let m;
-  if(m=txtNorm.match(/\b(urgente|urgencia|corre prisa|prisa|importante|prioridad alta|muy grave)\b/)) return {prio:'alta', txt:m[0]};
-  if(m=txtNorm.match(/\b(prioridad media|normal)\b/)) return {prio:'media', txt:m[0]};
-  if(m=txtNorm.match(/\b(prioridad baja|sin prisa|cuando pueda)\b/)) return {prio:'baja', txt:m[0]};
-  return null;
+  let todos = [];
+  for(const p of _VZ_PRIORIDAD_PATRONES){
+    p.re.lastIndex = 0;
+    let m;
+    while((m = p.re.exec(txtNorm))){
+      todos.push({prio:p.prio, start:m.index, end:p.re.lastIndex, txt:m[0]});
+      if(m[0]==='') p.re.lastIndex++;
+    }
+  }
+  if(!todos.length) return null;
+  // Si dos coinciden en el mismo tramo (p.ej. "prisa" suelta dentro de "no
+  // hay prisa"), gana la más larga: la forma más específica dice más que
+  // la palabra suelta que lleva dentro.
+  todos.sort((a,b)=> a.start-b.start || (b.end-b.start)-(a.end-a.start));
+  const filtrados = [];
+  for(const t of todos){
+    if(filtrados.length && t.start < filtrados[filtrados.length-1].end) continue;
+    filtrados.push(t);
+  }
+  const ultimo = filtrados[filtrados.length-1];
+  return {prio: ultimo.prio, txt: ultimo.txt};
 };
 
 // ── Tipo de documento ──
-const _VZ_ARRANQUES = /^(?:por favor\s+)?(?:me gustaria\s+|quisiera\s+|querria\s+)?(?:vamos a\s+|voy a\s+)?(?:creame|crea me|crea|creas|crear|anadele|añadele|anademe|añademe|anade|anadir|añade|agregale|agregame|agrega|anota|anotame|escribe|escribeme|haz me|hazme|haz|hazlo|apunta|apuntame|pon|ponme|mete|meteme|guarda|guardame|registra|registrame|dame de alta|abre|quiero|necesito|avisa|avisale|avisales)?\b\s*(?:me\s+)?(?:un|una|el|la|unos|unas)?\s*(?:nuevo|nueva)?\s*/;
+// ── Envoltorio de la orden: CÓMO la pides, no lo que pides ──
+// Antes de saber qué tipo de documento es, hay que quitar la forma de
+// PEDIRLO: la cortesía ("por favor"), los verbos con los que rodeas el
+// encargo ("ayúdame a", "puedes", "quiero que"...), el verbo de creación en
+// sí ("créame", "haz", "apunta"...) y el artículo/"nuevo(a)" que pueda
+// quedar delante. Es un envoltorio abierto —hay mil formas de pedir lo
+// mismo, igual que pasa con los conectores en la Fase 3 de más abajo—, así
+// que en vez de un único patrón fijo se prueban TROZOS sueltos una y otra
+// vez desde el principio, combinándose en el orden que sea, hasta que no
+// quede ninguno: así "ayúdame a crear un", "por favor haz un" o "quiero
+// que apuntes un" acaban reduciéndose a lo mismo que "créame un".
+const _VZ_TROZOS_ARRANQUE = [
+  /^por favor\s+/,
+  /^(?:me gustaria|quisiera|querria)\s+/,
+  /^(?:ayudame|ayudeme|ayuda)\s+a\s+/,
+  /^(?:puedes|podrias|podria|eres capaz|serias capaz)\s+(?:de\s+)?/,
+  /^(?:seria posible|seria capaz)\s+(?:de\s+)?/,
+  /^(?:quiero|quieres|necesito|necesitas|tienes|tendrias)\s+que\s+/,
+  /^a ver si\s+(?:puedes|podrias)?\s*/,
+  /^(?:vamos a|voy a)\s+/,
+  /^(?:hazme el favor de|hazme el favor)\s+/,
+  /^(?:creame|crea me|crea|creas|crees|cree|crear|anadele|añadele|anademe|añademe|anade|anadas|añadas|anadir|añade|agregale|agregame|agrega|agregues|agregar|anota|anotame|anotes|anotar|escribe|escribeme|escribas|escribir|haz me|hazme|haz|hagas|hazlo|hacerme|hacer|apunta|apuntame|apuntes|apuntar|pon|ponme|pongas|poner|mete|meteme|metas|meter|guarda|guardame|guardes|guardar|registra|registrame|registres|registrar|dame de alta|dar de alta|abre|abras|abrir|quiero|necesito|avisa|avisame|avisale|avisales|avises|avisar)\s+/,
+  /^me\s+/,
+  /^(?:un|una|el|la|unos|unas)\s+/,
+  /^(?:nuevo|nueva)\s+/,
+];
+
+// Aplica los trozos de arriba en bucle: cada pasada puede quitar varios,
+// combinados en cualquier orden ("por favor" + "ayudame a" + "crear" +
+// "un"), hasta que ninguno encaje ya al principio. Nunca deja la frase
+// vacía: si un recorte dejaría "" se ignora esa pasada y se conserva lo
+// que había, igual que hace _vzDondeEmpieza con los conectores.
+const _vzQuitarArranques = (texto) => {
+  let out = texto, cambiado = true, vueltas = 0;
+  while(cambiado && vueltas++ < 12){
+    cambiado = false;
+    for(const re of _VZ_TROZOS_ARRANQUE){
+      const recortado = out.replace(re, '');
+      if(recortado !== out && recortado.trim()){ out = recortado; cambiado = true; }
+    }
+  }
+  return out;
+};
 
 const _vzTipo = (txtNorm) => {
-  const limpio = txtNorm.replace(_VZ_ARRANQUES,'');
+  const limpio = _vzQuitarArranques(txtNorm);
   // Formas naturales de pedir un recordatorio sin decir la palabra "recordatorio"
-  let mr = limpio.match(/^(?:recuerdame|recuerda|acuerdate\s+de|acuerdame\s+de|no\s+se\s+te\s+olvide|no\s+olvides|que\s+no\s+se\s+me\s+olvide)\b\s*(?:de\s+)?/);
+  // "acuérdate que..." (sin "de") es tan natural como "acuérdate de que...":
+  // se admiten las dos.
+  let mr = limpio.match(/^(?:recuerdame|recuerda|recordar|acuerdate\s+(?:de\s+)?que|acuerdame\s+(?:de\s+)?que|acuerdate\s+de|acuerdame\s+de|no\s+se\s+te\s+olvide|no\s+olvides|que\s+no\s+se\s+me\s+olvide)\b\s*(?:de\s+)?/);
   if(mr) return {tipo:'recordatorio', resto:limpio.slice(mr[0].length).trim(), explicito:true};
-  // Formas naturales de pedir un cobro sin decir la palabra "cobro"
-  let mc = limpio.match(/^(?:cobrale|cobrales|cobrarle|cobrarles|cobra|cobrar|pasale la factura|pasa la factura)\b\s*(?:a\s+)?/);
+  // Formas naturales de pedir un cobro sin decir la palabra "cobro".
+  // OJO: aquí NO se traga la "a" que sigue ("cóbrale A Paco"): esa "a" es
+  // justo la que necesita luego _vzCliente para encontrar al cliente
+  // cuando es nuevo (uno ya existente se encuentra igual por parecido, sin
+  // preposición, pero uno nuevo no tiene con qué compararse y sin la "a"
+  // se quedaba sin nombre del todo).
+  let mc = limpio.match(/^(?:cobrale|cobrales|cobrarle|cobrarles|cobra|cobrar|pasale la factura|pasa la factura)\b\s*/);
   if(mc) return {tipo:'cobro', resto:limpio.slice(mc[0].length).trim(), explicito:true};
   let m = limpio.match(/^(aviso|recordatorio(?:\s+preventivo)?|cobro|factura|pago)\b/);
   if(m){
@@ -16684,6 +17093,28 @@ const _vzUltimoUso=(cliId)=>{
 // ── Cliente: busca en las fichas y decide si hay duda ──
 // Devuelve {estado:'unico'|'ambiguo'|'nuevo', cliente, candidatos, nombre, resto}
 const _VZ_PREP_CLIENTE = new Set(['para','de','del','a','al','con','en']);
+
+// ── Dónde termina el nombre del cliente ──
+// El nombre nunca se captura a ciegas por número de palabras: se corta en
+// la coma o en la primera palabra que ya no es parte del nombre, sea un
+// conector ("que", "tengo que"...) o el arranque de la descripción del
+// problema ("gotea", "revisar"...). Un único sitio para las dos listas:
+// las usan tanto el patrón de cliente YA EXISTENTE como el de cliente
+// NUEVO, para que no se queden desincronizadas con el tiempo.
+const _VZ_CLIENTE_CONECTOR_RE = 'que|hay|tiene|tengo|tienes|debo|debe|debes|necesito|necesitas|quiero|se|esta|no|por|urgente|manana|hoy|de|en el que|en la que';
+// Si justo después de "para/a/de..." viene uno de estos VERBOS (en vez de
+// un nombre), la preposición no está introduciendo al cliente: está
+// introduciendo la acción del propio recordatorio/aviso ("recordatorio
+// PARA LLAMAR a Paco", no "recordatorio para [el cliente] llamar a
+// Paco"). Sin este freno, "llamar a Paco" entero se colaba como si fuera
+// el nombre de un cliente nuevo.
+const _VZ_CLIENTE_VERBO_ACCION_RE = 'llamar|avisar|revisar|comprar|entregar|llevar|traer|pasar|mirar|cambiar|reparar|instalar|montar|limpiar|arreglar|preguntar|confirmar|decir|ir';
+// "estropead", "averiad" y "rot" iban sueltos, sin la vocal final
+// ("estropeadO/A", "averiadO/A", "rotO/A"): con el \b de después de cada
+// uno pegado justo ahí, nunca podían casar con una palabra real y esas
+// tres nunca llegaban a disparar el corte. Con la vocal + plural opcional
+// sí que casan con "estropeado/a(s)", "averiado/a(s)", "roto/a(s)".
+const _VZ_CLIENTE_SINTOMA_RE = 'revisar|revision|cambiar|arreglar|reparar|mirar|limpiar|instalar|montar|gotea|pierde|suena|huele|vibra|salta|arranca|enciende|funciona|estropead[oa]s?|averiad[oa]s?|averia|fuga|rot[oa]s?';
 // ══════════════════════════════════════════════════════════════
 // FASE 2 — CUÁNDO CONFIAR Y CUÁNDO PREGUNTAR
 // Aquí es donde se decide si el asistente actúa solo o interrumpe:
@@ -16707,10 +17138,23 @@ const _VZ_PREP_CLIENTE = new Set(['para','de','del','a','al','con','en']);
 const _vzCliente = (resto) => {
   const activos = (allClientes||[]).filter(c=>!c.archivado);
 
-  // "para un nuevo cliente llamado Paco", "a un cliente nuevo, Paco"
+  // "para un nuevo cliente llamado Paco", "a un cliente nuevo, Paco",
+  // "al nuevo cliente Paco" (con la preposición contraída "al" = "a"+"el").
   // Aqui SI has dicho que es nuevo, asi que no hace falta preguntar.
-  const mNuevo = resto.match(/\b(?:un|una)?\s*(?:nuev[oa]\s+client[ae]|client[ae]\s+nuev[oa])\s*(?:llamad[oa]|que se llama|de nombre)?\s*,?\s*([a-z0-9ñ]+(?:\s+[a-z0-9ñ]+){0,2})/);
-  if(mNuevo){
+  // La preposición y el artículo que preceden a "nuevo cliente" se
+  // incluyen DENTRO del propio patrón (antes solo se admitía "un/una"
+  // sueltos, sin preposición): así se consumen enteros y no queda un "al"
+  // o una "a" colgando al principio del texto del aviso. El nombre se
+  // recorta igual que en el patrón de cliente ya existente de más abajo:
+  // hasta la coma, o hasta la primera palabra que ya no es parte del
+  // nombre (un conector o un verbo de síntoma), nunca a ciegas por número
+  // de palabras — si no, "nuevo cliente Paco que se le ha roto..." se
+  // comía "que se" como si fueran apellidos.
+  const mNuevo = resto.match(new RegExp(
+    '\\b(?:(?:para|de|del|a|al|con|en)\\s+)?(?:(?:el|la|los|las|un|una)\\s+)?(?:nuev[oa]\\s+client[ae]|client[ae]\\s+nuev[oa])\\s*(?:llamad[oa]|que se llama|de nombre)?\\s*,?\\s*([a-z0-9ñ]+(?:\\s+[a-z0-9ñ]+)*?)'
+    + '(?=\\s*,|\\s+(?:'+_VZ_CLIENTE_CONECTOR_RE+')\\b|\\s+(?:'+_VZ_CLIENTE_SINTOMA_RE+')\\b|$)'
+  ));
+  if(mNuevo && mNuevo[1].trim()){
     const nom=mNuevo[1].trim();
     const sobra=(resto.slice(0,mNuevo.index)+' '+resto.slice(mNuevo.index+mNuevo[0].length)).replace(/\s+/g,' ').trim();
     return {estado:'nuevo', nombre:nom, resto:sobra, explicitoNuevo:true};
@@ -16726,13 +17170,55 @@ const _vzCliente = (resto) => {
     // 2) "para Pura Martinez, ..." / "de Antonio Ruiz de 340 euros"
     // Se admiten las formas largas: "a la clienta X", "al cliente X",
     // "para el cliente X", ademas de las cortas "para X" / "de X".
-    m = resto.match(/^\s*,?\s*(?:para|de|del|a|al|con|en)\s+(?:(?:el|la|los|las)\s+)?(?:client[ae]s?|senor|senora|sr|sra|comunidad de)?\s*([a-z0-9ñ\s.]+?)(?:\s*,|(?=\s+(?:que|hay|tiene|se|esta|no|por|urgente|manana|hoy|de|en el que|en la que)\b)|(?=\s+(?:revisar|revision|cambiar|arreglar|reparar|mirar|limpiar|instalar|montar|gotea|pierde|suena|huele|vibra|salta|arranca|enciende|funciona|estropead|averiad|averia|fuga|rot)\b)|$)/);
+    m = resto.match(new RegExp(
+      '^\\s*,?\\s*(?:para|de|del|a|al|con|en)\\s+(?!(?:'+_VZ_CLIENTE_VERBO_ACCION_RE+')\\b)(?:(?:el|la|los|las)\\s+)?(?:client[ae]s?|senor|senora|sr|sra|don|dona|comunidad de vecinos de|comunidad de)?\\s*([a-z0-9ñ\\s.]+?)'
+      + '(?:\\s*,|(?=\\s+(?:'+_VZ_CLIENTE_CONECTOR_RE+')\\b)|(?=\\s+(?:'+_VZ_CLIENTE_SINTOMA_RE+')\\b)|$)'
+    ));
     if(m){ nombre=m[1].trim(); rest=resto.slice(m.index+m[0].length).trim(); if(resto[m.index+m[0].length-1]===',') rest=resto.slice(m.index+m[0].length).trim(); }
   }
   if(!nombre){
     // 3) sin preposicion: "Pura Martinez, se ha roto el grifo"
     const trozos=resto.split(/\s*,\s*/);
     if(trozos.length>1 && trozos[0].split(' ').length<=4){ nombre=trozos[0].trim(); rest=trozos.slice(1).join(', ').trim(); }
+  }
+  // 3b) Autocorrección del cliente, dicha justo después ("pa Antonio no pa
+  // Pura", "pa Pura no era Pura era Pili", "pa Pura perdon pa Encarna"): al
+  // dictar rápido es habitual arrancar con un nombre y rectificar en el
+  // acto. Un "no"/"perdón"/"corrijo"/... pegado justo tras el nombre casi
+  // siempre significa "olvida ese, es este otro" — iguel que ya se hace
+  // con fechas e importes, manda lo último dicho. Solo se acepta si lo que
+  // sigue a la marca encaja de verdad con OTRO cliente real: si no
+  // encajara con nadie, es más probable que sea parte del cuerpo del
+  // aviso ("no hay prisa", "no es tan grave") que una corrección, y
+  // comerse esas palabras sería peor que dejarlas.
+  if(nombre){
+    const nombreEsc = nombre.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const mMarca = rest.match(new RegExp(
+      '^[\\s,.]*(?:no\\s+era\\s+(?:'+nombreEsc+'\\s+)?era|no|perdon|corrijo|mejor\\s+dicho|en\\s+realidad)\\b[\\s,.]*(?:era\\s+)?'
+    ));
+    if(mMarca){
+      const cola = rest.slice(mMarca[0].length);
+      const mNombre2 = cola.match(new RegExp(
+        '^(?:(?:para|de|del|a|al|con|en)\\s+)?(?:(?:el|la|los|las)\\s+)?(?:client[ae]s?|senor|senora|sr|sra|don|dona)?\\s*([a-z0-9ñ\\s.]+?)'
+        + '(?:\\s*,|(?=\\s+(?:'+_VZ_CLIENTE_CONECTOR_RE+')\\b)|(?=\\s+(?:'+_VZ_CLIENTE_SINTOMA_RE+')\\b)|$)'
+      ));
+      if(mNombre2 && mNombre2[1].trim()){
+        const cand = mNombre2[1].trim();
+        const cn2=_vzNorm(cand), cf2=_vzFonetica(cand);
+        let score2=0;
+        activos.forEach(c=>{
+          const cn=_vzNorm(c.nombre||''); if(!cn) return;
+          const cf=_vzFonetica(c.nombre||'');
+          let p=Math.max(_vzParecido(cn,cn2), _vzParecido(cf,cf2)*.97);
+          cn.split(' ').forEach(pal=>{ if(pal.length>=3) p=Math.max(p,_vzParecido(pal,cn2)*.9); });
+          if(p>score2) score2=p;
+        });
+        if(score2>=0.78){
+          nombre = cand;
+          rest = cola.slice(mNombre2[0].length).trim();
+        }
+      }
+    }
   }
   // 4) Escaneo de toda la frase por parecido —por escritura o por sonido—
   // contra los clientes reales. Se usa como respaldo si el nombre no vino
@@ -16742,7 +17228,10 @@ const _vzCliente = (resto) => {
   // 1-3, por si el patrón agarró una palabra que no es el cliente (antes
   // esto solo se intentaba cuando el patrón no encontraba nada).
   const _vzEscanear = () => {
-    const palabrasFrase = resto.split(/\s+/).filter(Boolean);
+    // Se quita la puntuación pegada a cada palabra ("encarna," antes de una
+    // coma) al trocear: si no, ese signo viajaba dentro del nombre
+    // encontrado y salía tal cual ("Encarna," en vez de "Encarna").
+    const palabrasFrase = resto.split(/\s+/).filter(Boolean).map(w=>w.replace(/^[.,;:¿?¡!]+|[.,;:¿?¡!]+$/g,'')).filter(Boolean);
     let mejor=null;
     for(let ini=0; ini<palabrasFrase.length; ini++){
       for(let len=1; len<=3 && ini+len<=palabrasFrase.length; len++){
@@ -16754,6 +17243,19 @@ const _vzCliente = (resto) => {
           const cf=_vzFonetica(c.nombre||'');
           let p=Math.max(_vzParecido(cn,cn0), _vzParecido(cf,cf0)*.97);
           cn.split(' ').forEach(pal=>{ if(pal.length>=3) p=Math.max(p,_vzParecido(pal,cn0)*.9); });
+          // Nombre de pila con dos palabras ("Mari Carmen López"): si el
+          // candidato es tal cual el PRINCIPIO del nombre completo de la
+          // ficha (se dijo el nombre de pila entero, sin el apellido), se
+          // premia — y cuanto más del nombre cubra, mejor, para que "Mari
+          // Carmen" (2 palabras) gane siempre a "Mari" solo (1 palabra) en
+          // vez de quedarse a medias y dejar "Carmen" suelto en el texto.
+          // Sin esto, el trozo de 2 palabras salía con menos parecido que
+          // el de 1 sola porque se comparaba contra el nombre CON apellido,
+          // que el candidato nunca dijo.
+          if((cn+' ').startsWith(cn0+' ') || (cf+' ').startsWith(cf0+' ')){
+            const cubre = cn0.split(' ').filter(Boolean).length;
+            p = Math.max(p, 0.9 + Math.min(cubre-1,3)*0.03);
+          }
           if(p>=.78 && (!mejor||p>mejor.p)) mejor={p,c,ini,len};
         });
       }
@@ -16786,6 +17288,15 @@ const _vzCliente = (resto) => {
       const cf=_vzFonetica(c.nombre||'');
       let p=Math.max(_vzParecido(cn,cnPatron), _vzParecido(cf,cfPatron)*.97);
       cn.split(' ').forEach(pal=>{ if(pal.length>=3) p=Math.max(p,_vzParecido(pal,cnPatron)*.9); });
+      // Nombre de pila con dos palabras ("Mari Carmen", "José Luis"): al
+      // comparar la frase entera dicha contra el nombre entero de la ficha
+      // (con apellido, que no se dijo), la distancia de edición penaliza
+      // ese apellido que falta y el parecido sale bajo aunque el patrón
+      // haya acertado del todo. Si lo dicho es tal cual el PRINCIPIO del
+      // nombre de la ficha, se cuenta como acierto fuerte — es la misma
+      // idea que ya usa "encaja" más abajo para no acortar un nombre
+      // completo a la primera palabra sin necesidad.
+      if(cn.startsWith(cnPatron) || cf.startsWith(cfPatron)) p=Math.max(p,0.9);
       if(p>scorePatron) scorePatron=p;
     });
     if(scorePatron<0.85){
@@ -16900,12 +17411,19 @@ const _vzAccion = (txtNorm) => {
   // la frase manda más que si la frase empieza (o no) por "llama" — mucha
   // gente dice "llama, mándale un wasap a Pura" usando "llama" como
   // muletilla, y eso antes se interpretaba (mal) como llamada telefónica.
-  const esWhatsapp = /\bwhatsapp\b/.test(txtNorm) &&
-    new RegExp(`(?:^|\\s)(?:${_VZ_VERBOS_WSP})\\b`).test(txtNorm);
+  // También cuenta, igual que con "llama"/"llamar" más abajo, que la frase
+  // EMPIECE directamente por "whatsapp" ("whatsapp a Antonio que ya voy"):
+  // antes hacía falta además un verbo de envío ("mándale un whatsapp..."),
+  // así que un simple "whatsapp a Fulano que..." se quedaba como aviso
+  // normal en vez de abrir WhatsApp.
+  const esWhatsapp = /^whatsapp\b/.test(txtNorm) ||
+    (/\bwhatsapp\b/.test(txtNorm) && new RegExp(`(?:^|\\s)(?:${_VZ_VERBOS_WSP})\\b`).test(txtNorm));
   if(esWhatsapp){
     const resto = txtNorm
       .replace(new RegExp(`^.*?\\b(?:${_VZ_VERBOS_WSP})\\b\\s*`),'')
       .replace(/\bwhatsapp\b/g,' ')
+      .replace(/\s+/g,' ')
+      .trim()
       .replace(/^(?:el\s+|un\s+)?(?:mensaje\s+)?(?:de\s+|por\s+)?/,'')
       .replace(/^(?:a\s+|al\s+|con\s+|para\s+)?/,'')
       .trim();
@@ -17075,6 +17593,25 @@ window._vzElegirClienteConsulta = (i) => {
   window._vzPendConsulta=null;
 };
 
+// ── Cancelar el dictado entero ──
+// "olvídalo", "cancela eso", "mejor no hagas nada", "quita lo último que
+// dije"... no crean ni una versión a medias del aviso/cobro: no quieres
+// guardar NADA. Se mira en CUALQUIER parte del dictado (no solo al
+// principio), porque es habitual construir el aviso entero y arrepentirse
+// al final ("...por la reparación del ascensor, no, que eso no es mío,
+// mejor olvídalo"). La lista es corta a propósito y solo tiene frases que
+// SIEMPRE hablan del propio dictado, nunca del trabajo en sí: "olvídate
+// DE algo" (con objeto) es una instrucción real de trabajo y no entra
+// aquí, solo "olvídalo" a secas. Por la misma razón no se incluye "no le
+// cobres nada" ni parecidas: esas sí son contenido real que hay que
+// guardar (una nota de que a ese cliente no se le cobra).
+const _vzCancelar = (txtNorm) => /\b(?:olvidalo|cancela(?:lo)?\s+eso|cancela\s+lo\s+que\s+(?:te\s+)?(?:acabo|he)\s+de\s+decir|anula(?:lo)?\s+eso|no\s+hagas\s+nada|no\s+apuntes\s+nada(?:\s+de\s+esto)?|quita\s+lo\s+ultimo(?:\s+que\s+dije)?|borra\s+lo\s+ultimo(?:\s+que\s+dije)?)\b/.test(txtNorm);
+window._vzResolverCancelar = (original) => {
+  toast('Vale, no he guardado nada','o');
+  _vzHablar('Vale, no he guardado nada.');
+  _vzApuntar(original, null, 'cancelado por el usuario');
+};
+
 // ── Vocabulario del oficio ──
 // El reconocedor no conoce las palabras de fontanería y calefacción, y las
 // sustituye por otras parecidas. Se corrigen antes de analizar la frase.
@@ -17087,8 +17624,37 @@ window._vzElegirClienteConsulta = (i) => {
 // solas: son muletillas puras, se limpian y ya. Las palabras que sí son
 // marcas de autocorrección real ("perdon", "corrijo"...) se han sacado de
 // aquí porque las gestiona _vzResolverCorreccionesProsa más abajo.
-const _VZ_RELLENO = /\b(?:eh+|em+|mmm+|ah+|esto|o sea|bueno|entonces|digamos|es que|vale|oye|mira|pues|venga|a ver|vamos a ver|espera|mejor no)\b/g;
+// Cortesía y muletillas de relleno puro: no aportan nada dicho en
+// cualquier punto de la frase ("por favor", "gracias"...), así que se
+// quitan estén donde estén. Ojo: NO se meten aquí palabras que también
+// pueden ser parte de una descripción real ("ya está", "eso es todo",
+// "nada más" pueden significar algo distinto a mitad de frase — "no hay
+// nada más que hacer" perdería sentido si se les quitara "nada más" a
+// ciegas); esas se gestionan aparte, solo al final, en _vzQuitarCierre.
+// "como se llamaba" (recordando un nombre) va en pasado ("llamaba"), así
+// que no choca con "se llama"/"que se llama" en presente, que sí se usa
+// en otro sitio para presentar el nombre de un cliente nuevo. "ah si"
+// como unidad va ANTES que "ah+" suelto: si no, "ah+" se comía solo el
+// "ah" y dejaba el "si" colgando, que de suelto es ambiguo (afirmación o
+// condicional) y no se puede quitar a ciegas.
+// "mejor no" y "esto" YA NO están aquí: "mejor no" se quitaba entero,
+// "no" incluido, y "mejor no toque la llave de paso" (una instrucción con
+// negación real) se quedaba en "toque la llave de paso" — justo lo
+// contrario de lo dicho. "esto" es un pronombre normal ("arregla esto de
+// aquí"), no una muletilla pura, y quitarlo a ciegas dejaba frases cojas.
+const _VZ_RELLENO = /\b(?:eh+|em+|mmm+|ah\s+s[ií]|ah+|o sea|bueno|entonces|digamos|es que|vale|oye|mira|pues|venga|a ver|vamos a ver|espera|por favor|porfa|porfavor|(?:muchas\s+)?gracias|de nada|por cierto|ya sabes|asi que|en fin|digo yo|vaya|como se llamaba|como se llama(?:ba)?)\b/g;
 const _vzQuitarRelleno = (t) => t.replace(_VZ_RELLENO,' ').replace(/\s+/g,' ').trim();
+
+// ── Remates de despedida, solo si van pegados al final ──
+// "ya está", "eso es todo", "nada más"... cierran el dictado sin añadir
+// nada AL FINAL de la frase, pero en mitad de ella pueden ser parte real
+// de lo dicho ("ya está arreglado", "no hay nada más que hacer"). Por eso
+// se comprueban solo contra el final del texto (ancla $), nunca en medio.
+const _vzQuitarCierre = (texto) => (texto||'')
+  .replace(/[\s,.;]*(?:y\s+)?ya esta(?:\s+todo)?\s*$/,'')
+  .replace(/[\s,.;]*eso\s+(?:es|era|seria)\s+todo\s*$/,'')
+  .replace(/[\s,.;]*nada\s+mas\s*$/,'')
+  .trim();
 
 // ── Repeticiones por titubeo ──
 // Al dictar es frecuente repetir sin querer una palabra ("la la bomba",
@@ -17113,6 +17679,28 @@ const _VZ_CORRECCIONES = [
   [/\bcuadro elektrico\b/g,'cuadro electrico'],
   // "340€" -> "340 euros", para que se lea como importe
   [/(\d)\s*€/g,'$1 euros'],
+  // ── Murciano / coloquial: se normaliza a la forma estándar para que el
+  // resto de patrones (que ya saben leer "para", "tienes", "nada"...) lo
+  // entiendan, sin tener que duplicar cada forma dialectal en cada sitio
+  // del código. "pa'l" pierde el apóstrofo en _vzNorm y llega aquí como
+  // "pa l" (dos palabras sueltas), por eso esa regla va antes que "pa"
+  // suelto — si no, "pa" se cambiaría a "para" y "l" se quedaría colgando.
+  [/\bpa l\b/g,'para el'],
+  [/\bpa\b/g,'para'],
+  [/\bties\b|\btiés\b/g,'tienes'],
+  [/\bna\b/g,'nada'],
+  [/\bpos\b/g,'pues'],
+  [/\btoa\b/g,'toda'],
+  [/\btoos\b/g,'todos'],
+  [/\btoas\b/g,'todas'],
+  [/\bto\b/g,'todo'],
+  [/\buste\b/g,'usted'],
+  [/\bustes\b/g,'ustedes'],
+  // "wasap"/"guasap" (con una o dos "p"): forma coloquial de "whatsapp"
+  [/\bwasap+\b|\bguasap+\b/g,'whatsapp'],
+  // "pavos" = euros, en plan coloquial ("veinte pavos")
+  [/\bpavos\b/g,'euros'],
+  [/\bpavo\b/g,'euro'],
   // muletillas del principio, que despistan al detectar el tipo
   [/^(?:eh|em|mmm|pues|vale|oye|a ver|mira)\s+/,''],
 ];
@@ -17148,9 +17736,11 @@ const _vzCorregirValorSuelto = (texto) => {
     if(/\bno[\s,.]*$/.test(ventanaAntes) || /^[\s,.]*no\b/.test(ventanaDespues)) continue;
     if(!_vzHayValor(ventanaAntes) || !_vzHayValor(ventanaDespues)) continue;
     // Retrocede hasta el principio del valor viejo (día o número) para
-    // borrar justo ese tramo + el "no".
+    // borrar justo ese tramo + el "no". El número en letras puede llevar
+    // "y" en medio ("treinta y cinco"): sin contarlo aquí, el "no" solo se
+    // tragaba la última palabra ("cinco") y dejaba "treinta y" colgando.
     const mv = ventanaAntes.match(new RegExp(
-      `(?:\\b(?:el\\s+)?(?:${_VZ_DIAS_RE})|\\b(?:\\d+(?:[.,]\\d+)?|(?:${_VZ_NUMPAL_RE})(?:\\s+(?:${_VZ_NUMPAL_RE}))*)\\s*(?:euros?)?)\\s*$`
+      `(?:\\b(?:el\\s+)?(?:${_VZ_DIAS_RE})|\\b(?:\\d+(?:[.,]\\d+)?|(?:\\b(?:${_VZ_NUMPAL_RE})\\b(?:\\s+y\\b)?\\s*)+)\\s*(?:euros?)?)\\s*$`
     ));
     const desde = mv ? iniAntes+mv.index : m.index;
     cortes.push({desde, hasta:re.lastIndex});
@@ -17221,11 +17811,25 @@ window._vzAnalizar = (texto) => {
   let trabajo = resto;
   const imp = _vzImporte(trabajo);
   if(imp) trabajo = trabajo.replace(imp.txt,' ');
-  const fecha = _vzFecha(trabajo);
+  // La recurrencia se saca ANTES que la fecha: solo quita la marca
+  // ("todos los", "cada seis meses"...), nunca el nombre del día si lo
+  // lleva pegado ("todos los lunes" deja "lunes" intacto para _vzFecha).
+  const rec = _vzRecurrencia(trabajo);
+  if(rec) trabajo = trabajo.replace(rec.txt,' ');
+  let fecha = _vzFecha(trabajo);
   if(fecha) trabajo = trabajo.replace(fecha.txt,' ');
+  // Si hay recurrencia pero no se ha dicho ninguna fecha propia ("cada
+  // seis meses" a secas), la primera ocasión es dentro de un intervalo
+  // completo a partir de hoy (no hoy mismo).
+  if(rec && !fecha){
+    fecha = {fecha:_vzSumarIntervalo(new Date(), rec.cada, rec.unidad), txt:''};
+  }
   const prio = _vzPrioridad(trabajo);
   if(prio) trabajo = trabajo.replace(prio.txt,' ');
   trabajo = trabajo.replace(/\s+/g,' ').replace(/\s+,/g,',').trim();
+  // La preposición que introducía la fecha/importe recién sacados puede
+  // quedarse huérfana al final ("comprar juntas para" tras sacar "mañana").
+  trabajo = _vzQuitarConectorFinal(trabajo);
 
   const cli = _vzCliente(trabajo);
   let cuerpo = (cli.resto!==undefined?cli.resto:trabajo);
@@ -17242,7 +17846,7 @@ window._vzAnalizar = (texto) => {
   let _cambiado=true;
   while(_cambiado){
     const _antes=cuerpo;
-    cuerpo = cuerpo.replace(/^(?:de|del|por|para|que|y|porque|ya que|en concepto de|por el concepto de|por lo de|en el que|en la que|en el cual|en la cual)(?:\s+|$)/,'').trim();
+    cuerpo = cuerpo.replace(/^(?:a|al|de|del|por|para|que|y|porque|ya que|en concepto de|por el concepto de|por lo de|en el que|en la que|en el cual|en la cual)(?:\s+|$)/,'').trim();
     _cambiado = (cuerpo!==_antes);
   }
   cuerpo = cuerpo.replace(/\s+/g,' ').trim();
@@ -17251,6 +17855,7 @@ window._vzAnalizar = (texto) => {
   let tipoFinal = tipo;
   if(!tipoFinal){
     if(imp) tipoFinal='cobro';
+    else if(rec) tipoFinal='recordatorio';
     else if(fecha && /\b(revisar|revision|mantenimiento|cambiar|anual|cada)\b/.test(norm)) tipoFinal='recordatorio';
     else tipoFinal='aviso';
   }
@@ -17258,8 +17863,11 @@ window._vzAnalizar = (texto) => {
     tipo:tipoFinal, explicito,
     cliente:cli,
     texto:(()=>{
-      // Fase 1: quitar repeticiones · Fase 3: empezar donde empieza el contenido
+      // Fase 1: quitar repeticiones · quitar remate de cierre al final ·
+      // Fase 3: empezar donde empieza el contenido
       let c=_vzQuitarRepeticiones(cuerpo);
+      c=_vzQuitarCierre(c);
+      c=_vzQuitarConectorFinal(c);
       c=_vzDondeEmpieza(c, tipoFinal);
       c=_vzPulirTexto(c);
       return c ? c.charAt(0).toUpperCase()+c.slice(1) : '';
@@ -17270,6 +17878,7 @@ window._vzAnalizar = (texto) => {
     importesSumados: imp?.sumados || null,    // se han sumado, se avisa
     fechaAmbigua: !!fecha?.ambigua,           // fecha pasada: ¿este año o el que viene?
     prioridad:prio?prio.prio:'baja',
+    repetir: rec ? {cada:rec.cada, unidad:rec.unidad} : null,
     original:texto
   };
 };
@@ -17462,14 +18071,15 @@ window._vzGuardar = async (r) => {
       const id='rec_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
       allRecordatorios.push({
         id, clienteId:cliId, clienteNombre:cliNom||'', equipoId:null, equipoNombre:'',
-        titulo:r.texto||'Recordatorio', fecha:r.fecha, notas:'',
+        titulo:r.texto||'Recordatorio', fecha:r.fecha, notas:'', repetir:r.repetir||null,
         estado:'pendiente', creadoEn:Date.now(), ...marca
       });
       _recSaveAll();
       if(document.querySelector('#screenRecordatorios.active')) renderRecordatorios();
       _vzUltimo={tipo:'recordatorio', id}; _vzUltimoR={...r};
-      _vzAvisoCreado(`<strong>Recordatorio</strong> para ${cliNom||'sin cliente'}: ${r.texto} · ${fmtFISO?fmtFISO(r.fecha):r.fecha}`);
-      _vzHablar(`Recordatorio creado para ${cliNom||'cliente sin ficha'}. ${r.texto}`);
+      const repTxt = r.repetir ? ` · 🔁 ${_recRepetirLabel(r.repetir)}` : '';
+      _vzAvisoCreado(`<strong>Recordatorio</strong> para ${cliNom||'sin cliente'}: ${r.texto} · ${fmtFISO?fmtFISO(r.fecha):r.fecha}${repTxt}`);
+      _vzHablar(`Recordatorio creado para ${cliNom||'cliente sin ficha'}. ${r.texto}${r.repetir?'. Se repite '+_recRepetirLabel(r.repetir).toLowerCase():''}`);
       _vzApuntar(r.original, r, 'recordatorio creado');
     }
   }catch(e){ toast('No se pudo guardar: '+e.message,'e'); }
@@ -17845,6 +18455,7 @@ window._vzToggle = (modo) => {
       if(acc){ window._vzResolverAccion(acc, dicho); return; }
       const cons=_vzConsulta(dichoNorm);
       if(cons){ window._vzResolverConsulta(cons, dicho); return; }
+      if(_vzCancelar(dichoNorm)){ window._vzResolverCancelar(dicho); return; }
 
       // De todas las interpretaciones que ha oído el móvil, nos quedamos con
       // la que reconoce a un cliente tuyo. Suele arreglar los nombres propios,
