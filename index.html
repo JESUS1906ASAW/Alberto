@@ -1544,6 +1544,46 @@ body.is-scrolling .presu-card{
   -webkit-backdrop-filter:none;
 }
 
+
+/* ══ GASTOS, INGRESOS Y BALANCE ══ */
+:root{--gx-ing:#3fb878;--gx-gas:#e2665c}
+body.modo-claro{--gx-ing:#23864f;--gx-gas:#c2443a}
+.gx-btn-gasto,.gx-btn-ingreso{flex:1;font-weight:800;border-radius:14px;padding:12px 10px;font-size:13px;cursor:pointer;font-family:var(--font)}
+.gx-btn-gasto{background:rgba(200,70,60,.12);border:1px solid rgba(200,70,60,.35);color:var(--gx-gas)}
+.gx-btn-ingreso{background:rgba(52,140,90,.12);border:1px solid rgba(52,140,90,.35);color:var(--gx-ing)}
+.gx-row{display:flex;align-items:center;gap:12px;padding:11px 12px;background:var(--card);border:1px solid var(--border);border-radius:14px;margin-bottom:8px;cursor:pointer;transition:transform .12s ease,border-color .15s ease}
+.gx-row:active{transform:scale(.985)}
+.gx-ico{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;flex-shrink:0}
+.gx-ico.ing{background:rgba(52,140,90,.15);color:var(--gx-ing)}
+.gx-ico.gas{background:rgba(200,70,60,.15);color:var(--gx-gas)}
+.gx-concepto{font-size:14px;font-weight:800;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gx-sub{font-size:11px;color:var(--tx2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gx-imp{font-size:14px;font-weight:900;white-space:nowrap;font-variant-numeric:tabular-nums}
+.gx-imp.ing,.gx-res-grid strong.ing,.gx-kpi strong.ing,.ing-t{color:var(--gx-ing)}
+.gx-imp.gas,.gx-res-grid strong.gas,.gx-kpi strong.gas,.gas-t{color:var(--gx-gas)}
+.gx-sinimp{font-size:11px;font-weight:700;color:var(--tx2);background:rgba(127,127,127,.12);padding:3px 8px;border-radius:8px}
+.gx-mes{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);margin:16px 4px 8px}
+.gx-resumen{padding:14px;margin-bottom:14px}
+.gx-res-tit{font-size:13px;font-weight:900;color:var(--tx);margin-bottom:10px}
+.gx-res-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.gx-res-grid div{display:flex;flex-direction:column;gap:2px;min-width:0}
+.gx-res-grid span{font-size:10px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em}
+.gx-res-grid strong{font-size:15px;font-weight:900;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gx-pend-mini{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:12px;color:var(--tx2)}
+.gx-pend-mini strong{color:var(--tx)}
+.gx-bal-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.gx-kpi{padding:14px;display:flex;flex-direction:column;gap:4px;margin-bottom:0}
+.gx-kpi span{font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em}
+.gx-kpi strong{font-size:19px;font-weight:900;font-variant-numeric:tabular-nums}
+.gx-kpi-big{margin-bottom:8px}
+.gx-kpi-big strong{font-size:26px}
+.gx-bars{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.gx-bar{height:8px;border-radius:6px;background:rgba(127,127,127,.12);overflow:hidden}
+.gx-bar i{display:block;height:100%;border-radius:6px;transition:width .4s cubic-bezier(.16,1,.3,1)}
+.gx-bar i.ing{background:var(--gx-ing)}
+.gx-bar i.gas{background:var(--gx-gas)}
+.gx-pend{display:flex;align-items:center;gap:6px;padding:12px 14px;font-size:13px;color:var(--tx2);cursor:pointer;background:rgba(234,179,8,.08);border-color:rgba(234,179,8,.28)}
+.gx-pend strong{color:var(--tx)}
 </style>
 <!-- ══ BLOQUEO INMEDIATO: se ejecuta antes de pintar nada ══ -->
 <script>
@@ -1872,6 +1912,9 @@ body.is-scrolling .presu-card{
     </div>
   </div>
 
+  <!-- ─── PANTALLA: GASTOS, INGRESOS Y BALANCE ─── -->
+  <div class="screen" id="screenGastos"><div class="scroll-pad" id="gastosContent"></div></div>
+
   <!-- ─── PANTALLA: RECORDATORIOS PREVENTIVOS ─── -->
   <div class="screen" id="screenRecordatorios">
     <div class="scroll-pad">
@@ -1966,6 +2009,9 @@ body.is-scrolling .presu-card{
       </button>
       <button class="fab-opt" id="fabOptRecordatorio" onclick="fabAccion('recordatorio')">
         <span class="fab-opt-ico">🔔</span><span class="fab-opt-txt">Nuevo recordatorio</span><span class="fab-opt-star">⭐</span>
+      </button>
+      <button class="fab-opt" id="fabOptGasto" onclick="fabAccion('gasto')">
+        <span class="fab-opt-ico">💸</span><span class="fab-opt-txt">Nuevo gasto</span><span class="fab-opt-star">⭐</span>
       </button>
     </div>
     <button id="fabMain" aria-label="Acciones rápidas">
@@ -2981,7 +3027,7 @@ const notifLocal=(titulo,cuerpo)=>{
 };
 
 // NAVEGACIÓN — History API (botón atrás nativo del navegador/móvil)
-const screens={inicio:'screenInicio',grupo:'screenGrupo',mantenimiento:'screenMantenimiento',administracion:'screenAdministracion',calendario:'screenCalendario',archivos:'screenArchivos',imagenes:'screenImagenes',presupuestos:'screenPresupuestos',notificaciones:'screenNotificaciones',perfil:'screenPerfil',log:'screenLog',historialGlobal:'screenHistorialGlobal',recordatorios:'screenRecordatorios',completados:'screenCompletados'};
+const screens={inicio:'screenInicio',grupo:'screenGrupo',mantenimiento:'screenMantenimiento',administracion:'screenAdministracion',calendario:'screenCalendario',archivos:'screenArchivos',imagenes:'screenImagenes',presupuestos:'screenPresupuestos',notificaciones:'screenNotificaciones',perfil:'screenPerfil',log:'screenLog',historialGlobal:'screenHistorialGlobal',recordatorios:'screenRecordatorios',gastos:'screenGastos',completados:'screenCompletados'};
 
 // Flag para evitar bucles al manejar popstate
 let _navFromPop=false;
@@ -3001,6 +3047,7 @@ const _renderScreen=id=>{
   else if(id==='grupo')renderGrupo();
   else if(id==='mantenimiento')renderMantenimiento();
   else if(id==='recordatorios'){ window._recQuery=''; renderRecordatorios(); }
+  else if(id==='gastos'){ if(typeof renderGastos==='function') renderGastos(); }
   else if(id==='completados'){ _compSub=null; window._compQuery={avisos:'',presupuestos:'',cobros:'',recordatorios:''}; renderCompletados(); }
   else if(id==='administracion')renderAdministracion();
   else if(id==='calendario')renderCalendarioGlobal();
@@ -3017,8 +3064,8 @@ const _renderScreen=id=>{
 // FAB — Acciones rápidas (Presupuesto / Avería / Cliente)
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let _fabOpen=false;
-const _FAB_LABELS={presupuesto:'Presupuesto',aviso:'Aviso',cliente:'Cliente',cobro:'Cobro',recordatorio:'Recordatorio'};
-const _FAB_KEYS=['presupuesto','aviso','cliente','cobro','recordatorio'];
+const _FAB_LABELS={presupuesto:'Presupuesto',aviso:'Aviso',cliente:'Cliente',cobro:'Cobro',recordatorio:'Recordatorio',gasto:'Gasto'};
+const _FAB_KEYS=['presupuesto','aviso','cliente','cobro','recordatorio','gasto'];
 window._fabDefaultKey=()=>localStorage.getItem('alberto_fab_default')||'presupuesto';
 
 // Muestra u oculta el FAB según la pantalla activa (solo tiene sentido dentro de un grupo)
@@ -3057,6 +3104,7 @@ window.fabAccion=(tipo)=>{
     else if(tipo==='cliente') abrirCliExpress();
     else if(tipo==='cobro') abrirNuevoSimple('cobro');
     else if(tipo==='recordatorio') abrirFormRecordatorio();
+    else if(tipo==='gasto') abrirFormGasto();
   },180);
 };
 
@@ -3601,7 +3649,7 @@ window.addEventListener('popstate',e=>{
 // - Si estás EN el menú del grupo (screenGrupo) → va al inicio real de la app
 // - En cualquier otro sitio → va al inicio de la app
 window.drawerIrInicio=()=>{
-  const screensDelGrupo=['mantenimiento','administracion','calendario','archivos','imagenes','perfil','notificaciones','log','recordatorios','completados'];
+  const screensDelGrupo=['mantenimiento','administracion','calendario','archivos','imagenes','perfil','notificaciones','log','recordatorios','completados','gastos'];
   const cur=_currentScreenId();
   if(screensDelGrupo.includes(cur)&&CGID){
     goScreen('grupo');
@@ -3674,6 +3722,7 @@ window._buildDrawerBody=(tieneGrupo)=>{
     ${sep}
     <div class="d-grupo-label"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align:middle;margin-right:5px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>${grupoNombre}</div>
     <div class="d-item${act('grupo','cobros')}" onclick="abrirTabExclusiva('cobros');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v2m0 8v2M9.5 9a2.5 2.5 0 0 1 2.5-1.5h.5a2 2 0 0 1 0 4h-1a2 2 0 0 0 0 4h.5A2.5 2.5 0 0 0 14.5 15"/></svg></span>Cobros</div>
+    <div class="d-item${act('gastos')}" onclick="_gxEntrar();cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span>Gastos, ingresos y balance</div>
     <div class="d-item${act('recordatorios')}" onclick="goScreen('recordatorios');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>Recordatorios${(typeof allRecordatorios!=='undefined'&&allRecordatorios.filter(r=>r.estado!=='completado'&&r.fecha&&r.fecha<=new Date().toISOString().split('T')[0]).length)?`<span style="margin-left:auto;background:#ef4444;color:#fff;border-radius:20px;padding:1px 7px;font-size:10.5px;font-weight:900">${allRecordatorios.filter(r=>r.estado!=='completado'&&r.fecha&&r.fecha<=new Date().toISOString().split('T')[0]).length}</span>`:''}</div>
     <div class="d-item${act('imagenes')}" onclick="goScreen('imagenes');cerrarDrawer()"><span class="d-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></span>Galería de instalaciones</div>
     ${sep}
@@ -3714,7 +3763,9 @@ const _SB_ACENTOS={
   recordatorio: {rgb:'190,140,30',  ico:'🔔'},
   equipo:       {rgb:'20,140,130',  ico:'🔧'},
   mantenimiento:{rgb:'194,116,40',  ico:'🛠️'},
-  parte:        {rgb:'132,80,150',  ico:'📋'}
+  parte:        {rgb:'132,80,150',  ico:'📋'},
+  gasto:        {rgb:'200,70,60',   ico:'💸'},
+  ingreso:      {rgb:'52,140,90',   ico:'💰'}
 };
 
 window.abrirSB=(titulo,html,cliId,tipo)=>{
@@ -4231,7 +4282,7 @@ const iniciarApp=async()=>{
   let targetGrupoId  = sessionStorage.getItem('alberto_cgid');
   let targetGrupoRaw = sessionStorage.getItem('alberto_cg');
   const hashScreen  = location.hash.replace('#','');
-  const screensNeedGroup = ['grupo','mantenimiento','administracion','calendario','archivos','imagenes','recordatorios','completados'];
+  const screensNeedGroup = ['grupo','mantenimiento','administracion','calendario','archivos','imagenes','recordatorios','completados','gastos'];
 
   // ── 0. Sin grupo activo en esta sesión: entrar directamente al grupo del usuario ──
   // (no hace falta elegir grupo manualmente: si solo tiene uno, se abre ese; si tiene
@@ -7264,6 +7315,10 @@ window.verCliente=async id=>{
       <button onclick="window._crearRecordatorioRapidoCli('${id}')" style="display:flex;align-items:center;gap:8px;background:rgba(234,179,8,.08);border:1px solid rgba(234,179,8,.24);border-radius:14px;padding:11px 12px;cursor:pointer;font-family:var(--font);text-align:left">
         <span style="font-size:18px">🔔</span>
         <div style="text-align:left"><div style="font-size:12px;font-weight:900;color:var(--tx)">Recordatorio</div><div style="font-size:10px;color:var(--tx2)">${_recDeCliente(id).filter(r=>r.estado!=='completado').length?`${_recDeCliente(id).filter(r=>r.estado!=='completado').length} pendiente${_recDeCliente(id).filter(r=>r.estado!=='completado').length!==1?'s':''}`:'Crear nuevo'}</div></div>
+      </button>
+      <button onclick="window._gxAbrirCliente('${id}')" style="display:flex;align-items:center;gap:8px;background:rgba(200,70,60,.07);border:1px solid rgba(200,70,60,.22);border-radius:14px;padding:11px 12px;cursor:pointer;font-family:var(--font);text-align:left">
+        <span style="font-size:18px">📊</span>
+        <div style="text-align:left"><div style="font-size:12px;font-weight:900;color:var(--tx)">Balance</div><div style="font-size:10px;color:var(--tx2)">Gastos e ingresos</div></div>
       </button>
       <button onclick="abrirImagenesClienteDesdeCli('${id}')" style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:14px;padding:11px 12px;cursor:pointer;font-family:var(--font);transition:.15s" onmouseover="this.style.borderColor='rgba(var(--theme-rgb),.4)'" onmouseout="this.style.borderColor='var(--border)'">
         <span style="font-size:18px">📷</span>
@@ -14596,6 +14651,7 @@ const renderPerfil=()=>{
       <button type="button" class="fab-pref-card ${_fabDefaultKey()==='cliente'?'active':''}" id="fabPrefCliente" onclick="_fabSetDefault('cliente')">👤<span>Cliente</span></button>
       <button type="button" class="fab-pref-card ${_fabDefaultKey()==='cobro'?'active':''}" id="fabPrefCobro" onclick="_fabSetDefault('cobro')">💰<span>Cobro</span></button>
       <button type="button" class="fab-pref-card ${_fabDefaultKey()==='recordatorio'?'active':''}" id="fabPrefRecordatorio" onclick="_fabSetDefault('recordatorio')">🔔<span>Recordatorio</span></button>
+      <button type="button" class="fab-pref-card ${_fabDefaultKey()==='gasto'?'active':''}" id="fabPrefGasto" onclick="_fabSetDefault('gasto')">💸<span>Gasto</span></button>
     </div>
   </div>
 
@@ -18681,6 +18737,532 @@ window._vzToggle = (modo) => {
 
   reiniciarSilencio();
   _vzIniciarSesion();
+};
+
+// Suma "cada N unidad" a una fecha base (lo usan los recordatorios que se repiten)
+const _sumarIntervalo = (base, cada, unidad) => {
+  const d=new Date(base); d.setHours(12,0,0,0);
+  if(unidad==='dia')         d.setDate(d.getDate()+cada);
+  else if(unidad==='semana') d.setDate(d.getDate()+cada*7);
+  else if(unidad==='mes')    d.setMonth(d.getMonth()+cada);
+  else                       d.setFullYear(d.getFullYear()+cada);
+  const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);
+  return z.toISOString().split('T')[0];
+};
+
+// ══════════════════════════════════════════════════════════════
+// GASTOS, INGRESOS Y BALANCE
+// Gastos: colección grupos/{gid}/gastos
+//   {concepto, importe, fecha 'YYYY-MM-DD', clienteId, clienteNombre, nota,
+//    recurrente: ''|'semanal'|'mensual'|'trimestral'|'anual',
+//    siguienteCreado: bool, recurRaiz: id del primero de la serie}
+// Ingresos: son los COBROS completados (grupos/{gid}/cobros). Su fecha es la
+// de completado. Un ingreso añadido desde aquí se guarda como un cobro ya
+// completado, así aparece también en Cobros y en la ficha del cliente.
+// ══════════════════════════════════════════════════════════════
+const _gx = {
+  gid:null, gastos:[], cobros:[], unsubG:null, unsubC:null,
+  tab:'mov', filtro:'todos', q:'', lim:120,
+  periodo:'mes', offset:0, desde:'', hasta:'',
+  procesados:new Set()
+};
+
+const _gxEsc = (t) => String(t??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const _gxISO = (d) => { const z=new Date(d.getTime()-d.getTimezoneOffset()*60000); return z.toISOString().split('T')[0]; };
+const _gxHoy = () => _gxISO(new Date());
+const _gxTsISO = (ts) => { try{ if(!ts) return ''; const d=ts.toDate?ts.toDate():(ts.seconds?new Date(ts.seconds*1000):new Date(ts)); return isNaN(d)?'':_gxISO(d); }catch(e){ return ''; } };
+const _gxFechaBonita = (iso) => { if(!iso) return '—'; const [a,m,d]=iso.split('-'); return `${d}/${m}/${a}`; };
+const _gxNum = (v) => { const n=parseFloat(v); return isNaN(n)?0:n; };
+const _gxCliNombre = (id, nombre) => (id && (allClientes||[]).find(c=>c.id===id)?.nombre) || nombre || '';
+
+const _GX_RECUR = {
+  semanal:{cada:1,unidad:'semana',label:'Cada semana'},
+  mensual:{cada:1,unidad:'mes',label:'Cada mes'},
+  trimestral:{cada:3,unidad:'mes',label:'Cada trimestre'},
+  anual:{cada:1,unidad:'ano',label:'Cada año'}
+};
+
+// ── Movimientos unificados ──
+const _gxMovimientos = () => {
+  const out = [];
+  (_gx.gastos||[]).forEach(g=>{
+    out.push({kind:'gasto', id:g.id, concepto:g.concepto||'Gasto', importe:_gxNum(g.importe),
+      fecha:g.fecha||_gxTsISO(g.creado), clienteId:g.clienteId||'', clienteNombre:_gxCliNombre(g.clienteId,g.clienteNombre),
+      nota:g.nota||'', recurrente:g.recurrente||''});
+  });
+  (_gx.cobros||[]).filter(c=>c.estado==='completado').forEach(c=>{
+    out.push({kind:'ingreso', id:c.id, concepto:c.titulo||'Cobro', importe:_gxNum(c.importe), sinImporte:(c.importe==null||c.importe===''),
+      fecha:_gxTsISO(c.completadoEn)||c.fecha||_gxTsISO(c.creado), clienteId:c.clienteId||'', clienteNombre:_gxCliNombre(c.clienteId,c.clienteNombre),
+      nota:c.nota||'', manual:c.origen==='ingreso'});
+  });
+  out.sort((a,b)=> (b.fecha||'').localeCompare(a.fecha||'') || (b.kind==='ingreso')-(a.kind==='ingreso'));
+  return out;
+};
+
+const _gxSumar = (lista) => {
+  let ing=0, gas=0;
+  lista.forEach(m=>{ if(m.kind==='ingreso') ing+=m.importe; else gas+=m.importe; });
+  return {ing, gas, bal:ing-gas};
+};
+
+const _gxPendientes = () => {
+  const p=(_gx.cobros||[]).filter(c=>c.estado==='pendiente');
+  return {n:p.length, total:p.reduce((s,c)=>s+_gxNum(c.importe),0)};
+};
+
+// ── Listeners en tiempo real ──
+const _gxSuscribir = () => {
+  if(!CGID) return;
+  if(_gx.gid!==CGID){
+    if(_gx.unsubG){ try{_gx.unsubG()}catch(e){} _gx.unsubG=null; }
+    if(_gx.unsubC){ try{_gx.unsubC()}catch(e){} _gx.unsubC=null; }
+    _gx.gid=CGID;
+    _gx.gastos=_lcLoad('gastos',CGID)||[];
+    _gx.cobros=_lcLoad('gx_cobros',CGID)||[];
+    _gx.procesados=new Set();
+  }
+  const gid=CGID;
+  if(!_gx.unsubG){
+    _gx.unsubG=onSnapshot(collection(db,'grupos',gid,'gastos'), snap=>{
+      if(_gx.gid!==gid) return;
+      _gx.gastos=snap.docs.map(d=>({id:d.id,...d.data()}));
+      _lcSave('gastos',gid,_gx.gastos);
+      _gxGenerarRecurrentes();
+      _gxRefrescar();
+    }, ()=>{});
+  }
+  if(!_gx.unsubC){
+    _gx.unsubC=onSnapshot(collection(db,'grupos',gid,'cobros'), snap=>{
+      if(_gx.gid!==gid) return;
+      _gx.cobros=snap.docs.map(d=>({id:d.id,...d.data()}));
+      _lcSave('gx_cobros',gid,_gx.cobros);
+      _gxRefrescar();
+    }, ()=>{});
+  }
+};
+
+// ── Gastos recurrentes: crea la siguiente ocasión cuando llega su fecha ──
+// El id del nuevo gasto es fijo (raíz + fecha), así dos móviles a la vez no
+// lo duplican: los dos escriben el mismo documento.
+const _gxGenerarRecurrentes = () => {
+  if(!CGID) return;
+  const hoy=_gxHoy();
+  (_gx.gastos||[]).forEach(g=>{
+    const r=_GX_RECUR[g.recurrente];
+    if(!r || g.siguienteCreado || !g.fecha || _gx.procesados.has(g.id)) return;
+    const sig=_sumarIntervalo(new Date(g.fecha+'T12:00:00'), r.cada, r.unidad);
+    if(sig>hoy) return;
+    _gx.procesados.add(g.id);
+    const raiz=g.recurRaiz||g.id;
+    const nuevo={concepto:g.concepto||'Gasto', importe:_gxNum(g.importe), fecha:sig,
+      clienteId:g.clienteId||'', clienteNombre:g.clienteNombre||'', nota:g.nota||'',
+      recurrente:g.recurrente, siguienteCreado:false, recurRaiz:raiz,
+      creado:serverTimestamp(), creadoPor:CUD?.nombre||CU?.email||''};
+    setDoc(doc(db,'grupos',CGID,'gastos',raiz+'_'+sig), nuevo).catch(()=>{});
+    updateDoc(doc(db,'grupos',CGID,'gastos',g.id), {siguienteCreado:true}).catch(()=>{});
+  });
+};
+
+const _gxRefrescar = () => {
+  if(!document.querySelector('#screenGastos.active')) return;
+  if(_gx.tab==='mov') _gxRenderMovList(); else _gxRenderBody();
+};
+
+// ══════════ PANTALLA ══════════
+window._gxEntrar = () => { _gx.q=''; _gx.filtro='todos'; _gx.tab='mov'; _gx.lim=120; goScreen('gastos'); };
+window._gxAbrirCliente = (cliId) => {
+  const c=(allClientes||[]).find(x=>x.id===cliId);
+  if(typeof cerrarSBTotal==='function') cerrarSBTotal();
+  _gx.q=c?.nombre||''; _gx.filtro='todos'; _gx.tab='mov'; _gx.lim=120;
+  setTimeout(()=>goScreen('gastos'),120);
+};
+
+window.renderGastos = () => {
+  const el=$('gastosContent'); if(!el) return;
+  if(!CGID){ el.innerHTML=`<div class="empty"><p>Selecciona un grupo primero</p></div>`; return; }
+  _gxSuscribir();
+  el.innerHTML=`
+    <button class="inicio-btn" onclick="goScreen('grupo')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg> Inicio</button>
+    <div style="font-size:20px;font-weight:900;color:var(--tx);margin-bottom:14px;display:flex;align-items:center;gap:8px">💶 Gastos, ingresos y balance</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <button class="btn gx-btn-gasto" onclick="abrirFormGasto()">− Nuevo gasto</button>
+      <button class="btn gx-btn-ingreso" onclick="abrirFormIngreso()">+ Nuevo ingreso</button>
+    </div>
+    <div class="stabs" style="margin-bottom:14px">
+      <button class="stab ${_gx.tab==='mov'?'active':''}" onclick="_gxSetTab('mov')">Movimientos</button>
+      <button class="stab ${_gx.tab==='bal'?'active':''}" onclick="_gxSetTab('bal')">Balance</button>
+    </div>
+    <div id="gxBody"></div>`;
+  _gxRenderBody();
+};
+
+window._gxSetTab = (t) => { _gx.tab=t; renderGastos(); };
+
+const _gxRenderBody = () => {
+  const b=$('gxBody'); if(!b) return;
+  if(_gx.tab==='mov'){
+    b.innerHTML=`
+      <input class="sbox" id="gxSearch" placeholder="🔍 Buscar por cliente o concepto..." value="${_gxEsc(_gx.q)}" oninput="_gxBuscar(this.value)">
+      <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+        ${[['todos','Todos'],['gasto','Gastos'],['ingreso','Ingresos']].map(([k,l])=>`<button class="fbtn ${_gx.filtro===k?'active':''}" onclick="_gxSetFiltro('${k}')">${l}</button>`).join('')}
+      </div>
+      <div id="gxMovList"></div>`;
+    _gxRenderMovList();
+  } else {
+    _gxRenderBalance();
+  }
+};
+
+window._gxBuscar = (q) => { _gx.q=q; _gx.lim=120; _gxRenderMovList(); };
+window._gxSetFiltro = (f) => { _gx.filtro=f; _gx.lim=120; _gxRenderBody(); };
+window._gxVerMas = () => { _gx.lim+=120; _gxRenderMovList(); };
+
+const _gxFilaHTML = (m) => {
+  const ing=m.kind==='ingreso';
+  const sub=[m.clienteNombre||'Sin cliente', _gxFechaBonita(m.fecha)];
+  if(m.recurrente && _GX_RECUR[m.recurrente]) sub.push('🔁 '+_GX_RECUR[m.recurrente].label);
+  return `<div class="gx-row" onclick="${ing?`abrirFormIngreso('${m.id}')`:`abrirFormGasto('${m.id}')`}">
+    <div class="gx-ico ${ing?'ing':'gas'}">${ing?'↓':'↑'}</div>
+    <div style="flex:1;min-width:0">
+      <div class="gx-concepto">${_gxEsc(m.concepto)}</div>
+      <div class="gx-sub">${_gxEsc(sub.join(' · '))}</div>
+    </div>
+    <div class="gx-imp ${ing?'ing':'gas'}">${m.sinImporte?'<span class="gx-sinimp">Sin importe</span>':(ing?'+':'−')+fmtM(m.importe)}</div>
+  </div>`;
+};
+
+const _gxRenderMovList = () => {
+  const el=$('gxMovList'); if(!el) return;
+  const qn=(_gx.q||'').toLowerCase().trim();
+  const words=qn?qn.split(/\s+/):[];
+  let lista=_gxMovimientos();
+  if(_gx.filtro!=='todos') lista=lista.filter(m=>m.kind===_gx.filtro);
+  if(words.length) lista=lista.filter(m=>{
+    const hay=[m.concepto,m.clienteNombre,m.nota].join(' ').toLowerCase();
+    return words.every(w=>hay.includes(w));
+  });
+
+  // Resumen de lo encontrado. Si la búsqueda apunta a un solo cliente,
+  // se muestra como su balance.
+  let resumen='';
+  if(words.length){
+    const todos=_gxMovimientos().filter(m=>{
+      const hay=[m.concepto,m.clienteNombre,m.nota].join(' ').toLowerCase();
+      return words.every(w=>hay.includes(w));
+    });
+    const s=_gxSumar(todos);
+    const clis=[...new Set(todos.map(m=>m.clienteId||('n:'+m.clienteNombre)).filter(k=>k&&k!=='n:'))];
+    const unCli = clis.length===1 && todos.every(m=>(m.clienteId||('n:'+m.clienteNombre))===clis[0]);
+    const titulo = unCli ? `Balance de ${_gxEsc(todos[0].clienteNombre)}` : 'Total de la búsqueda';
+    let pend='';
+    if(unCli){
+      const cid=todos[0].clienteId, cn=todos[0].clienteNombre;
+      const p=(_gx.cobros||[]).filter(c=>c.estado==='pendiente' && (cid?c.clienteId===cid:(c.clienteNombre||'')===cn));
+      if(p.length) pend=`<div class="gx-pend-mini">Pendiente de cobrar: <strong>${fmtM(p.reduce((a,c)=>a+_gxNum(c.importe),0))}</strong> (${p.length} cobro${p.length!==1?'s':''})</div>`;
+    }
+    resumen = todos.length ? `<div class="card gx-resumen">
+      <div class="gx-res-tit">${titulo}</div>
+      <div class="gx-res-grid">
+        <div><span>Ingresos</span><strong class="ing">${fmtM(s.ing)}</strong></div>
+        <div><span>Gastos</span><strong class="gas">${fmtM(s.gas)}</strong></div>
+        <div><span>Balance</span><strong class="${s.bal>=0?'ing':'gas'}">${fmtM(s.bal)}</strong></div>
+      </div>${pend}
+    </div>` : '';
+  }
+
+  if(!lista.length){
+    el.innerHTML=resumen+`<div class="empty"><div class="empty-ico">💶</div><p>${words.length?'Sin resultados para "'+_gxEsc(_gx.q)+'"':'Aún no hay movimientos.<br>Añade un gasto o un ingreso, o completa un cobro.'}</p></div>`;
+    return;
+  }
+  const visibles=lista.slice(0,_gx.lim);
+  let html='', mesPrev='';
+  visibles.forEach(m=>{
+    const mes=(m.fecha||'').slice(0,7);
+    if(mes!==mesPrev){
+      mesPrev=mes;
+      const etiqueta = mes ? new Date(mes+'-15T12:00:00').toLocaleDateString('es-ES',{month:'long',year:'numeric'}) : 'Sin fecha';
+      html+=`<div class="hg-day-sep" style="text-transform:capitalize">${etiqueta}</div>`;
+    }
+    html+=_gxFilaHTML(m);
+  });
+  if(lista.length>visibles.length) html+=`<button class="btn btn-s" style="width:100%;margin-top:8px" onclick="_gxVerMas()">Ver más (${lista.length-visibles.length})</button>`;
+  el.innerHTML=resumen+html;
+};
+
+// ══════════ BALANCE ══════════
+const _gxRango = () => {
+  const hoy=new Date(); hoy.setHours(12,0,0,0);
+  const o=_gx.offset||0;
+  let d1,d2,label;
+  if(_gx.periodo==='semana'){
+    const lunes=new Date(hoy); lunes.setDate(hoy.getDate()-((hoy.getDay()+6)%7)+o*7);
+    d1=lunes; d2=new Date(lunes); d2.setDate(lunes.getDate()+6);
+    label=`${d1.toLocaleDateString('es-ES',{day:'numeric',month:'short'})} – ${d2.toLocaleDateString('es-ES',{day:'numeric',month:'short',year:'numeric'})}`;
+  } else if(_gx.periodo==='mes'){
+    d1=new Date(hoy.getFullYear(),hoy.getMonth()+o,1,12); d2=new Date(d1.getFullYear(),d1.getMonth()+1,0,12);
+    label=d1.toLocaleDateString('es-ES',{month:'long',year:'numeric'});
+  } else if(_gx.periodo==='trimestre'){
+    const q0=Math.floor(hoy.getMonth()/3)+o;
+    d1=new Date(hoy.getFullYear(),q0*3,1,12); d2=new Date(d1.getFullYear(),d1.getMonth()+3,0,12);
+    label=`${Math.floor(d1.getMonth()/3)+1}.º trimestre ${d1.getFullYear()}`;
+  } else if(_gx.periodo==='anio'){
+    d1=new Date(hoy.getFullYear()+o,0,1,12); d2=new Date(hoy.getFullYear()+o,11,31,12);
+    label=String(d1.getFullYear());
+  } else {
+    if(!_gx.desde){ const m1=new Date(hoy.getFullYear(),hoy.getMonth(),1,12); _gx.desde=_gxISO(m1); }
+    if(!_gx.hasta) _gx.hasta=_gxISO(hoy);
+    return {desde:_gx.desde, hasta:_gx.hasta, label:`${_gxFechaBonita(_gx.desde)} – ${_gxFechaBonita(_gx.hasta)}`};
+  }
+  return {desde:_gxISO(d1), hasta:_gxISO(d2), label};
+};
+
+window._gxSetPeriodo = (p) => { _gx.periodo=p; _gx.offset=0; _gxRenderBalance(); };
+window._gxMover = (n) => { _gx.offset+=n; _gxRenderBalance(); };
+window._gxRango2 = () => { _gx.desde=$('gxDesde')?.value||_gx.desde; _gx.hasta=$('gxHasta')?.value||_gx.hasta; _gxRenderBalance(); };
+
+const _gxDatosPeriodo = () => {
+  const r=_gxRango();
+  const movs=_gxMovimientos().filter(m=>m.fecha && m.fecha>=r.desde && m.fecha<=r.hasta);
+  const tot=_gxSumar(movs);
+  const porCli={};
+  movs.forEach(m=>{
+    const k=m.clienteId||('n:'+(m.clienteNombre||''));
+    if(!porCli[k]) porCli[k]={nombre:m.clienteNombre||'Sin cliente (gastos generales)', sinCli:!m.clienteId&&!m.clienteNombre, ing:0, gas:0};
+    if(m.kind==='ingreso') porCli[k].ing+=m.importe; else porCli[k].gas+=m.importe;
+  });
+  const clientes=Object.values(porCli).map(c=>({...c,bal:c.ing-c.gas})).sort((a,b)=> (a.sinCli-b.sinCli) || (b.bal-a.bal));
+  return {r, movs, tot, clientes};
+};
+
+const _gxRenderBalance = () => {
+  const b=$('gxBody'); if(!b) return;
+  const {r, movs, tot, clientes} = _gxDatosPeriodo();
+  const pend=_gxPendientes();
+  const maxBar=Math.max(tot.ing,tot.gas,1);
+  const nav = _gx.periodo==='rango'
+    ? `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+         <div class="fgrp" style="margin:0"><label>Desde</label><input type="date" id="gxDesde" value="${r.desde}" onchange="_gxRango2()"></div>
+         <div class="fgrp" style="margin:0"><label>Hasta</label><input type="date" id="gxHasta" value="${r.hasta}" onchange="_gxRango2()"></div>
+       </div>`
+    : `<div class="calg-head" style="margin-bottom:14px">
+         <div class="calg-nav-btn" onclick="_gxMover(-1)">‹</div>
+         <div class="calg-title">${r.label}</div>
+         <div class="calg-nav-btn" onclick="_gxMover(1)">›</div>
+       </div>`;
+  b.innerHTML=`
+    <div style="display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap">
+      ${[['semana','Semana'],['mes','Mes'],['trimestre','Trimestre'],['anio','Año'],['rango','Personalizado']].map(([k,l])=>`<button class="fbtn ${_gx.periodo===k?'active':''}" onclick="_gxSetPeriodo('${k}')">${l}</button>`).join('')}
+    </div>
+    ${nav}
+    <div class="gx-bal-grid">
+      <div class="card gx-kpi"><span>Ingresos</span><strong class="ing">${fmtM(tot.ing)}</strong></div>
+      <div class="card gx-kpi"><span>Gastos</span><strong class="gas">${fmtM(tot.gas)}</strong></div>
+    </div>
+    <div class="card gx-kpi gx-kpi-big">
+      <span>${tot.bal>=0?'Beneficio':'Pérdida'}</span>
+      <strong class="${tot.bal>=0?'ing':'gas'}">${fmtM(tot.bal)}</strong>
+      <div class="gx-bars">
+        <div class="gx-bar"><i class="ing" style="width:${(tot.ing/maxBar*100).toFixed(1)}%"></i></div>
+        <div class="gx-bar"><i class="gas" style="width:${(tot.gas/maxBar*100).toFixed(1)}%"></i></div>
+      </div>
+      <div class="gx-sub" style="margin-top:6px">${movs.length} movimiento${movs.length!==1?'s':''} en el periodo</div>
+    </div>
+    ${pend.n?`<div class="card gx-pend" onclick="abrirTabExclusiva('cobros')">⏳ Pendiente de cobrar: <strong>${fmtM(pend.total)}</strong> · ${pend.n} cobro${pend.n!==1?'s':''} <span style="margin-left:auto;opacity:.6">›</span></div>`:''}
+    <div class="ficha-sec-tit" style="margin-top:18px">Por cliente</div>
+    ${clientes.length?clientes.map(c=>`
+      <div class="gx-row" onclick="${c.sinCli?'':`_gxBuscarDesdeBalance('${_gxEsc(c.nombre).replace(/'/g,"\\'")}')`}">
+        <div style="flex:1;min-width:0">
+          <div class="gx-concepto">${_gxEsc(c.nombre)}</div>
+          <div class="gx-sub"><span class="ing-t">+${fmtM(c.ing)}</span> · <span class="gas-t">−${fmtM(c.gas)}</span></div>
+        </div>
+        <div class="gx-imp ${c.bal>=0?'ing':'gas'}">${fmtM(c.bal)}</div>
+      </div>`).join(''):`<div class="empty" style="padding:20px"><p>Sin movimientos en este periodo</p></div>`}
+    <button class="btn btn-p" style="width:100%;margin-top:16px" onclick="exportarBalancePDF()">📄 Exportar PDF del periodo</button>`;
+};
+
+window._gxBuscarDesdeBalance = (nombre) => { _gx.q=nombre; _gx.filtro='todos'; _gx.tab='mov'; _gx.lim=120; renderGastos(); };
+
+// ══════════ FORMULARIOS ══════════
+window.abrirFormGasto = (id, preCliId) => {
+  _gxSuscribir();
+  const g = id ? (_gx.gastos||[]).find(x=>x.id===id) : null;
+  if(id && !g){ toast('No se ha encontrado el gasto','e'); return; }
+  abrirSB(g?'Editar gasto':'Nuevo gasto',`
+    <div class="fsec">
+      <div class="fgrp"><label>Importe (€) *</label><input type="number" id="gxImp" inputmode="decimal" step="0.01" min="0" placeholder="0.00" value="${g?_gxNum(g.importe):''}"></div>
+      <div class="fgrp"><label>Concepto *</label><input id="gxConc" placeholder="Ej: Material de fontanería, gasoil..." value="${_gxEsc(g?.concepto||'')}"></div>
+      <div class="fgrp"><label>Fecha</label><input type="date" id="gxFecha" value="${g?.fecha||_gxHoy()}"></div>
+      <div class="fgrp"><label>Cliente <span class="lbl-opt">(opcional)</span></label><div id="gxCli-wrap"></div></div>
+      <div class="fgrp"><label>Se repite</label>
+        <select id="gxRecur">
+          <option value="">No se repite</option>
+          ${Object.entries(_GX_RECUR).map(([k,v])=>`<option value="${k}" ${g?.recurrente===k?'selected':''}>${v.label}</option>`).join('')}
+        </select>
+        <div style="font-size:11px;color:var(--tx2);margin-top:5px;line-height:1.4">Para la cuota de autónomo, el seguro, etc. El siguiente gasto se crea solo cuando llega su fecha.</div>
+      </div>
+      <div class="fgrp"><label>Nota <span class="lbl-opt">(opcional)</span></label><textarea id="gxNota" rows="2" placeholder="Detalles...">${_gxEsc(g?.nota||'')}</textarea></div>
+      <button class="btn btn-p" onclick="guardarGasto('${id||''}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${g?'Guardar cambios':'Guardar gasto'}</button>
+      ${g?`<button class="btn btn-del" style="margin-top:8px" onclick="eliminarGasto('${id}')">🗑️ Eliminar gasto</button>`:''}
+    </div>`, undefined, 'gasto');
+  setTimeout(()=>{
+    _buildCliSelect('gxCli', g?.clienteId||preCliId||'', ()=>{}, (!g?.clienteId && g?.clienteNombre) ? g.clienteNombre : '');
+    if(!g) $('gxImp')?.focus();
+  },40);
+};
+
+window.guardarGasto = (id) => {
+  if(!CGID){ toast('No hay grupo activo','e'); return; }
+  const importe=parseFloat(($('gxImp')?.value||'').replace(',','.'));
+  const concepto=($('gxConc')?.value||'').trim();
+  if(isNaN(importe)||importe<=0){ toast('Escribe el importe','e'); return; }
+  if(!concepto){ toast('Escribe el concepto','e'); return; }
+  const cliId=_getCliSelectVal('gxCli')||'';
+  const data={
+    concepto, importe:Math.round(importe*100)/100,
+    fecha:$('gxFecha')?.value||_gxHoy(),
+    clienteId:cliId, clienteNombre:window._cliNombreDe('gxCli')||'',
+    recurrente:$('gxRecur')?.value||'',
+    nota:($('gxNota')?.value||'').trim()
+  };
+  if(id){
+    const prev=(_gx.gastos||[]).find(x=>x.id===id);
+    // Si cambia la repetición o la fecha, se vuelve a evaluar la siguiente ocasión
+    if(prev && (prev.recurrente!==data.recurrente || prev.fecha!==data.fecha)) data.siguienteCreado=false;
+    updateDoc(doc(db,'grupos',CGID,'gastos',id), data).catch(()=>toast('Sin conexión: se guardará al recuperar internet','i'));
+    _gx.procesados.delete(id);
+    toast('✓ Gasto actualizado','o');
+  } else {
+    const ref=doc(collection(db,'grupos',CGID,'gastos'));
+    setDoc(ref,{...data, siguienteCreado:false, recurRaiz:ref.id, creado:serverTimestamp(), creadoPor:CUD?.nombre||CU?.email||''})
+      .catch(()=>toast('Sin conexión: se guardará al recuperar internet','i'));
+    toast('✓ Gasto creado','o');
+  }
+  cerrarSB();
+};
+
+window.eliminarGasto = async (id) => {
+  if(!(await askConfirm('¿Eliminar este gasto?'))) return;
+  deleteDoc(doc(db,'grupos',CGID,'gastos',id)).catch(()=>{});
+  cerrarSB();
+  toast('🗑️ Gasto eliminado','o');
+};
+
+// Ingreso = cobro completado
+window.abrirFormIngreso = (id, preCliId) => {
+  _gxSuscribir();
+  const c = id ? (_gx.cobros||[]).find(x=>x.id===id) : null;
+  if(id && !c){ toast('No se ha encontrado el ingreso','e'); return; }
+  const fecha = c ? (_gxTsISO(c.completadoEn)||c.fecha||_gxHoy()) : _gxHoy();
+  abrirSB(c?'Editar ingreso':'Nuevo ingreso',`
+    ${c && c.origen!=='ingreso'?`<div style="background:rgba(52,140,90,.1);border:1px solid rgba(52,140,90,.3);border-radius:12px;padding:9px 12px;margin-bottom:14px;font-size:12px;font-weight:700;color:#34a06a">💰 Este ingreso es un cobro completado. Los cambios también se verán en Cobros.</div>`:''}
+    <div class="fsec">
+      <div class="fgrp"><label>Importe (€) *</label><input type="number" id="giImp" inputmode="decimal" step="0.01" min="0" placeholder="0.00" value="${c&&c.importe!=null&&c.importe!==''?_gxNum(c.importe):''}"></div>
+      <div class="fgrp"><label>Concepto *</label><input id="giConc" placeholder="Ej: Reparación termo" value="${_gxEsc(c?.titulo||'')}"></div>
+      <div class="fgrp"><label>Fecha de cobro</label><input type="date" id="giFecha" value="${fecha}"></div>
+      <div class="fgrp"><label>Cliente <span class="lbl-opt">(opcional)</span></label><div id="giCli-wrap"></div></div>
+      <div class="fgrp"><label>Nota <span class="lbl-opt">(opcional)</span></label><textarea id="giNota" rows="2" placeholder="Detalles...">${_gxEsc(c?.nota||'')}</textarea></div>
+      <button class="btn btn-p" onclick="guardarIngreso('${id||''}')"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> ${c?'Guardar cambios':'Guardar ingreso'}</button>
+      ${c?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+        <button class="btn btn-s" onclick="ingresoAPendiente('${id}')">↩️ Volver a pendiente</button>
+        <button class="btn btn-del" onclick="eliminarIngreso('${id}')">🗑️ Eliminar</button>
+      </div>`:''}
+    </div>`, undefined, 'ingreso');
+  setTimeout(()=>{
+    _buildCliSelect('giCli', c?.clienteId||preCliId||'', ()=>{}, (!c?.clienteId && c?.clienteNombre) ? c.clienteNombre : '');
+    if(!c) $('giImp')?.focus();
+  },40);
+};
+
+window.guardarIngreso = (id) => {
+  if(!CGID){ toast('No hay grupo activo','e'); return; }
+  const importe=parseFloat(($('giImp')?.value||'').replace(',','.'));
+  const titulo=($('giConc')?.value||'').trim();
+  if(isNaN(importe)||importe<=0){ toast('Escribe el importe','e'); return; }
+  if(!titulo){ toast('Escribe el concepto','e'); return; }
+  const fecha=$('giFecha')?.value||_gxHoy();
+  const cliId=_getCliSelectVal('giCli')||'';
+  const data={
+    titulo, importe:Math.round(importe*100)/100,
+    clienteId:cliId, clienteNombre:window._cliNombreDe('giCli')||'',
+    nota:($('giNota')?.value||'').trim(),
+    estado:'completado',
+    completadoEn:Timestamp.fromDate(new Date(fecha+'T12:00:00'))
+  };
+  if(id){
+    updateDoc(doc(db,'grupos',CGID,'cobros',id), data).catch(()=>toast('Sin conexión: se guardará al recuperar internet','i'));
+    toast('✓ Ingreso actualizado','o');
+  } else {
+    const ref=doc(collection(db,'grupos',CGID,'cobros'));
+    setDoc(ref,{...data, fecha, prioridad:'normal', origen:'ingreso', creado:serverTimestamp(), creadoPor:CUD?.nombre||CU?.email||''})
+      .catch(()=>toast('Sin conexión: se guardará al recuperar internet','i'));
+    toast('✓ Ingreso creado','o');
+  }
+  cerrarSB();
+};
+
+window.ingresoAPendiente = (id) => {
+  updateDoc(doc(db,'grupos',CGID,'cobros',id), {estado:'pendiente', completadoEn:null}).catch(()=>{});
+  cerrarSB();
+  toast('↩️ Vuelve a estar pendiente de cobrar','o');
+};
+
+window.eliminarIngreso = async (id) => {
+  if(!(await askConfirm('¿Eliminar este ingreso? También se eliminará el cobro.'))) return;
+  deleteDoc(doc(db,'grupos',CGID,'cobros',id)).catch(()=>{});
+  cerrarSB();
+  toast('🗑️ Ingreso eliminado','o');
+};
+
+// ══════════ PDF ══════════
+window.exportarBalancePDF = () => {
+  const {r, movs, tot, clientes} = _gxDatosPeriodo();
+  const pend=_gxPendientes();
+  const hoy=new Date().toLocaleDateString('es-ES',{day:'2-digit',month:'long',year:'numeric'});
+  const filasMov=movs.slice().sort((a,b)=>(a.fecha||'').localeCompare(b.fecha||'')).map(m=>`
+    <tr><td>${_gxFechaBonita(m.fecha)}</td><td>${m.kind==='ingreso'?'Ingreso':'Gasto'}</td><td>${_gxEsc(m.concepto)}</td><td>${_gxEsc(m.clienteNombre||'—')}</td>
+    <td class="num ${m.kind==='ingreso'?'ing':'gas'}">${m.kind==='ingreso'?'+':'−'}${fmtM(m.importe)}</td></tr>`).join('');
+  const filasCli=clientes.map(c=>`<tr><td>${_gxEsc(c.nombre)}</td><td class="num ing">${fmtM(c.ing)}</td><td class="num gas">${fmtM(c.gas)}</td><td class="num ${c.bal>=0?'ing':'gas'}"><strong>${fmtM(c.bal)}</strong></td></tr>`).join('');
+  const html=`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Balance ${_gxEsc(r.label)}</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap">
+  <style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',sans-serif;color:#222;background:#fff;font-size:12px;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  @page{margin:12mm 10mm;size:A4 portrait}
+  .head{background:linear-gradient(135deg,#0b5c56,#0f766e);color:#fff;padding:20px 24px;border-radius:10px;display:flex;align-items:center;gap:14px;margin-bottom:16px}
+  .head img{width:40px;height:40px;border-radius:10px}
+  .head h1{font-size:20px;font-weight:900}.head p{font-size:12px;opacity:.85}
+  .head .meta{margin-left:auto;text-align:right;font-size:11px;opacity:.85}
+  .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px}
+  .kpi{border:1px solid #e5e5e5;border-radius:10px;padding:12px}
+  .kpi span{display:block;font-size:9px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#888;margin-bottom:4px}
+  .kpi strong{font-size:18px;font-weight:900}
+  .ing{color:#1f8a52}.gas{color:#c6382e}
+  .pend{font-size:11px;color:#666;margin-bottom:16px}
+  h2{font-size:9.5px;font-weight:900;letter-spacing:2px;text-transform:uppercase;color:#0f766e;border-bottom:2px solid #0f766e;padding-bottom:5px;margin:14px 0 8px}
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:#888;padding:6px;border-bottom:1px solid #ddd}
+  td{padding:6px;border-bottom:1px solid #f0f0f0;vertical-align:top}
+  .num{text-align:right;white-space:nowrap;font-weight:700}
+  .foot{margin-top:16px;font-size:9px;color:#aaa;display:flex;justify-content:space-between}
+  </style></head><body>
+  <div class="head"><img src="${LOGO_B64}"><div><h1>${_gxEsc(CG?.nombre||'Ángel')}</h1><p>Balance · ${_gxEsc(r.label)}</p></div>
+    <div class="meta">${_gxFechaBonita(r.desde)} – ${_gxFechaBonita(r.hasta)}<br>Generado el ${hoy}</div></div>
+  <div class="kpis">
+    <div class="kpi"><span>Ingresos</span><strong class="ing">${fmtM(tot.ing)}</strong></div>
+    <div class="kpi"><span>Gastos</span><strong class="gas">${fmtM(tot.gas)}</strong></div>
+    <div class="kpi"><span>${tot.bal>=0?'Beneficio':'Pérdida'}</span><strong class="${tot.bal>=0?'ing':'gas'}">${fmtM(tot.bal)}</strong></div>
+  </div>
+  ${pend.n?`<div class="pend">Pendiente de cobrar a día de hoy: <strong>${fmtM(pend.total)}</strong> (${pend.n} cobro${pend.n!==1?'s':''})</div>`:''}
+  <h2>Por cliente</h2>
+  ${filasCli?`<table><thead><tr><th>Cliente</th><th class="num">Ingresos</th><th class="num">Gastos</th><th class="num">Balance</th></tr></thead><tbody>${filasCli}</tbody></table>`:'<p>Sin movimientos.</p>'}
+  <h2>Movimientos (${movs.length})</h2>
+  ${filasMov?`<table><thead><tr><th>Fecha</th><th>Tipo</th><th>Concepto</th><th>Cliente</th><th class="num">Importe</th></tr></thead><tbody>${filasMov}</tbody></table>`:'<p>Sin movimientos.</p>'}
+  <div class="foot"><span>Ángel · Gastos, ingresos y balance</span><span>${_gxEsc(CG?.nombre||'')}</span></div>
+  </body></html>`;
+  const w=window.open('','_blank');
+  if(!w){ toast('Activa las ventanas emergentes para exportar','e'); return; }
+  w.document.write(html); w.document.close();
+  setTimeout(()=>{ try{w.focus();w.print();}catch(e){} },700);
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
