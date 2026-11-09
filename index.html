@@ -1584,6 +1584,37 @@ body.modo-claro{--gx-ing:#23864f;--gx-gas:#c2443a}
 .gx-bar i.gas{background:var(--gx-gas)}
 .gx-pend{display:flex;align-items:center;gap:6px;padding:12px 14px;font-size:13px;color:var(--tx2);cursor:pointer;background:rgba(234,179,8,.08);border-color:rgba(234,179,8,.28)}
 .gx-pend strong{color:var(--tx)}
+
+/* ══ FLUJO PRESUPUESTO → AVISO → COBRO ══ */
+.fx-ov{position:fixed;inset:0;background:rgba(0,0,0,.62);z-index:1400;backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;transition:opacity .18s ease}
+.fx-ov.open{opacity:1}
+.fx-modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.92);width:min(380px,92vw);max-height:90vh;max-height:90dvh;overflow-y:auto;z-index:1410;background:rgba(17,17,17,.98);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-radius:var(--rd-lg);border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.5);padding:24px 20px 18px;text-align:center;opacity:0;transition:transform .22s cubic-bezier(.16,1,.3,1),opacity .18s ease}
+.fx-modal.open{transform:translate(-50%,-50%) scale(1);opacity:1}
+body.modo-claro .fx-modal{background:rgba(253,253,252,.98)}
+.fx-x{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:10px;border:none;background:transparent;color:var(--tx2);font-size:15px;cursor:pointer;font-family:var(--font)}
+.fx-tit{font-size:17px;font-weight:900;color:var(--tx);margin-bottom:6px}
+.fx-sub{font-size:13px;color:var(--tx2);line-height:1.45;margin-bottom:14px;word-break:break-word}
+.fx-ref{font-size:13px;color:var(--tx2);background:rgba(127,127,127,.1);border-radius:12px;padding:9px 12px;margin-bottom:12px}
+.fx-ref strong{color:var(--tx)}
+.fx-nota{font-size:12.5px;font-weight:700;color:var(--r);margin-bottom:12px}
+.fx-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;text-align:left}
+.fx-grid .fgrp{margin-bottom:10px}
+.fx-total{display:flex;justify-content:space-between;align-items:baseline;padding:10px 4px 2px;border-top:1px solid var(--border)}
+.fx-total span{font-size:11px;font-weight:800;color:var(--tx2);text-transform:uppercase;letter-spacing:1.5px}
+.fx-total strong{font-size:22px;font-weight:900;color:var(--tx);font-variant-numeric:tabular-nums}
+.fx-dif{display:none;font-size:11.5px;font-weight:600;color:#e0a100;text-align:left;margin-top:6px;line-height:1.4}
+.fx-lbl{font-size:11px;font-weight:800;color:var(--tx2);letter-spacing:1.5px;text-transform:uppercase;text-align:left;margin:16px 0 8px}
+.fx-seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.fx-seg .fbtn{width:100%;padding:11px 8px;font-size:13px}
+.fx-err{display:none;font-size:12.5px;font-weight:700;color:var(--gx-gas);margin-top:12px}
+.fx-btns{display:flex;gap:10px;margin-top:18px}
+.fx-btns .btn{flex:1;padding:12px;font-size:14px}
+.fx-chip{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:2px 8px;font-size:10px;font-weight:800;background:rgba(127,127,127,.12);color:var(--tx2)}
+.fx-chip.eur{background:rgba(52,140,90,.14);color:var(--gx-ing)}
+.fx-desg{font-size:11.5px;color:var(--tx2);margin-top:4px}
+.fx-desg b{font-weight:800;font-variant-numeric:tabular-nums}
+.fx-desg b.g{color:var(--gx-gas)}
+.fx-desg b.b{color:var(--gx-ing)}
 </style>
 <!-- ══ BLOQUEO INMEDIATO: se ejecuta antes de pintar nada ══ -->
 <script>
@@ -3459,9 +3490,8 @@ window._selDeleteCobros=async(ids)=>{
   toast(`🗑️ ${ids.length>1?'Cobros eliminados':'Cobro eliminado'}`,'o');
 };
 window._selCompletarCobros=async(ids)=>{
-  toast('Actualizando…','i');
-  for(const id of ids){ try{ await updateDoc(doc(db,'grupos',CGID,'cobros',id),{estado:'completado',completadoEn:serverTimestamp()}); }catch(e){} }
-  toast(`✅ ${ids.length>1?'Cobros completados':'Cobro completado'}`,'o');
+  // Uno por uno: cada cobro pide (o confirma) su gasto y su beneficio.
+  for(const id of ids){ try{ await _fxCompletarCobro(id); }catch(e){ console.warn('_selCompletarCobros',id,e); } }
 };
 window._selRestaurarCobros=async(ids)=>{
   toast('Actualizando…','i');
@@ -3473,10 +3503,7 @@ window._selRestaurarCobros=async(ids)=>{
 // El listener de Firestore (onSnapshot en _suscribirSimple) repinta la lista solo.
 window.swipeCompletarCobro=async(id)=>{
   if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
-  try{
-    await updateDoc(doc(db,'grupos',CGID,'cobros',id),{estado:'completado',completadoEn:serverTimestamp()});
-    toast('✅ Cobro completado','o');
-  }catch(e){ console.error('swipeCompletarCobro',e); toast('Sin conexión: se completará al recuperar internet','i'); }
+  await _fxCompletarCobro(id);
 };
 window.swipeRestaurarCobro=async(id)=>{
   if(typeof window._closeAllSwipes==='function') window._closeAllSwipes();
@@ -3528,12 +3555,11 @@ window._selDeleteAvisos=async(ids)=>{
   toast(`🗑️ ${ids.length>1?'Avisos eliminados':'Aviso eliminado'}`,'o');
 };
 window._selResolverAvisos=async(ids)=>{
-  toast('Actualizando…','i');
+  // Uno por uno: cada aviso pide su gasto y su beneficio.
   for(const id of ids){
-    try{ await updateDoc(doc(db,'grupos',CGID,'avisos',id),{estado:'resuelto',resueltaEn:serverTimestamp()}); }
+    try{ await _fxResolverAviso(id); }
     catch(e){ console.warn('_selResolverAvisos',id,e); }
   }
-  toast(`✅ ${ids.length>1?'Avisos resueltos':'Aviso resuelto'}`,'o');
 };
 window._selRestaurarAvisos=async(ids)=>{
   toast('Actualizando…','i');
@@ -3554,20 +3580,27 @@ window._selDeletePresupuestos=async(ids)=>{
   toast(`🗑️ ${ids.length>1?'Presupuestos eliminados':'Presupuesto eliminado'}`,'o');
 };
 window._selCompletarPresupuestos=async(ids)=>{
-  toast('Actualizando…','i');
+  // Uno por uno: cada presupuesto pide el título de su aviso.
+  let n=0;
   for(const id of ids){
-    try{ await updateDoc(doc(db,'grupos',CGID,'presupuestos',id),{estado:'aceptado',actualizadoEn:serverTimestamp()}); }
-    catch(e){ console.warn('_selCompletarPresupuestos',id,e); }
+    const r=await _fxCrearAvisoDePresupuesto(id);
+    if(!r) continue;
+    updateDoc(doc(db,'grupos',CGID,'presupuestos',id),{estado:'aceptado',avisoId:r.avisoId,actualizadoEn:serverTimestamp()})
+      .catch(e=>console.warn('_selCompletarPresupuestos',id,e));
+    n++;
   }
-  toast(`✅ ${ids.length>1?'Presupuestos completados':'Presupuesto completado'}`,'o');
+  if(n) toast(`✅ ${n>1?n+' presupuestos completados · avisos creados':'Presupuesto completado · aviso creado'}`,'o');
 };
 window._selRestaurarPresupuestos=async(ids)=>{
-  toast('Actualizando…','i');
+  let n=0;
   for(const id of ids){
-    try{ await updateDoc(doc(db,'grupos',CGID,'presupuestos',id),{estado:'espera',actualizadoEn:serverTimestamp()}); }
-    catch(e){ console.warn('_selRestaurarPresupuestos',id,e); }
+    const ok=await _fxQuitarAvisoDePresupuesto(id);
+    if(!ok) continue;
+    updateDoc(doc(db,'grupos',CGID,'presupuestos',id),{estado:'espera',avisoId:null,actualizadoEn:serverTimestamp()})
+      .catch(e=>console.warn('_selRestaurarPresupuestos',id,e));
+    n++;
   }
-  toast(`↩️ ${ids.length>1?'Presupuestos restaurados a pendientes':'Presupuesto restaurado a pendiente'}`,'o');
+  if(n) toast(`↩️ ${n>1?n+' presupuestos restaurados a pendientes':'Presupuesto restaurado a pendiente'}`,'o');
 };
 
 window.goScreen=id=>{
@@ -5447,7 +5480,8 @@ const _simpleCardHtml=(tipo,item,completado)=>{
         <div style="flex:1;min-width:0">
           <div class="averia-title">${item.titulo||conf.labelSing}${importeTxt}</div>
           <div class="averia-sub">${c?.nombre||item.clienteNombre||'Sin cliente'} · ${completado?'Completado ':''}${fmtF(fecha)}${fechaTxt&&!completado?' · 📅 '+fechaTxt:''}</div>
-          <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">${_simplePrioTag(prio)}</div>
+          ${tipo==='cobro'?_fxDesgloseHTML(item):''}
+          <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap">${_simplePrioTag(prio)}${item.avisoId?'<span class="fx-chip">📋 De aviso</span>':''}</div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
           <span class="averia-badge ${completado?'resuelta':'pend'}">${completado?'Completado':'Pendiente'}</span>
@@ -5562,7 +5596,13 @@ window.abrirNuevoSimple=(tipo,editId,presetFecha,presetCliId)=>{
   abrirSB(editing?`Editar ${conf.labelSing.toLowerCase()}`:`${conf.art} ${conf.labelSing.toLowerCase()}`,`
     <div class="fsec">
       <div class="fgrp"><label>Título</label><input id="smpTitulo" placeholder="${conf.tituloPh}" value="${(editing?.titulo||'').replace(/"/g,'&quot;')}"></div>
-      ${tipo==='cobro'?`<div class="fgrp"><label>Importe (€) <span class="lbl-opt">(opcional)</span></label><input id="smpImporte" type="number" step="0.01" min="0" placeholder="0.00" value="${editing?.importe??''}"></div>`:''}
+      ${tipo==='cobro'?(_fxTieneDesglose(editing)
+        ?`<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div class="fgrp"><label>Gasto (€)</label><input id="smpGasto" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0,00" value="${editing.gasto??''}" oninput="_fxSmpTotal()"></div>
+            <div class="fgrp"><label>Beneficio (€)</label><input id="smpBenef" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${editing.beneficio??''}" oninput="_fxSmpTotal()"></div>
+          </div>
+          <div class="fx-desg" style="margin:-4px 0 14px">Importe del cobro (gasto + beneficio): <b id="smpTotalFx" style="color:var(--tx)">${fmtM(editing.importe)}</b></div>`
+        :`<div class="fgrp"><label>Importe (€) <span class="lbl-opt">(opcional)</span></label><input id="smpImporte" type="number" step="0.01" min="0" placeholder="0.00" value="${editing?.importe??''}"></div>`):''}
       <div class="fgrp"><label>Cliente <span class="lbl-opt">(opcional)</span></label><div id="smpCli-wrap"></div></div>
       <div class="fgrp"><label>Fecha <span class="lbl-opt">(opcional)</span></label><input id="smpFecha" type="date" value="${editing?.fecha||presetFecha||''}"></div>
       <div class="fgrp">
@@ -5612,8 +5652,16 @@ window.guardarSimple=async(tipo,editId)=>{
     prioridad:$('smpPrio')?.value||'normal'
   };
   if(tipo==='cobro'){
-    const impVal=$('smpImporte')?.value;
-    data.importe=impVal!==undefined&&impVal!==''?parseFloat(impVal)||0:null;
+    if($('smpGasto')){
+      // Cobro con desglose: el importe es siempre gasto + beneficio
+      const g=_fxNum($('smpGasto').value)||0, b=_fxNum($('smpBenef')?.value)||0;
+      data.gasto=g; data.beneficio=b; data.importe=Math.round((g+b)*100)/100;
+      const prev=(_simplePend.cobro||[]).find(x=>x.id===editId)||(_simpleComp.cobro||[]).find(x=>x.id===editId);
+      if(prev?.avisoId) updateDoc(doc(db,'grupos',CGID,'avisos',prev.avisoId),{gasto:g,beneficio:b}).catch(()=>{});
+    } else {
+      const impVal=$('smpImporte')?.value;
+      data.importe=impVal!==undefined&&impVal!==''?parseFloat(impVal)||0:null;
+    }
   }
   try{
     if(editId){
@@ -5651,6 +5699,8 @@ window.verSimple=(tipo,itemId)=>{
       </div>
       ${item.fecha?`<div style="font-size:12px;color:var(--tx2);margin-top:4px">📅 ${_fmtFechaSimple(item.fecha)}</div>`:''}
       ${(tipo==='cobro'&&item.importe)?`<div style="font-size:13px;font-weight:900;color:var(--r);margin-top:4px">${fmtM(item.importe)}</div>`:''}
+      ${tipo==='cobro'?_fxDesgloseHTML(item):''}
+      ${(tipo==='cobro'&&item.avisoId)?`<div style="margin-top:6px"><span class="fx-chip">📋 Creado al resolver un aviso</span></div>`:''}
       <div style="font-size:12px;color:var(--tx2);margin-top:2px">${fmtF(item.creado)}</div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
@@ -5664,6 +5714,8 @@ window.verSimple=(tipo,itemId)=>{
 };
 
 window.completarSimple=async(tipo,itemId,silent)=>{
+  // Los cobros piden (o confirman) gasto y beneficio antes de pasar al balance.
+  if(tipo==='cobro' && !silent){ await _fxCompletarCobro(itemId); return; }
   if(!silent && !(await askConfirm(`¿Marcar ${_SIMPLE_CONF[tipo].artEste} ${_SIMPLE_CONF[tipo].labelSing.toLowerCase()} como completado?`,{danger:false,icon:'✅',textoSi:'Marcar'}))) return;
   try{
     await updateDoc(doc(db,'grupos',CGID,_SIMPLE_CONF[tipo].col,itemId),{estado:'completado',completadoEn:serverTimestamp()});
@@ -13759,10 +13811,24 @@ window._enviarPresuWA=async(prId,firmaDataURL)=>{
 
 
 window.toggleEstadoPresupuesto=async(prId,nuevoEstado)=>{
+  // Flujo presupuesto → aviso: al completar se crea su aviso (pidiendo el
+  // título); al devolver a pendientes se borra (o se impide si ya está resuelto).
+  let extraPr={}, msgExtra='';
+  if(nuevoEstado==='aceptado'){
+    const r=await _fxCrearAvisoDePresupuesto(prId);
+    if(!r) return;
+    extraPr={avisoId:r.avisoId};
+    if(!r.ya) msgExtra=' · aviso creado';
+  } else if(nuevoEstado==='espera'){
+    const ok=await _fxQuitarAvisoDePresupuesto(prId);
+    if(!ok) return;
+    extraPr={avisoId:null};
+    if(ok==='borrado') msgExtra=' · aviso eliminado';
+  }
   try{
     const snapP=await getDoc(doc(db,'grupos',CGID,'presupuestos',prId));
     const estadoPrev=snapP.exists()?(snapP.data().estado||'espera'):'espera';
-    await updateDoc(doc(db,'grupos',CGID,'presupuestos',prId),{estado:nuevoEstado,actualizadoEn:serverTimestamp()});
+    await updateDoc(doc(db,'grupos',CGID,'presupuestos',prId),{estado:nuevoEstado,...extraPr,actualizadoEn:serverTimestamp()});
     try{
       await addDoc(collection(db,'grupos',CGID,'presupuestos',prId,'historial'),{
         de:estadoPrev,a:nuevoEstado,
@@ -13770,7 +13836,7 @@ window.toggleEstadoPresupuesto=async(prId,nuevoEstado)=>{
         fecha:serverTimestamp()
       });
     }catch(eH){}
-    cerrarSB();toast(nuevoEstado==='aceptado'?'✅ Presupuesto completado':'↩️ Marcado como pendiente','o');
+    cerrarSB();toast((nuevoEstado==='aceptado'?'✅ Presupuesto completado':'↩️ Marcado como pendiente')+msgExtra,'o');
   }catch(e){toast('Error','e')}
 };
 
@@ -15129,7 +15195,7 @@ const _htmlListaAvisos=(listaBase,qL,esResueltos)=>{
         <div class="averia-ico" style="color:${esResuelto?'var(--ok)':borderColor}">${_avisIco}</div>
         <div style="flex:1;min-width:0">
           <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:6px;align-items:center">
-            ${prioChip}${alertaChip}
+            ${prioChip}${alertaChip}${_fxChipsAviso(a)}
           </div>
           <div class="averia-title" style="white-space:normal;line-height:1.4">${a.descripcion||'Sin descripción'}</div>
           <div class="averia-sub" style="margin-top:4px">
@@ -15143,6 +15209,7 @@ ${a.creadoPorVoz?`<span title="Creado dictando" style="font-size:11px;opacity:.5
             ${a.creadoPorNombre||'Técnico'} · ${fmtF(a.creado)}
             ${esResuelto?` · <span style="color:var(--ok);font-weight:700">Resuelto ${fmtF(a.resueltaEn)}</span>`:''}
           </div>
+          ${esResuelto?_fxDesgloseHTML(a):''}
           <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap">
             ${cli?.telefono?`<a href="tel:${cli.telefono}" style="text-decoration:none" onclick="event.stopPropagation()" class="btn btn-s btn-sm"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.71 3.4 2 2 0 0 1 3.68 1.21h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.18 6.18l1.86-1.04a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg> Llamar</a>`:''}
             ${cli?.telefono?`<a href="https://wa.me/${window._waTel(cli.telefono)}" target="_blank" style="text-decoration:none" onclick="event.stopPropagation()" class="btn btn-s btn-sm">💬 WhatsApp</a>`:''}
@@ -15170,6 +15237,10 @@ window.abrirNuevoAviso=(presetFecha,presetCliId)=>{
       <div class="fgrp">
         <label>Cliente vinculado <span class="lbl-opt">(opcional)</span></label>
         <div id="avisCli-wrap"></div>
+      </div>
+      <div class="fgrp">
+        <label>💶 Precio total (€) <span class="lbl-opt">(opcional)</span></label>
+        <input id="avisImporte" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0,00" value="">
       </div>
       <div class="fgrp">
         <label>Prioridad</label>
@@ -15220,6 +15291,10 @@ window.editarAviso=(id)=>{
         <div id="avisCli-wrap"></div>
       </div>
       <div class="fgrp">
+        <label>💶 Precio total (€) <span class="lbl-opt">(opcional)</span></label>
+        <input id="avisImporte" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0,00" value="${a.importe??''}">
+      </div>
+      <div class="fgrp">
         <label>Prioridad</label>
         <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px" id="avisPrioWrapEdit">
            <button type="button" onclick="_setAvisoPrio('baja','E')" id="avisPrioBajaE"
@@ -15263,6 +15338,7 @@ window.guardarNuevoAviso=async()=>{
       clienteNombre:cliNom||null,
       prioridad:prio,
       fechaAlerta:fechaAlerta||null,
+      importe:_fxNum(document.getElementById('avisImporte')?.value),
       creadoPor:CU.uid,
       creadoPorNombre:CUD?.nombre||CU.email||'Técnico',
       creado:serverTimestamp(),
@@ -15288,21 +15364,15 @@ window.actualizarAviso=async(id)=>{
       clienteNombre:cliNom||null,
       prioridad:prio,
       fechaAlerta:fechaAlerta||null,
+      importe:_fxNum(document.getElementById('avisImporte')?.value),
     });
     cerrarSB();
     toast('✅ Aviso actualizado','o');
   }catch(e){toast('Error: '+e.message,'e');}
 };
 
-window.resolverAviso=async(id)=>{
-  try{
-    await updateDoc(doc(db,'grupos',CGID,'avisos',id),{
-      estado:'resuelto',
-      resueltaEn:serverTimestamp()
-    });
-    toast('✅ Aviso marcado como resuelto','o');
-  }catch(e){toast('Error: '+e.message,'e');}
-};
+// Resolver un aviso pide gasto y beneficio y crea su cobro (flujo de trabajo).
+window.resolverAviso=async(id)=>{ return _fxResolverAviso(id); };
 
 // Marcar un aviso como resuelto directamente (ya no ofrece crear un parte: sección eliminada)
 window.resolverAvisoConOpcion=(id)=>{ resolverAviso(id); };
@@ -18791,9 +18861,17 @@ const _gxMovimientos = () => {
       nota:g.nota||'', recurrente:g.recurrente||''});
   });
   (_gx.cobros||[]).filter(c=>c.estado==='completado').forEach(c=>{
+    const fecha=_gxTsISO(c.completadoEn)||c.fecha||_gxTsISO(c.creado);
+    const cliNom=_gxCliNombre(c.clienteId,c.clienteNombre);
+    const desg=_fxTieneDesglose(c);
     out.push({kind:'ingreso', id:c.id, concepto:c.titulo||'Cobro', importe:_gxNum(c.importe), sinImporte:(c.importe==null||c.importe===''),
-      fecha:_gxTsISO(c.completadoEn)||c.fecha||_gxTsISO(c.creado), clienteId:c.clienteId||'', clienteNombre:_gxCliNombre(c.clienteId,c.clienteNombre),
-      nota:c.nota||'', manual:c.origen==='ingreso'});
+      fecha, clienteId:c.clienteId||'', clienteNombre:cliNom,
+      nota:c.nota||'', manual:c.origen==='ingreso', beneficio:desg?_gxNum(c.beneficio):null});
+    // Gasto del trabajo: entra en el balance a la vez que el cobro
+    if(desg && _gxNum(c.gasto)>0){
+      out.push({kind:'gasto', id:c.id, deCobro:true, concepto:'Gasto · '+(c.titulo||'Cobro'), importe:_gxNum(c.gasto),
+        fecha, clienteId:c.clienteId||'', clienteNombre:cliNom, nota:'', recurrente:''});
+    }
   });
   out.sort((a,b)=> (b.fecha||'').localeCompare(a.fecha||'') || (b.kind==='ingreso')-(a.kind==='ingreso'));
   return out;
@@ -18921,7 +18999,11 @@ const _gxFilaHTML = (m) => {
   const ing=m.kind==='ingreso';
   const sub=[m.clienteNombre||'Sin cliente', _gxFechaBonita(m.fecha)];
   if(m.recurrente && _GX_RECUR[m.recurrente]) sub.push('🔁 '+_GX_RECUR[m.recurrente].label);
-  return `<div class="gx-row" onclick="${ing?`abrirFormIngreso('${m.id}')`:`abrirFormGasto('${m.id}')`}">
+  if(ing && m.beneficio!=null) sub.push('Beneficio '+fmtM(m.beneficio));
+  if(m.deCobro) sub.push('del cobro');
+  const accion = m.deCobro || (ing && m.beneficio!=null) ? `_fxVerCobro('${m.id}')`
+    : (ing ? `abrirFormIngreso('${m.id}')` : `abrirFormGasto('${m.id}')`);
+  return `<div class="gx-row" onclick="${accion}">
     <div class="gx-ico ${ing?'ing':'gas'}">${ing?'↓':'↑'}</div>
     <div style="flex:1;min-width:0">
       <div class="gx-concepto">${_gxEsc(m.concepto)}</div>
@@ -19066,6 +19148,9 @@ const _gxRenderBalance = () => {
         <div class="gx-bar"><i class="gas" style="width:${(tot.gas/maxBar*100).toFixed(1)}%"></i></div>
       </div>
       <div class="gx-sub" style="margin-top:6px">${movs.length} movimiento${movs.length!==1?'s':''} en el periodo</div>
+      ${(()=>{ const t=movs.filter(m=>m.kind==='ingreso'&&m.beneficio!=null); if(!t.length) return '';
+        const b=t.reduce((a,m)=>a+m.beneficio,0);
+        return `<div class="gx-sub" style="margin-top:4px">💼 Beneficio de trabajos: <b class="${b>=0?'ing-t':'gas-t'}" style="font-weight:800">${fmtM(b)}</b> (${t.length} cobro${t.length!==1?'s':''})</div>`; })()}
     </div>
     ${pend.n?`<div class="card gx-pend" onclick="abrirTabExclusiva('cobros')">⏳ Pendiente de cobrar: <strong>${fmtM(pend.total)}</strong> · ${pend.n} cobro${pend.n!==1?'s':''} <span style="margin-left:auto;opacity:.6">›</span></div>`:''}
     <div class="ficha-sec-tit" style="margin-top:18px">Por cliente</div>
@@ -19263,6 +19348,346 @@ window.exportarBalancePDF = () => {
   if(!w){ toast('Activa las ventanas emergentes para exportar','e'); return; }
   w.document.write(html); w.document.close();
   setTimeout(()=>{ try{w.focus();w.print();}catch(e){} },700);
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// FLUJO DE TRABAJO: PRESUPUESTO → AVISO → COBRO → BALANCE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// · Al completar un presupuesto se pide el título y se crea un aviso con el
+//   cliente y el precio total. Al devolverlo a pendientes se borra ese aviso
+//   (si el aviso ya está resuelto no se permite: el trabajo ya está hecho).
+// · Al resolver un aviso se piden gasto y beneficio y si el cobro está
+//   pendiente o ya cobrado; se crea el cobro por el total (gasto + beneficio).
+// · Al completar un cobro se piden (o se confirman) gasto y beneficio. Si está
+//   enlazado a un aviso sin resolver, el aviso se resuelve también.
+// · El balance cuenta el total como ingreso y el gasto como gasto SOLO cuando
+//   el cobro está completado (lo calcula _gxMovimientos a partir del cobro).
+// Campos nuevos: aviso.importe, aviso.presupuestoId, aviso.cobroId,
+// aviso.gasto, aviso.beneficio · presupuesto.avisoId · cobro.avisoId,
+// cobro.gasto, cobro.beneficio.
+
+const _fxNum = (v) => {
+  if(v===null || v===undefined || v==='') return null;
+  const n=parseFloat(String(v).replace(',','.'));
+  return isNaN(n) ? null : Math.round(n*100)/100;
+};
+const _fxTieneDesglose = (c) => !!c && (_fxNum(c.gasto)!=null || _fxNum(c.beneficio)!=null);
+const _fxConTiempo = (p, ms=6000) => Promise.race([p, new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms))]);
+const _fxLog = (donde) => (e) => console.warn('[flujo] '+donde, e);
+
+// ── Búsqueda de datos: primero memoria, luego Firestore (vale sin red gracias a la caché) ──
+const _fxBuscarAviso = async (id) => {
+  if(!id) return null;
+  const a=(_avisosPend||[]).find(x=>x.id===id) || (_avisosRes||[]).find(x=>x.id===id);
+  if(a) return a;
+  try{ const s=await _fxConTiempo(getDoc(doc(db,'grupos',CGID,'avisos',id))); return s.exists()?{id,...s.data()}:null; }
+  catch(e){ return null; }
+};
+const _fxBuscarCobro = async (id) => {
+  if(!id) return null;
+  const c=(_simplePend.cobro||[]).find(x=>x.id===id) || (_simpleComp.cobro||[]).find(x=>x.id===id)
+        || (_gx.gid===CGID ? (_gx.cobros||[]).find(x=>x.id===id) : null);
+  if(c) return c;
+  try{ const s=await _fxConTiempo(getDoc(doc(db,'grupos',CGID,'cobros',id))); return s.exists()?{id,...s.data()}:null; }
+  catch(e){ return null; }
+};
+const _fxBuscarPresu = async (id) => {
+  if(!id) return null;
+  const p=(_presusPend||[]).find(x=>x.id===id) || (_presusComp||[]).find(x=>x.id===id);
+  if(p) return p;
+  try{ const s=await _fxConTiempo(getDoc(doc(db,'grupos',CGID,'presupuestos',id))); return s.exists()?{id,...s.data()}:null; }
+  catch(e){ return null; }
+};
+
+// Mismo cálculo que el TOTAL que se ve en el detalle del presupuesto.
+const _fxTotalPresu = (p) => {
+  const mo=_gxNum(p.importeManoObra), mat=_gxNum(p.importeMateriales), des=_gxNum(p.importeDesplazamiento);
+  const iva=p.aplicarIVA ? (mo+mat+des)*0.21 : 0;
+  const part=(p.partidas||[]).reduce((a,b)=>a+_gxNum(b.importe),0);
+  return Math.round((mo+mat+iva+des+part)*100)/100;
+};
+
+// ══════════ DIÁLOGOS (mismo estilo que el modal de confirmación) ══════════
+const _fxError = (m, txt) => { const e=m.querySelector('.fx-err'); if(e){ e.textContent=txt||''; e.style.display=txt?'block':'none'; } };
+
+// botones: [{txt, cls, valor, principal}] · valor puede ser una función (m)=>valor;
+// si devuelve undefined el diálogo no se cierra (validación).
+const _fxDialogo = ({ico, titulo, sub, cuerpo, botones, alAbrir}) => new Promise(resolve=>{
+  document.getElementById('fxOv')?.remove(); document.getElementById('fxModal')?.remove();
+  const ov=document.createElement('div'); ov.id='fxOv'; ov.className='fx-ov';
+  const m=document.createElement('div'); m.id='fxModal'; m.className='fx-modal';
+  m.setAttribute('role','dialog'); m.setAttribute('aria-modal','true');
+  m.innerHTML=`<button class="fx-x" type="button" aria-label="Cerrar">✕</button>
+    ${ico?`<div class="confirm-ico">${ico}</div>`:''}
+    <div class="fx-tit">${titulo}</div>
+    ${sub?`<div class="fx-sub">${sub}</div>`:''}
+    ${cuerpo||''}
+    <div class="fx-err"></div>
+    <div class="fx-btns">${botones.map((b,i)=>`<button type="button" class="btn ${b.cls||'btn-s'}" data-i="${i}">${b.txt}</button>`).join('')}</div>`;
+  document.body.appendChild(ov); document.body.appendChild(m);
+  requestAnimationFrame(()=>{ ov.classList.add('open'); m.classList.add('open'); });
+  let hecho=false;
+  const cerrar=(val)=>{
+    if(hecho) return; hecho=true;
+    document.removeEventListener('keydown',onKey);
+    ov.classList.remove('open'); m.classList.remove('open');
+    setTimeout(()=>{ ov.remove(); m.remove(); },220);
+    if(val && typeof _sndConfirm==='function'){ try{ setTimeout(_sndConfirm,0); }catch(e){} }
+    resolve(val);
+  };
+  const pulsar=(i)=>{
+    const b=botones[i]; if(!b) return;
+    if(b.valor==='__cancel'){ cerrar(null); return; }
+    const v=typeof b.valor==='function' ? b.valor(m) : b.valor;
+    if(v===undefined) return;
+    cerrar(v);
+  };
+  const onKey=(e)=>{
+    if(e.key==='Escape'){ e.preventDefault(); cerrar(null); }
+    else if(e.key==='Enter' && e.target && e.target.tagName==='INPUT'){
+      const p=botones.findIndex(b=>b.principal); if(p>=0){ e.preventDefault(); pulsar(p); }
+    }
+  };
+  ov.addEventListener('click',()=>cerrar(null));
+  m.querySelector('.fx-x').addEventListener('click',()=>cerrar(null));
+  m.querySelectorAll('.fx-btns .btn').forEach(el=>el.addEventListener('click',()=>pulsar(+el.dataset.i)));
+  document.addEventListener('keydown',onKey);
+  if(alAbrir) setTimeout(()=>alAbrir(m),40);
+});
+
+const _fxInfo = (ico, titulo, html) => _fxDialogo({ico, titulo, sub:html, botones:[{txt:'Entendido', cls:'btn-p', principal:true, valor:true}]});
+
+const _fxPedirTexto = ({ico, titulo, sub, label, valor, textoSi, vacio}) => _fxDialogo({ico, titulo, sub,
+  cuerpo:`<div class="fgrp" style="text-align:left;margin:2px 0 0"><label>${label}</label><input id="fxTxt" maxlength="200" autocomplete="off" value="${_gxEsc(valor||'')}"></div>`,
+  botones:[
+    {txt:'Cancelar', cls:'btn-s', valor:'__cancel'},
+    {txt:textoSi||'Aceptar', cls:'btn-p', principal:true, valor:(m)=>{
+      const v=(m.querySelector('#fxTxt').value||'').trim();
+      if(!v){ _fxError(m, vacio||'Escribe un título'); return undefined; }
+      return v;
+    }}
+  ],
+  alAbrir:(m)=>{ const i=m.querySelector('#fxTxt'); if(i){ i.focus(); i.select(); } }
+});
+
+// Pide gasto y beneficio. Devuelve {gasto, beneficio, total, cobrado} · {sin:true} · null (cancelado)
+// o: {ico, titulo, sub, referencia, refLabel, gasto, beneficio, nota, preguntarCobrado, cobradoDefault, permitirSin, textoSi}
+const _fxPedirImportes = (o) => _fxDialogo({ico:o.ico||'💶', titulo:o.titulo, sub:o.sub,
+  cuerpo:`
+    ${o.referencia!=null?`<div class="fx-ref">${o.refLabel||'Precio'}: <strong>${fmtM(o.referencia)}</strong></div>`:''}
+    ${o.nota?`<div class="fx-nota">${o.nota}</div>`:''}
+    <div class="fx-grid">
+      <div class="fgrp"><label>Gasto (€)</label><input id="fxGasto" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0,00" value="${o.gasto??''}"></div>
+      <div class="fgrp"><label>Beneficio (€)</label><input id="fxBenef" type="number" inputmode="decimal" step="0.01" placeholder="0,00" value="${o.beneficio??''}"></div>
+    </div>
+    <div class="fx-total"><span>Total</span><strong id="fxTotal">${fmtM(0)}</strong></div>
+    <div class="fx-dif" id="fxDif"></div>
+    ${o.preguntarCobrado?`
+      <div class="fx-lbl">¿El cobro está…?</div>
+      <div class="fx-seg" id="fxSeg">
+        <button type="button" class="fbtn ${o.cobradoDefault?'':'active'}" data-c="0">⏳ Pendiente</button>
+        <button type="button" class="fbtn ${o.cobradoDefault?'active':''}" data-c="1">✅ Ya cobrado</button>
+      </div>`:''}`,
+  botones:[
+    o.permitirSin ? {txt:'Sin importes', cls:'btn-s', valor:{sin:true}} : {txt:'Cancelar', cls:'btn-s', valor:'__cancel'},
+    {txt:o.textoSi||'Guardar', cls:'btn-p', principal:true, valor:(m)=>{
+      const g=_fxNum(m.querySelector('#fxGasto').value), b=_fxNum(m.querySelector('#fxBenef').value);
+      if(g==null && b==null){ _fxError(m, o.permitirSin?'Escribe el gasto y el beneficio, o pulsa «Sin importes».':'Escribe el gasto y el beneficio.'); return undefined; }
+      if((g||0)<0){ _fxError(m,'El gasto no puede ser negativo.'); return undefined; }
+      const gasto=g||0, beneficio=b||0, total=Math.round((gasto+beneficio)*100)/100;
+      if(total<=0){ _fxError(m,'El total (gasto + beneficio) tiene que ser mayor que 0.'); return undefined; }
+      const seg=m.querySelector('#fxSeg .fbtn.active');
+      return {gasto, beneficio, total, cobrado: seg ? seg.dataset.c==='1' : true};
+    }}
+  ],
+  alAbrir:(m)=>{
+    const gI=m.querySelector('#fxGasto'), bI=m.querySelector('#fxBenef');
+    const upd=()=>{
+      const g=_fxNum(gI.value)||0, b=_fxNum(bI.value)||0, t=Math.round((g+b)*100)/100;
+      m.querySelector('#fxTotal').textContent=fmtM(t);
+      const dif=m.querySelector('#fxDif');
+      if(o.referencia!=null && (gI.value!==''||bI.value!=='') && Math.abs(t-o.referencia)>0.004){
+        dif.textContent=`No coincide con ${(o.refLabel||'el precio').toLowerCase()} (${fmtM(o.referencia)}). Se guardará ${fmtM(t)}.`;
+        dif.style.display='block';
+      } else dif.style.display='none';
+      _fxError(m,'');
+    };
+    gI.addEventListener('input',upd); bI.addEventListener('input',upd);
+    m.querySelectorAll('#fxSeg .fbtn').forEach(bt=>bt.addEventListener('click',()=>{
+      m.querySelectorAll('#fxSeg .fbtn').forEach(x=>x.classList.remove('active')); bt.classList.add('active');
+    }));
+    upd();
+    if(!gI.value) gI.focus();
+  }
+});
+
+const _fxSubCli = (titulo, cliId, cliNom) => {
+  const n=_gxCliNombre(cliId, cliNom);
+  return `<strong style="color:var(--tx)">${_gxEsc(titulo||'')}</strong>${n?`<br>${_gxEsc(n)}`:''}`;
+};
+
+// ══════════ 1. PRESUPUESTO → AVISO ══════════
+// Devuelve {avisoId, ya} o null si el usuario cancela.
+const _fxCrearAvisoDePresupuesto = async (prId) => {
+  const p=await _fxBuscarPresu(prId);
+  if(!p){ toast('Presupuesto no encontrado','e'); return null; }
+  if(p.avisoId){ const ya=await _fxBuscarAviso(p.avisoId); if(ya) return {avisoId:ya.id, ya:true}; }
+  const total=_fxTotalPresu(p);
+  const titulo=await _fxPedirTexto({
+    ico:'📋', titulo:'Pasar a avisos',
+    sub:`${_fxSubCli(p.titulo,p.clienteId,p.clienteNombre)}<br><br>Se creará un aviso con el cliente y el precio total (<strong style="color:var(--tx)">${fmtM(total)}</strong>).`,
+    label:'Título del aviso', valor:p.titulo||'', textoSi:'Crear aviso'
+  });
+  if(titulo==null) return null;
+  const ref=doc(collection(db,'grupos',CGID,'avisos'));
+  setDoc(ref,{
+    descripcion:titulo,
+    clienteId:p.clienteId||null,
+    clienteNombre:p.clienteNombre||null,
+    importe:total>0?total:null,
+    presupuestoId:prId,
+    prioridad:'baja',
+    fechaAlerta:null,
+    creadoPor:CU.uid,
+    creadoPorNombre:CUD?.nombre||CU.email||'Técnico',
+    creado:serverTimestamp(),
+    estado:'pendiente',
+    resueltaEn:null
+  }).catch(_fxLog('crear aviso de presupuesto'));
+  return {avisoId:ref.id, ya:false};
+};
+
+// Devuelve false si no se puede devolver a pendientes; 'borrado' si se borró
+// su aviso; true si no tenía aviso.
+const _fxQuitarAvisoDePresupuesto = async (prId) => {
+  const p=await _fxBuscarPresu(prId);
+  let a=p?.avisoId ? await _fxBuscarAviso(p.avisoId) : null;
+  if(!a) a=[...(_avisosPend||[]),...(_avisosRes||[])].find(x=>x.presupuestoId===prId)||null;
+  if(!a){
+    try{
+      const q=await _fxConTiempo(getDocs(query(collection(db,'grupos',CGID,'avisos'),where('presupuestoId','==',prId))));
+      const d=q.docs[0]; if(d) a={id:d.id,...d.data()};
+    }catch(e){}
+  }
+  if(!a) return true;
+  if(a.estado==='resuelto'){
+    await _fxInfo('🔒','No se puede devolver a pendientes',
+      `El aviso «${_gxEsc(a.descripcion||'')}» de este presupuesto ya está resuelto: el trabajo está hecho.<br><br>Si de verdad no se ha hecho, reabre primero el aviso.`);
+    return false;
+  }
+  _avisosPend=(_avisosPend||[]).filter(x=>x.id!==a.id);
+  if(typeof _renderAvisBody==='function') _renderAvisBody();
+  deleteDoc(doc(db,'grupos',CGID,'avisos',a.id)).catch(_fxLog('borrar aviso de presupuesto'));
+  return 'borrado';
+};
+
+// ══════════ 2. RESOLVER AVISO → COBRO ══════════
+const _fxResolverAviso = async (id) => {
+  const a=await _fxBuscarAviso(id);
+  if(!a){ toast('Aviso no encontrado','e'); return false; }
+  if(a.estado==='resuelto') return true;
+  // Si el aviso se reabrió y ya tenía cobro, se reutiliza ese cobro (no se duplica)
+  const previo=a.cobroId ? await _fxBuscarCobro(a.cobroId) : null;
+  const r=await _fxPedirImportes({
+    ico:'✅', titulo:'Resolver aviso',
+    sub:_fxSubCli(a.descripcion||'Aviso', a.clienteId, a.clienteNombre),
+    referencia:_fxNum(a.importe), refLabel:'Precio del aviso',
+    gasto:previo?(previo.gasto??''):'', beneficio:previo?(previo.beneficio??''):'',
+    preguntarCobrado:true, cobradoDefault:previo?.estado==='completado',
+    permitirSin:true, textoSi:'Resolver'
+  });
+  if(!r) return false;
+  const avRef=doc(db,'grupos',CGID,'avisos',id);
+  if(r.sin){
+    updateDoc(avRef,{estado:'resuelto',resueltaEn:serverTimestamp()}).catch(_fxLog('resolver aviso'));
+    toast('✅ Aviso resuelto','o');
+    return true;
+  }
+  const datosCobro={
+    importe:r.total, gasto:r.gasto, beneficio:r.beneficio,
+    estado:r.cobrado?'completado':'pendiente',
+    completadoEn:r.cobrado?serverTimestamp():null
+  };
+  let cobroId=previo?.id||null;
+  if(cobroId){
+    updateDoc(doc(db,'grupos',CGID,'cobros',cobroId),datosCobro).catch(_fxLog('actualizar cobro del aviso'));
+  } else {
+    const ref=doc(collection(db,'grupos',CGID,'cobros'));
+    cobroId=ref.id;
+    setDoc(ref,{
+      titulo:(a.descripcion||'Aviso').slice(0,140),
+      clienteId:a.clienteId||'',
+      clienteNombre:_gxCliNombre(a.clienteId,a.clienteNombre)||'',
+      fecha:'', prioridad:'normal',
+      avisoId:id,
+      creado:serverTimestamp(),
+      ...datosCobro
+    }).catch(_fxLog('crear cobro del aviso'));
+  }
+  updateDoc(avRef,{estado:'resuelto',resueltaEn:serverTimestamp(),cobroId,gasto:r.gasto,beneficio:r.beneficio}).catch(_fxLog('resolver aviso'));
+  toast(r.cobrado
+    ? `✅ Aviso resuelto · ${fmtM(r.total)} cobrados y añadidos al balance`
+    : `✅ Aviso resuelto · cobro de ${fmtM(r.total)} pendiente`,'o');
+  return true;
+};
+
+// ══════════ 3. COMPLETAR COBRO → BALANCE ══════════
+const _fxCompletarCobro = async (id) => {
+  const c=await _fxBuscarCobro(id);
+  if(!c){ toast('Cobro no encontrado','e'); return false; }
+  if(c.estado==='completado') return true;
+  const tiene=_fxTieneDesglose(c);
+  const aviso=c.avisoId ? await _fxBuscarAviso(c.avisoId) : null;
+  const r=await _fxPedirImportes({
+    ico:'💰', titulo:'Completar cobro',
+    sub:_fxSubCli(c.titulo||'Cobro', c.clienteId, c.clienteNombre),
+    referencia:tiene?null:_fxNum(c.importe), refLabel:'Importe del cobro',
+    gasto:tiene?(c.gasto??''):'', beneficio:tiene?(c.beneficio??''):'',
+    nota:tiene?(c.avisoId?'Gasto y beneficio indicados en el aviso. ¿Son correctos?':'¿Son correctos el gasto y el beneficio?'):'',
+    preguntarCobrado:false, permitirSin:!tiene, textoSi:'Completar'
+  });
+  if(!r) return false;
+  const ref=doc(db,'grupos',CGID,'cobros',id);
+  if(r.sin){
+    updateDoc(ref,{estado:'completado',completadoEn:serverTimestamp()}).catch(_fxLog('completar cobro'));
+  } else {
+    updateDoc(ref,{estado:'completado',completadoEn:serverTimestamp(),importe:r.total,gasto:r.gasto,beneficio:r.beneficio}).catch(_fxLog('completar cobro'));
+  }
+  let avisoResuelto=false;
+  if(c.avisoId && aviso){
+    const upd={};
+    if(!r.sin){ upd.gasto=r.gasto; upd.beneficio=r.beneficio; upd.cobroId=id; }
+    if(aviso.estado!=='resuelto'){ upd.estado='resuelto'; upd.resueltaEn=serverTimestamp(); avisoResuelto=true; }
+    if(Object.keys(upd).length) updateDoc(doc(db,'grupos',CGID,'avisos',c.avisoId),upd).catch(_fxLog('sincronizar aviso'));
+  }
+  toast(`✅ Cobro completado${r.sin?'':' · '+fmtM(r.total)+' al balance'}${avisoResuelto?' · aviso resuelto':''}`,'o');
+  return true;
+};
+
+// Abre el detalle de un cobro desde el balance aunque la pestaña Cobros aún no se haya abierto.
+window._fxVerCobro = (id) => {
+  if(typeof _suscribirSimple==='function') _suscribirSimple('cobro');
+  const enMem=(_simplePend.cobro||[]).some(x=>x.id===id) || (_simpleComp.cobro||[]).some(x=>x.id===id);
+  if(!enMem){
+    const c=(_gx.cobros||[]).find(x=>x.id===id);
+    if(c){ if(c.estado==='completado') _simpleComp.cobro=[...(_simpleComp.cobro||[]),c]; else _simplePend.cobro=[...(_simplePend.cobro||[]),c]; }
+  }
+  verSimple('cobro',id);
+};
+
+// ── Piezas visuales reutilizadas en tarjetas y detalles ──
+const _fxDesgloseHTML = (x) => _fxTieneDesglose(x)
+  ? `<div class="fx-desg">Gasto <b class="g">${fmtM(_gxNum(x.gasto))}</b> · Beneficio <b class="b">${fmtM(_gxNum(x.beneficio))}</b></div>` : '';
+const _fxChipsAviso = (a) => {
+  let h='';
+  if(_fxNum(a.importe)!=null) h+=`<span class="fx-chip eur">💶 ${fmtM(a.importe)}</span>`;
+  if(a.presupuestoId) h+=`<span class="fx-chip">📄 De presupuesto</span>`;
+  return h;
+};
+// Total en vivo al editar un cobro con desglose
+window._fxSmpTotal = () => {
+  const g=_fxNum($('smpGasto')?.value)||0, b=_fxNum($('smpBenef')?.value)||0;
+  const el=$('smpTotalFx'); if(el) el.textContent=fmtM(Math.round((g+b)*100)/100);
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

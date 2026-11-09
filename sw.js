@@ -1,6 +1,6 @@
-const CN       = 'alberto-v6';       // caché de datos/red
-const SHELL_CN = 'alberto-shell-v6'; // caché del app shell
-// IMPORTANTE: sube este número (v6, v7, v8...) en cada despliegue que
+const CN       = 'alberto-v7';       // caché de datos/red
+const SHELL_CN = 'alberto-shell-v7'; // caché del app shell
+// IMPORTANTE: sube este número (v7, v8, v9...) en cada despliegue que
 // incluya cambios de verdad. El navegador solo se entera de que hay un
 // sw.js nuevo si el ARCHIVO cambia byte a byte; si solo tocas index.html
 // y dejas este número igual, el navegador ve el mismo sw.js de siempre y
